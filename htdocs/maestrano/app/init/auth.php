@@ -29,4 +29,8 @@ $opts = array();
 $db=getDoliDBInstance($dolibarr_main_db_type,$dolibarr_main_db_host,$dolibarr_main_db_user,$dolibarr_main_db_pass,$dolibarr_main_db_name,$dolibarr_main_db_port);
 $opts['db_connection'] = $db;
 
+// Define the database prefix
+if (empty($dolibarr_main_db_prefix)) $dolibarr_main_db_prefix='llx_';
+$opts['db_table_prefix'] = $dolibarr_main_db_prefix;
+
 
