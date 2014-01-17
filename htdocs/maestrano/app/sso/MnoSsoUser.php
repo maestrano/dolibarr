@@ -12,7 +12,12 @@ class MnoSsoUser extends MnoSsoBaseUser
    */
   public $connection = null;
   
-  
+  /**
+   * Internal Dolibarr user object
+   * @var PDO
+   */
+	private $_user = null;
+	
   /**
    * Extend constructor to inialize app specific objects
    *
@@ -27,6 +32,7 @@ class MnoSsoUser extends MnoSsoBaseUser
     
     // Assign new attributes
     $this->connection = $opts['db_connection'];
+		
   }
   
   
@@ -69,21 +75,72 @@ class MnoSsoUser extends MnoSsoBaseUser
    *
    * @return the ID of the user created, null otherwise
    */
-  // protected function createLocalUser()
-  // {
-  //   $lid = null;
-  //   
-  //   if ($this->accessScope() == 'private') {
-  //     // First set $conn variable (need global variable?)
-  //     $conn = $this->connection;
-  //     
-  //     // Create user
-  //     $lid = $this->connection->query("CREATE BLA.....");
-  //   }
-  //   
-  //   return $lid;
-  // }
+  protected function createLocalUser()
+  {
+    $lid = null;
+    
+    if ($this->accessScope() == 'private') {
+			// Build the local user first
+			$this->buildLocalUser();
+			
+			// Save the user and capture the id
+      $lid = $this->_user->create(null);
+    }
+    
+    return $lid;
+  }
   
+  /**
+   * Build the _user object (Dolibarr user)
+   *
+   * @return User Dolibarr user object
+   */
+  protected function buildLocalUser()
+  {
+		 $u = new User($db);
+     $u->lastname		  = $this->last_name;
+     $u->firstname	  = $this->first_name;
+     $u->login		    = $this->uid;
+     $u->admin		    = $this->isAdmin();
+     $u->office_phone	= "";
+     $u->office_fax	  = "";
+     $u->user_mobile	= "";
+     $u->email		    = $this->email;
+     $u->job			    = "";
+     $u->signature	  = "";
+     $u->note			    = "";
+     $u->ldap_sid		  = "";
+		 
+		 $this->_user = $u;
+		 
+		 return $this->_user;
+  }
+  
+  /**
+   * Check wether a user should be set admin in
+	 * dolibarr or not
+   *
+   * @return boolean true if admin false otherwise
+   */
+	protected function isAdmin()
+	{
+    $admin = false;
+    
+    if ($this->app_owner) {
+      $admin = true;
+    } else {
+      foreach ($this->organizations as $organization) {
+        if ($organization['role'] == 'Admin' || $organization['role'] == 'Super Admin') {
+          $admin = true;
+        } else {
+          $admin = false;
+        }
+      }
+    }
+    
+    return $admin;
+	}
+	
   /**
    * Get the ID of a local user via Maestrano UID lookup
    *
