@@ -19,6 +19,12 @@ class MnoSsoUser extends MnoSsoBaseUser
 	private $_user = null;
 	
   /**
+   * The dolibarr table prefix
+   * @var string
+   */
+	private $_db_tbl_prefix = 'llx_';
+	
+  /**
    * Extend constructor to inialize app specific objects
    *
    * @param OneLogin_Saml_Response $saml_response
@@ -32,6 +38,10 @@ class MnoSsoUser extends MnoSsoBaseUser
     
     // Assign new attributes
     $this->connection = $opts['db_connection'];
+
+		if ($opts['db_table_prefix']) {
+			$this->_db_tbl_prefix = $opts['db_table_prefix'];
+		}
 		
   }
   
@@ -43,29 +53,24 @@ class MnoSsoUser extends MnoSsoBaseUser
    *
    * @return boolean whether the user was successfully set in session or not
    */
-  // protected function setInSession()
-  // {
-  //   // First set $conn variable (need global variable?)
-  //   $conn = $this->connection;
-  //   
-  //   $sel1 = $conn->query("SELECT ID,name,lastlogin FROM user WHERE ID = $this->local_id");
-  //   $chk = $sel1->fetch();
-  //   if ($chk["ID"] != "") {
-  //       $now = time();
-  //       
-  //       // Set session
-  //       $this->session['userid'] = $chk['ID'];
-  //       $this->session['username'] = stripslashes($chk['name']);
-  //       $this->session['lastlogin'] = $now;
-  //       
-  //       // Update last login timestamp
-  //       $upd1 = $conn->query("UPDATE user SET lastlogin = '$now' WHERE ID = $this->local_id");
-  //       
-  //       return true;
-  //   } else {
-  //       return false;
-  //   }
-  // }
+  protected function setInSession()
+  {
+    // First set $conn variable (need global variable?)
+    $this->session["dol_login"] = $this->uid;
+    $this->session["dol_authmode"]='';
+    $this->session["dol_tz"]='';
+    $this->session["dol_tz_string"]='';
+    $this->session["dol_dst"]='';
+    $this->session["dol_dst_observed"]='';
+    $this->session["dol_dst_first"]='';
+    $this->session["dol_dst_second"]='';
+    $this->session["dol_screenwidth"]='';
+    $this->session["dol_screenheight"]='';
+    $this->session["dol_company"]='';
+    $this->session["dol_entity"]=1;
+		
+		return true;
+  }
   
   
   /**
@@ -146,32 +151,34 @@ class MnoSsoUser extends MnoSsoBaseUser
    *
    * @return a user ID if found, null otherwise
    */
-  // protected function getLocalIdByUid()
-  // {
-  //   $result = $this->connection->query("SELECT ID FROM user WHERE mno_uid = {$this->connection->quote($this->uid)} LIMIT 1")->fetch();
-  //   
-  //   if ($result && $result['ID']) {
-  //     return $result['ID'];
-  //   }
-  //   
-  //   return null;
-  // }
+  protected function getLocalIdByUid()
+  {
+    $sql = "SELECT rowid FROM " . $this->_db_tbl_prefix . "user WHERE mno_uid = {$this->connection->escape($this->uid)} LIMIT 1";
+		$result = $this->connection->query($sql)->fetch();
+    
+    if ($result && $result['rowid']) {
+      return $result['rowid'];
+    }
+    
+    return null;
+  }
   
   /**
    * Get the ID of a local user via email lookup
    *
    * @return a user ID if found, null otherwise
    */
-  // protected function getLocalIdByEmail()
-  // {
-  //   $result = $this->connection->query("SELECT ID FROM user WHERE email = {$this->connection->quote($this->email)} LIMIT 1")->fetch();
-  //   
-  //   if ($result && $result['ID']) {
-  //     return $result['ID'];
-  //   }
-  //   
-  //   return null;
-  // }
+  protected function getLocalIdByEmail()
+  {
+    $sql = "SELECT rowid FROM " . $this->_db_tbl_prefix . "user WHERE email = {$this->connection->escape($this->email)} LIMIT 1";
+		$result = $this->connection->query($sql)->fetch();
+    
+    if ($result && $result['rowid']) {
+      return $result['rowid'];
+    }
+    
+    return null;
+  }
   
   /**
    * Set all 'soft' details on the user (like name, surname, email)
@@ -179,28 +186,35 @@ class MnoSsoUser extends MnoSsoBaseUser
    *
    * @return boolean whether the user was synced or not
    */
-   // protected function syncLocalDetails()
-   // {
-   //   if($this->local_id) {
-   //     $upd = $this->connection->query("UPDATE user SET name = {$this->connection->quote($this->name . ' ' . $this->surname)}, email = {$this->connection->quote($this->email)} WHERE ID = $this->local_id");
-   //     return $upd;
-   //   }
-   //   
-   //   return false;
-   // }
+   protected function syncLocalDetails()
+   {
+		 if($this->local_id) {
+			 $sql = "UPDATE user SET 
+				 firstname = {$this->connection->escape($this->name)},
+			 	 lastname = {$this->connection->escape($this->surname)},
+		     email = {$this->connection->escape($this->email)} 
+				 WHERE rowid = $this->local_id";
+       
+			 $upd = $this->connection->query($sql);
+       return $upd;
+     }
+     
+     return false;
+   }
   
   /**
    * Set the Maestrano UID on a local user via id lookup
    *
    * @return a user ID if found, null otherwise
    */
-  // protected function setLocalUid()
-  // {
-  //   if($this->local_id) {
-  //     $upd = $this->connection->query("UPDATE user SET mno_uid = {$this->connection->quote($this->uid)} WHERE ID = $this->local_id");
-  //     return $upd;
-  //   }
-  //   
-  //   return false;
-  // }
+  protected function setLocalUid()
+  {
+    if($this->local_id) {
+			$sql = "UPDATE " . $this->_db_tbl_prefix . "user SET mno_uid = {$this->connection->escape($this->uid)} WHERE rowid = $this->local_id";
+      $upd = $this->connection->query($sql);
+      return $upd;
+    }
+    
+    return false;
+  }
 }
