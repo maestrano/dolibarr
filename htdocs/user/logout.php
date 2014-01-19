@@ -80,6 +80,14 @@ dol_syslog("End of session ".$sessionname);
 unset($_SESSION['dol_login']);
 unset($_SESSION['dol_entity']);
 
+// Hook:Maestrano
+$maestrano = MaestranoService::getInstance();
+if ($maestrano->isSsoEnabled()) {
+	//echo "About to redirect to: " . $maestrano->getSsoLogoutUrl();
+  header("Location: " . $maestrano->getSsoLogoutUrl());
+	return;
+}
+
 if (GETPOST('noredirect')) return; 
 header("Location: ".$url);		// Default behaviour is redirect to index.php page
 ?>

@@ -310,6 +310,17 @@ if (! empty($_SESSION["disablemodules"]))
     }
 }
 
+// Hook:Maestrano
+// Load Maestrano
+// Require authentication straight away if intranet
+// mode enabled
+require DOL_DOCUMENT_ROOT . '/maestrano/app/init/base.php';
+$maestrano = MaestranoService::getInstance();
+if ($maestrano->isSsoIntranetEnabled()) {
+  if (!$maestrano->getSsoSession()->isValid()) {
+    header("Location: " . $maestrano->getSsoInitUrl());
+  }
+}
 
 /*
  * Phase authentication / login
@@ -342,6 +353,12 @@ if (! defined('NOLOGIN'))
     $test=true;
     if (! isset($_SESSION["dol_login"]))
     {
+			  // Hook:Maestrano
+		    // Redirect to SSO login
+		    if ($maestrano->isSsoEnabled()) {
+		      header("Location: " . $maestrano->getSsoInitUrl());
+		    }
+				
         // It is not already authenticated and it requests the login / password
         include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 
@@ -512,7 +529,15 @@ if (! defined('NOLOGIN'))
         // We are already into an authenticated session
         $login=$_SESSION["dol_login"];
         dol_syslog("This is an already logged session. _SESSION['dol_login']=".$login);
-
+				
+			  // Hook:Maestrano
+		    // Check Maestrano session is still valid
+		    if ($maestrano->isSsoEnabled()) {
+		      if (!$maestrano->getSsoSession()->isValid()) {
+		        header("Location: " . $maestrano->getSsoInitUrl());
+		      }
+		    }
+				
         $resultFetchUser=$user->fetch('',$login);
         if ($resultFetchUser <= 0)
         {
