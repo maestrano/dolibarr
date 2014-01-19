@@ -13,6 +13,12 @@ class MnoSsoUser extends MnoSsoBaseUser
   public $connection = null;
   
   /**
+   * The dolibarr configuration object
+   * @var string
+   */
+	//private $_app_conf = null;
+	
+  /**
    * Internal Dolibarr user object
    * @var PDO
    */
@@ -38,11 +44,14 @@ class MnoSsoUser extends MnoSsoBaseUser
     
     // Assign new attributes
     $this->connection = $opts['db_connection'];
-
+		$this->_app_conf = $opts['app_conf'];
+		
 		if ($opts['db_table_prefix']) {
 			$this->_db_tbl_prefix = $opts['db_table_prefix'];
 		}
 		
+		// Assign global variable $conf (used internally by dolibarr)
+		$conf = $opts['app_conf'];
   }
   
   
@@ -89,7 +98,12 @@ class MnoSsoUser extends MnoSsoBaseUser
 			$this->buildLocalUser();
 			
 			// Save the user and capture the id
+			$this->connection->begin();
       $lid = $this->_user->create(null);
+			$this->connection->commit();
+			echo "User created - ID: " . $lid;
+			echo "<br/>";
+			echo var_dump($this->_user->errors);
     }
     
     return $lid;
@@ -102,7 +116,7 @@ class MnoSsoUser extends MnoSsoBaseUser
    */
   protected function buildLocalUser()
   {
-		 $u = new User($db);
+		 $u = new User($this->connection);
      $u->lastname		  = $this->last_name;
      $u->firstname	  = $this->first_name;
      $u->login		    = $this->uid;
@@ -115,6 +129,7 @@ class MnoSsoUser extends MnoSsoBaseUser
      $u->signature	  = "";
      $u->note			    = "";
      $u->ldap_sid		  = "";
+		 $u->entity       = 1;
 		 
 		 $this->_user = $u;
 		 
@@ -154,7 +169,8 @@ class MnoSsoUser extends MnoSsoBaseUser
   protected function getLocalIdByUid()
   {
     $sql = "SELECT rowid FROM " . $this->_db_tbl_prefix . "user WHERE mno_uid = {$this->connection->escape($this->uid)} LIMIT 1";
-		$result = $this->connection->query($sql)->fetch();
+		$result = $this->connection->query($sql);
+		if ($result) $result = $result->fetch();
     
     if ($result && $result['rowid']) {
       return $result['rowid'];
@@ -171,7 +187,8 @@ class MnoSsoUser extends MnoSsoBaseUser
   protected function getLocalIdByEmail()
   {
     $sql = "SELECT rowid FROM " . $this->_db_tbl_prefix . "user WHERE email = {$this->connection->escape($this->email)} LIMIT 1";
-		$result = $this->connection->query($sql)->fetch();
+		$result = $this->connection->query($sql);
+		if ($result) $result = $result->fetch();
     
     if ($result && $result['rowid']) {
       return $result['rowid'];
