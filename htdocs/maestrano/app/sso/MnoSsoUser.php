@@ -100,10 +100,8 @@ class MnoSsoUser extends MnoSsoBaseUser
 			// Save the user and capture the id
 			$this->connection->begin();
       $lid = $this->_user->create(null);
+			if ($lid > 0) $this->_user->setPassword(null,$this->generatePassword());
 			$this->connection->commit();
-			echo "User created - ID: " . $lid;
-			echo "<br/>";
-			echo var_dump($this->_user->errors);
     }
     
     return $lid;
@@ -117,8 +115,8 @@ class MnoSsoUser extends MnoSsoBaseUser
   protected function buildLocalUser()
   {
 		 $u = new User($this->connection);
-     $u->lastname		  = $this->last_name;
-     $u->firstname	  = $this->first_name;
+     $u->lastname		  = $this->surname;
+     $u->firstname	  = $this->name;
      $u->login		    = $this->uid;
      $u->admin		    = $this->isAdmin();
      $u->office_phone	= "";
@@ -168,12 +166,12 @@ class MnoSsoUser extends MnoSsoBaseUser
    */
   protected function getLocalIdByUid()
   {
-    $sql = "SELECT rowid FROM " . $this->_db_tbl_prefix . "user WHERE mno_uid = {$this->connection->escape($this->uid)} LIMIT 1";
+    $sql = "SELECT rowid FROM " . $this->_db_tbl_prefix . "user WHERE mno_uid = '{$this->connection->escape($this->uid)}' LIMIT 1";
 		$result = $this->connection->query($sql);
-		if ($result) $result = $result->fetch();
-    
-    if ($result && $result['rowid']) {
-      return $result['rowid'];
+		if ($result) $result = $this->connection->fetch_object($result);
+		
+    if ($result && $result->rowid) {
+      return $result->rowid;
     }
     
     return null;
@@ -186,12 +184,12 @@ class MnoSsoUser extends MnoSsoBaseUser
    */
   protected function getLocalIdByEmail()
   {
-    $sql = "SELECT rowid FROM " . $this->_db_tbl_prefix . "user WHERE email = {$this->connection->escape($this->email)} LIMIT 1";
+    $sql = "SELECT rowid FROM " . $this->_db_tbl_prefix . "user WHERE email = '{$this->connection->escape($this->email)}' LIMIT 1";
 		$result = $this->connection->query($sql);
-		if ($result) $result = $result->fetch();
-    
-    if ($result && $result['rowid']) {
-      return $result['rowid'];
+		if ($result) $result = $this->connection->fetch_object($result);
+		
+    if ($result && $result->rowid) {
+      return $result->rowid;
     }
     
     return null;
@@ -206,14 +204,20 @@ class MnoSsoUser extends MnoSsoBaseUser
    protected function syncLocalDetails()
    {
 		 if($this->local_id) {
-			 $sql = "UPDATE user SET 
-				 firstname = {$this->connection->escape($this->name)},
-			 	 lastname = {$this->connection->escape($this->surname)},
-		     email = {$this->connection->escape($this->email)} 
+			 
+			 // Prepare sql statement
+			 $sql = "UPDATE " . $this->_db_tbl_prefix . "user SET 
+				 firstname = '{$this->connection->escape($this->name)}',
+			 	 lastname = '{$this->connection->escape($this->surname)}',
+		     email = '{$this->connection->escape($this->email)}'
 				 WHERE rowid = $this->local_id";
        
+			 // Execute
+			 $this->connection->begin();
 			 $upd = $this->connection->query($sql);
-       return $upd;
+			 $this->connection->commit();
+			 
+			 return $upd;
      }
      
      return false;
@@ -227,8 +231,14 @@ class MnoSsoUser extends MnoSsoBaseUser
   protected function setLocalUid()
   {
     if($this->local_id) {
-			$sql = "UPDATE " . $this->_db_tbl_prefix . "user SET mno_uid = {$this->connection->escape($this->uid)} WHERE rowid = $this->local_id";
-      $upd = $this->connection->query($sql);
+			// Prepare statement
+			$sql = "UPDATE " . $this->_db_tbl_prefix . "user SET mno_uid = '{$this->connection->escape($this->uid)}' WHERE rowid = $this->local_id";
+      
+			// Execute
+			$this->connection->begin();
+			$upd = $this->connection->query($sql);
+			$this->connection->commit();
+			
       return $upd;
     }
     
