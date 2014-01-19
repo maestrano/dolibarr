@@ -34,18 +34,10 @@ define('DOL_URL_ROOT', '');
 define('MAIN_DB_PREFIX', $dolibarr_main_db_prefix);
 
 
-
-// Configure Dolibarr Database
-$db=getDoliDBInstance($dolibarr_main_db_type,$dolibarr_main_db_host,$dolibarr_main_db_user,$dolibarr_main_db_pass,$dolibarr_main_db_name,$dolibarr_main_db_port);
-$opts['db_connection'] = $db;
-//echo var_dump($db);
-
-// Define the database prefix
-if (empty($dolibarr_main_db_prefix)) $dolibarr_main_db_prefix='llx_';
-$opts['db_table_prefix'] = $dolibarr_main_db_prefix;
-
 // Dolibarr configuration (global)
 $conf = new Conf();
+
+// DB configuration
 $conf->db->host							= $dolibarr_main_db_host;
 $conf->db->port							= $dolibarr_main_db_port;
 $conf->db->name							= $dolibarr_main_db_name;
@@ -55,9 +47,24 @@ $conf->db->type							= $dolibarr_main_db_type;
 $conf->db->prefix						= $dolibarr_main_db_prefix;
 $conf->db->character_set				= $dolibarr_main_db_character_set;
 $conf->db->dolibarr_main_db_collation	= $dolibarr_main_db_collation;
-$conf->db->dolibarr_main_db_encryption	= $dolibarr_main_db_encryption;
-$conf->db->dolibarr_main_db_cryptkey	= $dolibarr_main_db_cryptkey;
+
+// Set properties specific to conf file
+$conf->file->mailing_limit_sendbyweb	= $dolibarr_mailing_limit_sendbyweb;
+$conf->file->main_authentication		= empty($dolibarr_main_authentication)?'':$dolibarr_main_authentication;	// Identification mode
+$conf->file->main_force_https			= empty($dolibarr_main_force_https)?'':$dolibarr_main_force_https;			// Force https
+$conf->file->strict_mode 				= empty($dolibarr_strict_mode)?'':$dolibarr_strict_mode;					// Force php strict mode (for debug)
+$conf->file->cookie_cryptkey			= empty($dolibarr_main_cookie_cryptkey)?'':$dolibarr_main_cookie_cryptkey;	// Cookie cryptkey
+$conf->file->dol_document_root			= array('main' => DOL_DOCUMENT_ROOT);										// Define array of document root directories
 $opts['app_conf'] = $conf;
+
+// Configure Dolibarr Database
+$db=getDoliDBInstance($dolibarr_main_db_type,$dolibarr_main_db_host,$dolibarr_main_db_user,$dolibarr_main_db_pass,$dolibarr_main_db_name,$dolibarr_main_db_port);
+$opts['db_connection'] = $db;
+//echo var_dump($db);
+
+// Define the database prefix
+if (empty($dolibarr_main_db_prefix)) $dolibarr_main_db_prefix='llx_';
+$opts['db_table_prefix'] = $dolibarr_main_db_prefix;
 
 // Dolibarr hookmanager (global)
 $hookmanager=new HookManager($db);
