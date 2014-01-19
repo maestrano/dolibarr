@@ -182,6 +182,18 @@ if (ini_get('register_globals'))    // To solve bug in using $_SESSION
     }
 }
 
+// Hook:Maestrano
+// Load Maestrano
+// Require authentication straight away if intranet
+// mode enabled
+require DOL_DOCUMENT_ROOT . '/maestrano/app/init/base.php';
+$maestrano = MaestranoService::getInstance();
+if ($maestrano->isSsoIntranetEnabled()) {
+  if (!$maestrano->getSsoSession()->isValid()) {
+    header("Location: " . $maestrano->getSsoInitUrl());
+  }
+}
+
 // Init the 5 global objects
 // This include will set: $conf, $db, $langs, $user, $mysoc objects
 require_once 'master.inc.php';
@@ -308,18 +320,6 @@ if (! empty($_SESSION["disablemodules"]))
         	$conf->$module->enabled=false;
         }
     }
-}
-
-// Hook:Maestrano
-// Load Maestrano
-// Require authentication straight away if intranet
-// mode enabled
-require DOL_DOCUMENT_ROOT . '/maestrano/app/init/base.php';
-$maestrano = MaestranoService::getInstance();
-if ($maestrano->isSsoIntranetEnabled()) {
-  if (!$maestrano->getSsoSession()->isValid()) {
-    header("Location: " . $maestrano->getSsoInitUrl());
-  }
 }
 
 /*
@@ -1402,9 +1402,20 @@ function top_menu($head, $title='', $target='', $disablejs=0, $disablehead=0, $a
 	        $companylink=' ('.$thirdpartystatic->getNomUrl('','').')';
 	        $company=' ('.$langs->trans("Company").': '.$thirdpartystatic->name.')';
 	    }
-	    $logintext='<div class="login"><a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$user->id.'"';
+			
+			
+			$logintext='<div class="login"><a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$user->id.'"';
 	    $logintext.=$target?(' target="'.$target.'"'):'';
-	    $logintext.='>'.$user->login.'</a>';
+			
+			// Hook:Maestrano
+			// Modify displayed name
+			$maestrano = MaestranoService::getInstance();
+			if ($maestrano->isSsoEnabled()) {
+				$logintext.='>'. $user->getFullName($langs) .'</a>';
+			} else {
+				$logintext.='>'.$user->login.'</a>';
+			}
+	    
 	    if ($user->societe_id) $logintext.=$companylink;
 	    $logintext.='</div>';
 	    $loginhtmltext.='<u>'.$langs->trans("User").'</u>';
