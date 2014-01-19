@@ -73,9 +73,4 @@ $hookmanager=new HookManager($db);
 $session_name='DOLSESSID_' . dol_getprefix();
 session_name($session_name);
 
-// Reset session completely to avoid garbage (undeclared classes)
-session_start();
-session_unset();
-session_destroy();
-
 
