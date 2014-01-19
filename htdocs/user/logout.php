@@ -83,7 +83,6 @@ unset($_SESSION['dol_entity']);
 // Hook:Maestrano
 $maestrano = MaestranoService::getInstance();
 if ($maestrano->isSsoEnabled()) {
-	//echo "About to redirect to: " . $maestrano->getSsoLogoutUrl();
   header("Location: " . $maestrano->getSsoLogoutUrl());
 	return;
 }
