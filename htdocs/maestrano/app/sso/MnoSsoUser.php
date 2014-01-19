@@ -78,6 +78,12 @@ class MnoSsoUser extends MnoSsoBaseUser
     $this->session["dol_company"]='';
     $this->session["dol_entity"]=1;
 		
+		// Used by extensions like cashdesk
+		$this->session['uid'] = $this->local_id;
+		$this->session['uname'] = $this->local_id;
+		$this->session['lastname'] = $this->surname;
+		$this->session['firstname'] = $this->name;
+		
 		return true;
   }
   
@@ -206,7 +212,8 @@ class MnoSsoUser extends MnoSsoBaseUser
 		 if($this->local_id) {
 			 
 			 // Prepare sql statement
-			 $sql = "UPDATE " . $this->_db_tbl_prefix . "user SET 
+			 $sql = "UPDATE " . $this->_db_tbl_prefix . "user SET,
+			 	 login = '{$this->connection->escape($this->uid)}',
 				 firstname = '{$this->connection->escape($this->name)}',
 			 	 lastname = '{$this->connection->escape($this->surname)}',
 		     email = '{$this->connection->escape($this->email)}'
