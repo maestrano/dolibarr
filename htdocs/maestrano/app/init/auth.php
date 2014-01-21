@@ -10,8 +10,7 @@ require MAESTRANO_ROOT . '/app/init/base.php';
 //-----------------------------------------------
 // Require your app specific files here
 //-----------------------------------------------
-define('DOL_DOCUMENT_ROOT', '/Users/arnaudlachaume/Sites/apps-dev/app-dolibarr/htdocs');
-//define('DOL_DOCUMENT_ROOT', realpath(MAESTRANO_ROOT . '/../'));
+define('DOL_DOCUMENT_ROOT', realpath(MAESTRANO_ROOT . '/../'));
 require DOL_DOCUMENT_ROOT . '/conf/conf.php';
 require DOL_DOCUMENT_ROOT . '/core/class/conf.class.php';
 require DOL_DOCUMENT_ROOT . '/core/lib/security.lib.php';
