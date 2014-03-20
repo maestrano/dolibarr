@@ -212,7 +212,7 @@ class MnoSsoUser extends MnoSsoBaseUser
 		 if($this->local_id) {
 			 
 			 // Prepare sql statement
-			 $sql = "UPDATE " . $this->_db_tbl_prefix . "user SET,
+			 $sql = "UPDATE " . $this->_db_tbl_prefix . "user SET
 			 	 login = '{$this->connection->escape($this->uid)}',
 				 firstname = '{$this->connection->escape($this->name)}',
 			 	 lastname = '{$this->connection->escape($this->surname)}',
