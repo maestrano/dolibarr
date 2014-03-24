@@ -231,10 +231,15 @@ class MnoSoaBaseOrganization extends MnoSoaBaseEntity
 
                 $this->saveLocalEntity(false, $status);
             }
-            if ($is_new_id) {
-                $this->addIdMapEntry($this->_local_entity->id, $this->_id);
+
+            $local_entity_id = $this->getLocalEntityIdentifier();
+            $mno_entity_id = $this->_id;
+            
+            if ($is_new_id && !empty($local_entity_id) && !empty($mno_entity_id)) {
+                $this->addIdMapEntry($local_entity_id, $mno_entity_id);
             }
         }
+        $this->_log->debug(__FUNCTION__ . " end persist");
     }
     
     /**

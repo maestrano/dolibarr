@@ -5,19 +5,19 @@
 if (!defined('MAESTRANO_ROOT')) {
   define("MAESTRANO_ROOT", realpath(dirname(__FILE__) . '/../../'));
 }
-require MAESTRANO_ROOT . '/app/init/base.php';
+require_once MAESTRANO_ROOT . '/app/init/base.php';
 
 //-----------------------------------------------
 // Require your app specific files here
 //-----------------------------------------------
 define('DOL_DOCUMENT_ROOT', realpath(MAESTRANO_ROOT . '/../'));
-require DOL_DOCUMENT_ROOT . '/conf/conf.php';
-require DOL_DOCUMENT_ROOT . '/core/class/conf.class.php';
-require DOL_DOCUMENT_ROOT . '/core/lib/security.lib.php';
-require DOL_DOCUMENT_ROOT . '/includes/adodbtime/adodb-time.inc.php';
-require DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
-require DOL_DOCUMENT_ROOT . '/core/class/hookmanager.class.php';
-require DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+require_once DOL_DOCUMENT_ROOT . '/conf/conf.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/conf.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/security.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/includes/adodbtime/adodb-time.inc.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/hookmanager.class.php';
+require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 
 //-----------------------------------------------
 // Perform your custom preparation code

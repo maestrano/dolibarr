@@ -309,7 +309,7 @@ class Societe extends CommonObject
 		      
             if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {	                 
                 if ($this->particulier != "1") {
-                    $mno_org=new MnoSoaOrganization($this->db, $opts['logger']);
+                    $mno_org=new MnoSoaOrganization($this->db, new MnoSoaBaseLogger());
                     $mno_org->send($this);
                 }
             }

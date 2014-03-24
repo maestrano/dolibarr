@@ -206,7 +206,7 @@ class Contact extends CommonObject
                 $maestrano = MaestranoService::getInstance();
 
                 if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {	  
-                    $mno_org=new MnoSoaPersonContact($this->db, $opts['logger']);
+                    $mno_org=new MnoSoaPersonContact($this->db, new MnoSoaBaseLogger());
                     $mno_org->send($this);
                 }
             }

@@ -6,8 +6,7 @@
  * @author root
  */
 
-class MnoSoaDB extends MnoSoaBaseDB {
-    
+class MnoSoaDB extends MnoSoaBaseDB {    
     /**
     * Update identifier map table
     * @param  	string 	local_id                Local entity identifier
