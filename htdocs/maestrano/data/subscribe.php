@@ -27,7 +27,7 @@ if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {
                 }
 				break;
         case "PERSONS":
-                if (class_exists('MnoSoaPerson')) {
+                if (class_exists('MnoSoaPersonContact')) {
                     $mno_person = new MnoSoaPersonContact($opts['db_connection'], $log);		
                     $mno_person->receiveNotification($notification);
                 }
