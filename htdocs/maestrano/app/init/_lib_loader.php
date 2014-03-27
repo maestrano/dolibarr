@@ -35,5 +35,4 @@ require_once MNO_APP_DIR . 'sso/MnoSsoUser.php';
 require_once MNO_APP_DIR . 'soa/MnoSoaEntity.php';
 require_once MNO_APP_DIR . 'soa/MnoSoaDB.php';
 require_once MNO_APP_DIR . 'soa/MnoSoaOrganization.php';
-require_once MNO_APP_DIR . 'soa/MnoSoaPersonSociete.php';
 require_once MNO_APP_DIR . 'soa/MnoSoaPersonContact.php';

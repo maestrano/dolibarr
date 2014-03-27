@@ -200,82 +200,19 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
     
     // DONE
     protected function pushEntity() {
-        $this->_log->debug(__FUNCTION__ . " start ");
-        
-        if (!empty($this->_local_entity->socid)) {
-            $mno_id = $this->getMnoIdByLocalIdName($this->_local_entity->socid, "societe");
-	    
-	    if ($this->isValidIdentifier($mno_id)) {
-                $this->_log->debug(__FUNCTION__ . " mno_id = " . json_encode($mno_id));
-                $organization = new Societe($this->_db);
-                $organization->fetch($mno_id->_id);
-                
-                if (!empty($organization->client)) {
-                    switch($organization->client) {
-                        case 0: $this->_entity->customer = false; $this->_entity->lead = false; break;
-                        case 1: $this->_entity->customer = true; break;
-                        case 2: $this->_entity->lead = true; break;
-                        case 3: $this->_entity->customer = true; $this->_entity->lead = true; break;
-                    }
-                } else {
-                    $this->_entity->customer = false; 
-                    $this->_entity->lead = false;
-                }
-
-                if (!empty($organization->fournisseur)) {
-                    switch($organization->fournisseur) {
-                        case 0: $this->_entity->supplier = false; break;
-                        case 1: $this->_entity->supplier = true; break;
-                    }
-                } else {
-                    $this->_entity->supplier = false;
-                }
-	    }
-	}
-        
-        $this->_log->debug(__FUNCTION__ . " end ");
+        // DO NOTHING
     }
     
     // DONE
     protected function pullEntity() {
-        $this->_log->debug(__FUNCTION__ . " start ");
-    
-        if (!empty($this->_local_entity->socid)) {
-            $mno_id = $this->getMnoIdByLocalIdName($this->_local_entity->socid, "societe");
-	    
-	    if ($this->isValidIdentifier($mno_id)) {
-                $this->_log->debug(__FUNCTION__ . " mno_id = " . json_encode($mno_id));
-                $organization = new Societe($this->_db);
-                $organization->fetch($mno_id->_id);
-                
-                if (!empty($this->_entity->customer) && !empty($this->_entity->lead)) {
-                    $organization->client = 3;
-                } else if (!empty($this->_entity->customer)) {
-                    $organization->client = 1;
-                } else if (!empty($this->_entity->lead)) {
-                    $organization->client = 2;
-                } else {
-                    $organization->client = 0;
-                }
-
-                if (!empty($this->_entity->supplier)) {
-                    $organization->fournisseur = 1;
-                } else {
-                    $organization->fournisseur = 0;
-                }
-                
-                $organization->update($this->_local_entity->id, '', 1, 0, 0, 'update', 1, false);
-            }
-        }
-        
-        $this->_log->debug(__FUNCTION__ . " end ");
+        // DO NOTHING
     }
     
     // DONE
     protected function pushRole() {
         $this->_log->debug(__FUNCTION__ . " start ");
         
-        if (!empty($this->_local_entity->socid)) {
+        if (!empty($this->_local_entity->socid) && $this->_local_entity->socid != -1) {
             $mno_id = $this->getMnoIdByLocalIdName($this->_local_entity->socid, "societe");
 	    
 	    if ($this->isValidIdentifier($mno_id)) {

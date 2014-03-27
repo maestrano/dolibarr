@@ -212,6 +212,18 @@ class Contact extends CommonObject
                 }
             }
         }
+        
+        function deleteFromMaestrano()
+        {
+            // Get Maestrano Service
+            $maestrano = MaestranoService::getInstance();
+
+            // DISABLED DELETE NOTIFICATIONS
+            if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {
+                $mno_org=new MnoSoaPersonContact($this->db, new MnoSoaBaseLogger());
+                $mno_org->sendDeleteNotification($this->id);
+            }
+        }
 
 	/**
 	 *      Update informations into database
@@ -779,6 +791,9 @@ class Contact extends CommonObject
 		{
 
 			$this->db->commit();
+                        
+                        $this->deleteFromMaestrano();
+                        
 			return 1;
 		}
 		else

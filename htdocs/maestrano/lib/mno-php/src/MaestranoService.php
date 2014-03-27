@@ -136,8 +136,8 @@ class MaestranoService
     {
       self::$_after_sso_sign_in_path = $path;
     }
-    
-    /**
+
+	/**
      * Check if Maestrano integration is enabled
      *
      * @return boolean

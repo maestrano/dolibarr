@@ -284,7 +284,7 @@ class MnoSoaOrganization extends MnoSoaBaseOrganization
     }
     
     // DONE
-    protected function getLocalEntityIdentifier() {
+    public function getLocalEntityIdentifier() {
         return $this->_local_entity->id;
     }
 
