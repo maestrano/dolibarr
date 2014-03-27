@@ -29,7 +29,7 @@
  *	\brief      File for third party class
  */
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
-require_once DOL_DOCUMENT_ROOT.'/maestrano/app/init/soa.php';
+require_once DOL_DOCUMENT_ROOT.'/maestrano/app/init/base.php';
 
 
 /**

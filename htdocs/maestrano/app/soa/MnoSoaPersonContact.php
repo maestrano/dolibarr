@@ -104,27 +104,28 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
     protected function pushAddresses() {
         $this->_log->debug(__FUNCTION__ . " start ");
         // POSTAL ADDRESS
-        $this->_address->postalAddress->postalCode = $this->push_set_or_delete_value($this->_local_entity->zip, "");
-        $this->_address->postalAddress->locality = $this->push_set_or_delete_value($this->_local_entity->town, "");
+        $this->_address->work->postalAddress->streetAddress = $this->push_set_or_delete_value($this->_local_entity->address);
+        $this->_address->work->postalAddress->postalCode = $this->push_set_or_delete_value($this->_local_entity->zip, "");
+        $this->_address->work->postalAddress->locality = $this->push_set_or_delete_value($this->_local_entity->town, "");
         if (empty($this->_local_entity->state_id)) {
-            $this->_address->postalAddress->region = "";
+            $this->_address->work->postalAddress->region = "";
         } else {
             $state = getState($this->_local_entity->state_id,0,$this->_db);
             if (!empty($state) && array_key_exists('label', $state)) {
-                $this->_address->postalAddress->region = $this->push_set_or_delete_value($state['label'], "");
+                $this->_address->work->postalAddress->region = $this->push_set_or_delete_value($state['label'], "");
             } else {
                 $this->log->error(__FUNCTION__ . " failed to lookup state " . $this->_local_entity->state_id);
             }
         }
         
         if (empty($this->_local_entity->country_id)) {
-            $this->_address->postalAddress->country = "";
+            $this->_address->work->postalAddress->country = "";
         } else {
             $country_code = getCountry($this->_local_entity->country_id,2,$this->_db);
             if (!empty($country_code) && $country_code != 'NotDefined' && $country_code != 'Error' && strlen($country_code) == 2) {
-                $this->_address->postalAddress->country = $this->push_set_or_delete_value(strtoupper($country_code));
+                $this->_address->work->postalAddress->country = $this->push_set_or_delete_value(strtoupper($country_code));
             } else {
-                $this->log->error(__FUNCTION__ . " failed to lookup country " . $this->_address->postalAddress->country);
+                $this->log->error(__FUNCTION__ . " failed to lookup country " . $this->_address->work->postalAddress->country);
             }
             
         }
@@ -135,18 +136,18 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
     protected function pullAddresses() {
         $this->_log->debug(__FUNCTION__ . " start ");
 	// POSTAL ADDRESS
-        $this->_local_entity->address = $this->pull_set_or_delete_value($this->_address->postalAddress->streetAddress, "");
-        $this->_local_entity->town = $this->pull_set_or_delete_value($this->_address->postalAddress->locality, "");
-        $this->_local_entity->zip = $this->pull_set_or_delete_value($this->_address->postalAddress->postalCode, "");
-        if ($this->_address->postalAddress->country != null) {
-            if (empty($this->_address->postalAddress->country)) {
+        $this->_local_entity->address = $this->pull_set_or_delete_value($this->_address->work->postalAddress->streetAddress, "");
+        $this->_local_entity->town = $this->pull_set_or_delete_value($this->_address->work->postalAddress->locality, "");
+        $this->_local_entity->zip = $this->pull_set_or_delete_value($this->_address->work->postalAddress->postalCode, "");
+        if ($this->_address->work->postalAddress->country != null) {
+            if (empty($this->_address->work->postalAddress->country)) {
                 $this->_local_entity->country_id = "";
             } else {
-                $country_code = getCountry($this->_address->postalAddress->country,3,$this->_db);
+                $country_code = getCountry($this->_address->work->postalAddress->country,3,$this->_db);
                 if (!empty($country_code) && $country_code != 'NotDefined' && $country_code != 'Error') {
                     $this->_local_entity->country_id = $country_code;
                 } else {
-                    $this->log->error(__FUNCTION__ . " failed to lookup country " . $this->_address->postalAddress->country);
+                    $this->log->error(__FUNCTION__ . " failed to lookup country " . $this->_address->work->postalAddress->country);
                 }
             }
         }
