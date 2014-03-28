@@ -11,7 +11,7 @@ class MnoSoaOrganization extends MnoSoaBaseOrganization
     protected function pushId() 
     {
         $this->_log->debug(__FUNCTION__ . " start");
-	$id = $this->_local_entity->id;
+	$id = $this->getLocalEntityIdentifier();
 	
 	if (!empty($id)) {
 	    $this->_log->debug(__FUNCTION__ . " this->_local_entity->id = " . json_encode($id));
