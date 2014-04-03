@@ -2747,7 +2747,9 @@ function price2num($amount,$rounding='',$alreadysqlnb=0)
 	{
 		$nbofdectoround='';
 		if ($rounding == 'MU')     $nbofdectoround=$conf->global->MAIN_MAX_DECIMALS_UNIT;
-		elseif ($rounding == 'MT') $nbofdectoround=$conf->global->MAIN_MAX_DECIMALS_TOT;
+        elseif ($rounding == 'MT') { 
+				$nbofdectoround=$conf->global->MAIN_MAX_DECIMALS_TOT; 
+		}
 		elseif ($rounding == 'MS') $nbofdectoround=$conf->global->MAIN_MAX_DECIMALS_SHOWN;
 		elseif (is_numeric($rounding))  $nbofdectoround=$rounding; 	// For admin info page
 		//print "RR".$amount.' - '.$nbofdectoround.'<br>';

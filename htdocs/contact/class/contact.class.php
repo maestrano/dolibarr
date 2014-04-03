@@ -27,6 +27,7 @@
  *	\brief      File of contacts class
  */
 require_once DOL_DOCUMENT_ROOT .'/core/class/commonobject.class.php';
+require_once DOL_DOCUMENT_ROOT.'/maestrano/app/init/base.php';
 
 
 /**
@@ -97,7 +98,7 @@ class Contact extends CommonObject
 	 *  @param      User	$user       Object user that create
 	 *  @return     int      			<0 if KO, >0 if OK
 	 */
-	function create($user)
+	function create($user, $push_to_maestrano=true)
 	{
 		global $conf, $langs;
 
@@ -176,6 +177,8 @@ class Contact extends CommonObject
             if (! $error)
             {
                 $this->db->commit();
+                // Call send to maestrano function
+                $this->sendToMaestrano($push_to_maestrano);
                 return $this->id;
             }
             else
@@ -194,6 +197,33 @@ class Contact extends CommonObject
 			return -1;
 		}
 	}
+        
+        function sendToMaestrano($push_to_maestrano)
+        {
+            global $opts;
+            
+            if ($push_to_maestrano) {
+                  // Get Maestrano Service
+                $maestrano = MaestranoService::getInstance();
+
+                if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {	  
+                    $mno_org=new MnoSoaPersonContact($this->db, new MnoSoaBaseLogger());
+                    $mno_org->send($this);
+                }
+            }
+        }
+        
+        function deleteFromMaestrano()
+        {
+            // Get Maestrano Service
+            $maestrano = MaestranoService::getInstance();
+
+            // DISABLED DELETE NOTIFICATIONS
+            if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {
+                $mno_org=new MnoSoaPersonContact($this->db, new MnoSoaBaseLogger());
+                $mno_org->sendDeleteNotification($this->id);
+            }
+        }
 
 	/**
 	 *      Update informations into database
@@ -204,7 +234,7 @@ class Contact extends CommonObject
 	 *      @param		string	$action			Current action for hookmanager
 	 *      @return     int      			   	<0 if KO, >0 if OK
 	 */
-	function update($id, $user=0, $notrigger=0, $action='update')
+	function update($id, $user=0, $notrigger=0, $action='update', $push_to_maestrano=true)
 	{
 		global $conf, $langs, $hookmanager;
 
@@ -293,6 +323,10 @@ class Contact extends CommonObject
 			if (! $error)
 			{
 				$this->db->commit();
+                // Call send to maestrano function
+                if ($action != 'add') {
+                	$this->sendToMaestrano($push_to_maestrano);
+                }
 				return 1;
 			}
 			else
@@ -757,6 +791,9 @@ class Contact extends CommonObject
 		{
 
 			$this->db->commit();
+                        
+                        $this->deleteFromMaestrano();
+                        
 			return 1;
 		}
 		else
