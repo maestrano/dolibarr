@@ -169,7 +169,7 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
         $this->_log->debug(__FUNCTION__ . " start ");
         $this->_telephone->work->voice = $this->push_set_or_delete_value($this->_local_entity->phone_pro, "");
         $this->_telephone->home->voice = $this->push_set_or_delete_value($this->_local_entity->phone_perso, "");
-        $this->_telephone->work->mobile = $this->push_set_or_delete_value($this->_local_entity->phone_mobile, "");
+        $this->_telephone->home->mobile = $this->push_set_or_delete_value($this->_local_entity->phone_mobile, "");
         $this->_telephone->work->fax = $this->push_set_or_delete_value($this->_local_entity->fax, "");
         $this->_log->debug(__FUNCTION__ . " end ");
     }
@@ -179,7 +179,7 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
         $this->_log->debug(__FUNCTION__ . " end ");
         $this->_local_entity->phone_pro = $this->pull_set_or_delete_value($this->_telephone->work->voice, "");
         $this->_local_entity->phone_perso = $this->pull_set_or_delete_value($this->_telephone->home->voice, "");
-        $this->_local_entity->phone_mobile = $this->pull_set_or_delete_value($this->_telephone->work->mobile, "");
+        $this->_local_entity->phone_mobile = $this->pull_set_or_delete_value($this->_telephone->home->mobile, "");
         $this->_local_entity->fax = $this->pull_set_or_delete_value($this->_telephone->work->fax, "");
         $this->_log->debug(__FUNCTION__ . " end ");
     }

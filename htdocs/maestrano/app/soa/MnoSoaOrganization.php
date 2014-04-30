@@ -125,12 +125,13 @@ class MnoSoaOrganization extends MnoSoaBaseOrganization
     protected function pushAddresses() {
         $this->_log->debug(__FUNCTION__ . " start ");
         // POSTAL ADDRESS
-        $this->_address->postalAddress->postalCode = $this->push_set_or_delete_value($this->_local_entity->zip, "");
-        $this->_address->postalAddress->locality = $this->push_set_or_delete_value($this->_local_entity->town, "");
+        $this->_address->postalAddress->streetAddress = $this->push_set_or_delete_value($this->_local_entity->address);
+        $this->_address->postalAddress->postalCode = $this->push_set_or_delete_value($this->_local_entity->zip);
+        $this->_address->postalAddress->locality = $this->push_set_or_delete_value($this->_local_entity->town);
         if (!empty($this->_local_entity->state_id)) {
             $state = getState($this->_local_entity->state_id,0,$this->_db);
             if (!empty($state) && array_key_exists('label', $state)) {
-                $this->_address->postalAddress->region = $this->push_set_or_delete_value($state['label'], "");
+                $this->_address->postalAddress->region = $this->push_set_or_delete_value($state['label']);
             } else {
                 $this->log->error(__FUNCTION__ . " failed to lookup state " . $this->_local_entity->state_id);
             }
@@ -154,9 +155,9 @@ class MnoSoaOrganization extends MnoSoaBaseOrganization
     protected function pullAddresses() {
         $this->_log->debug(__FUNCTION__ . " start ");
 	// POSTAL ADDRESS
-        $this->_local_entity->address = $this->pull_set_or_delete_value($this->_address->postalAddress->streetAddress, "");
-        $this->_local_entity->town = $this->pull_set_or_delete_value($this->_address->postalAddress->locality, "");
-        $this->_local_entity->zip = $this->pull_set_or_delete_value($this->_address->postalAddress->postalCode, "");
+        $this->_local_entity->address = $this->pull_set_or_delete_value($this->_address->postalAddress->streetAddress);
+        $this->_local_entity->town = $this->pull_set_or_delete_value($this->_address->postalAddress->locality);
+        $this->_local_entity->zip = $this->pull_set_or_delete_value($this->_address->postalAddress->postalCode);
         if ($this->_address->postalAddress->country != null) {
             if (empty($this->_address->postalAddress->country)) {
                 $this->_local_entity->country_id = null;
