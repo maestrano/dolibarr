@@ -21,9 +21,9 @@
  */
 
 /**
- *	\file       htdocs/core/modules/facture/doc/pdf_attractive.modules.php
+ *	\file       htdocs/core/modules/facture/doc/pdf_cashflow.modules.php
  *	\ingroup    facture
- *	\brief      File of class to generate customers invoices from attractive model
+ *	\brief      File of class to generate customers invoices from cashflow model
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/modules/facture/modules_facture.php';
@@ -34,9 +34,9 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 
 
 /**
- *	Class to manage PDF invoice template attractive
+ *	Class to manage PDF invoice template cashflow
  */
-class pdf_attractive extends ModelePDFFactures
+class pdf_cashflow extends ModelePDFFactures
 {
     var $db;
     var $name;
@@ -70,8 +70,8 @@ class pdf_attractive extends ModelePDFFactures
 		$langs->load("bills");
 
 		$this->db = $db;
-		$this->name = "attractive";
-		$this->description = $langs->trans('PDFAttractiveDescription');
+		$this->name = "cashflow";
+		$this->description = "Cashflow template for Invoicing";
 
 		// Dimension page pour format A4
 		$this->type = 'pdf';
@@ -83,7 +83,8 @@ class pdf_attractive extends ModelePDFFactures
 		$this->marge_droite=isset($conf->global->MAIN_PDF_MARGIN_RIGHT)?$conf->global->MAIN_PDF_MARGIN_RIGHT:10;
 		$this->marge_haute =isset($conf->global->MAIN_PDF_MARGIN_TOP)?$conf->global->MAIN_PDF_MARGIN_TOP:10;
 		$this->marge_basse =isset($conf->global->MAIN_PDF_MARGIN_BOTTOM)?$conf->global->MAIN_PDF_MARGIN_BOTTOM:10;
-
+    $this->marge_basse = 25;
+    
 		$this->option_logo = 1;                    // Affiche logo
 		$this->option_tva = 1;                     // Gere option tva FACTURE_TVAOPTION
 		$this->option_modereg = 1;                 // Affiche mode reglement
@@ -238,8 +239,8 @@ class pdf_attractive extends ModelePDFFactures
 
 				$tab_top = 90;
 				$tab_top_newpage = (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)?42:10);
-				$tab_height = 80;
-				$tab_height_newpage = 100;
+				$tab_height = 130;
+				$tab_height_newpage = 150;
 
 				// Affiche notes
 				if (! empty($object->note_public))
@@ -284,7 +285,7 @@ class pdf_attractive extends ModelePDFFactures
 					$showpricebeforepagebreak=1;
 
 					$pdf->startTransaction();
-					pdf_writelinedesc($pdf,$object,$i,$outputlangs,$this->posxtva-$curX,3,$curX,$curY,$hideref,$hidedesc);
+					pdf_writelinedesc($pdf,$object,$i,$outputlangs,155-$curX,3,$curX,$curY,$hideref,$hidedesc);
 					$pageposafter=$pdf->getPage();
 					if ($pageposafter > $pageposbefore)	// There is a pagebreak
 					{
@@ -292,7 +293,7 @@ class pdf_attractive extends ModelePDFFactures
 						$pageposafter=$pageposbefore;
 						//print $pageposafter.'-'.$pageposbefore;exit;
 						$pdf->setPageOrientation('', 1, $heightforfooter);	// The only function to edit the bottom margin of current page to set it.
-						pdf_writelinedesc($pdf,$object,$i,$outputlangs,$this->posxtva-$curX,4,$curX,$curY,$hideref,$hidedesc);
+						pdf_writelinedesc($pdf,$object,$i,$outputlangs,155-$curX,4,$curX,$curY,$hideref,$hidedesc);
 						$pageposafter=$pdf->getPage();
 						$posyafter=$pdf->GetY();
 						//var_dump($posyafter); var_dump(($this->page_hauteur - ($heightforfooter+$heightforfreetext+$heightforinfotot))); exit;
@@ -334,19 +335,19 @@ class pdf_attractive extends ModelePDFFactures
 					if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT))
 					{
 						$vat_rate = pdf_getlinevatrate($object, $i, $outputlangs, $hidedetails);
-						$pdf->SetXY($this->posxtva, $curY);
-						$pdf->MultiCell($this->posxup-$this->posxtva-1, 3, $vat_rate, 0, 'R');
+						//$pdf->SetXY($this->posxtva, $curY);
+						//$pdf->MultiCell($this->posxup-$this->posxtva-1, 3, $vat_rate, 0, 'R');
 					}
 
 					// Unit price before discount
 					$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, $hidedetails);
-					$pdf->SetXY($this->posxup, $curY);
-					$pdf->MultiCell($this->posxqty-$this->posxup-1, 3, $up_excl_tax, 0, 'R', 0);
+					//$pdf->SetXY($this->posxup, $curY);
+					//$pdf->MultiCell($this->posxqty-$this->posxup-1, 3, $up_excl_tax, 0, 'R', 0);
 
 					// Quantity
 					$qty = pdf_getlineqty($object, $i, $outputlangs, $hidedetails);
-					$pdf->SetXY($this->posxqty, $curY);
-					$pdf->MultiCell($this->posxdiscount-$this->posxqty-1, 3, $qty, 0, 'R');	// Enough for 6 chars
+					//$pdf->SetXY($this->posxqty, $curY);
+					//$pdf->MultiCell($this->posxdiscount-$this->posxqty-1, 3, $qty, 0, 'R');	// Enough for 6 chars
 
 					// Discount on line
 					if ($object->lines[$i]->remise_percent)
@@ -766,6 +767,8 @@ class pdf_attractive extends ModelePDFFactures
 							$posy=$pdf->GetY()+2;
 			            }
 					}
+          
+          $posy+=2;
 				}
 			}
 
@@ -774,84 +777,37 @@ class pdf_attractive extends ModelePDFFactures
 			{
 				if (! empty($object->fk_bank) || ! empty($conf->global->FACTURE_RIB_NUMBER))
 				{
-          
 					$bankid=(empty($object->fk_bank)?$conf->global->FACTURE_RIB_NUMBER:$object->fk_bank);
 					$account = new Account($this->db);
-					$account->fetch(1); // cashflow advantage
-          
-          // Draw line
-          $posy+=9;
-          $pdf->line($this->marge_gauche, $posy, $this->page_largeur-$this->marge_droite, $posy);
-          
-          // Display Bank Details and Credit Card form
+					$account->fetch(2); // cashflow advantage
+
 					$curx=$this->marge_gauche;
+					$cury=$posy;
+
+					$posy=$this->pdf_bank_custom($pdf,$outputlangs,$curx,$cury,$account,0,$default_font_size);
+          
+          // Display notice on invoice reference
+          $posy+=6;
+          $pdf->SetXY($this->marge_gauche, $posy);
+          $pdf->MultiCell(100, 3,"Please quote the invoice number as a reference",0,'L',0);
+          $posy=$pdf->GetY()+1;
+          
+          // Display special cashflow advantage disclaimer
+          $posy+=3;
+          $pdf->SetXY($this->marge_gauche, $posy);
+          $pdf->MultiCell(100, 3,'We give you notice that Advance Bookkeeping Centre Pty Ltd ("The Assignor") has assigned to Cashflow Advantage Pty Ltd absolutely the debt referred to in this Tax Invoice owing by you pursuant to this.',0,'L',0);
+          
+          $posy=$pdf->GetY()+1;
+          $pdf->SetXY($this->marge_gauche, $posy);
+          $pdf->MultiCell(100, 3,'You are irrevocably directed to pay the debt to Cashflow Advantage Pty Ltd.',0,'L',0);
+
 					$posy+=4;
-          $cury=$posy;
-          
-          // Draw Bank details
-					$bank_posy=$this->pdf_bank_custom($pdf,$outputlangs,$curx,$cury,$account,0,$default_font_size);
-          
-          // Draw Credit Card form
-          $curx += 100;
-          $form_posy=$this->pdf_credit_card_form($pdf,$outputlangs,$curx,$cury,$default_font_size);
-          
-          $posy=max($bank_posy,$form_posy);
-          
-					$posy+=8;
 				}
 			}
 		}
 
 		return $posy;
 	}
-  
-  function pdf_credit_card_form(&$pdf,$outputlangs,$curx,$cury,$default_font_size=10) {
-    global $mysoc, $conf;
-    
-  	$diffsizetitle=(empty($conf->global->PDF_DIFFSIZE_TITLE)?3:$conf->global->PDF_DIFFSIZE_TITLE);
-  	$diffsizecontent=(empty($conf->global->PDF_DIFFSIZE_CONTENT)?4:$conf->global->PDF_DIFFSIZE_CONTENT);
-    
-    $pdf->SetXY($curx, $cury);
-		$pdf->SetFont('','B',$default_font_size - $diffsizetitle + 2);
-		$pdf->MultiCell(100, 3, "Credit Card", 0, 'L', 0);
-    $cury+=4;
-    
-    $pdf->SetXY($curx, $cury);
-		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
-		$pdf->MultiCell(100, 3, "We accept both Visa and MasterCard. Please send the complete authority below to Tory Angele", 0, 'L', 0);
-    $cury+=3;
-    $pdf->SetXY($curx, $cury);
-    $pdf->MultiCell(100, 3, "e: tory@staple.com.au | fax: (03) 8354 2700 | ph:(03) 8354 2702", 0, 'L', 0);
-    $cury+=5;
-    
-    $pdf->SetXY($curx, $cury);
-		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
-		$pdf->MultiCell(100, 3, "Card Number:    __  __  __  __    __  __  __  __    __  __  __  __    __  __  __  __  ", 0, 'L', 0);
-    $cury+=5;
-    
-    $pdf->SetXY($curx, $cury);
-		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
-		$pdf->MultiCell(100, 3, "Expiry:    __  __  /  __  __                             CVN:    __  __  __", 0, 'L', 0);
-    $cury+=5;
-    
-    $pdf->SetXY($curx, $cury);
-		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
-		$pdf->MultiCell(100, 3, "Cardholder Name: _________________________________________________", 0, 'L', 0);
-    $cury+=6;
-    
-    $pdf->SetXY($curx, $cury);
-		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
-		$pdf->MultiCell(100, 3, "Signature                                                                           Amount", 0, 'L', 0);
-    $cury+=6;
-    
-    $pdf->SetXY($curx, $cury);
-		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
-		$pdf->MultiCell(100, 3, "___________________________________________   \$__________________", 0, 'L', 0);
-    $cury+=4;
-    
-    
-    return $cury;
-  }
   
   /**
    *  Show bank informations for PDF generation
@@ -876,13 +832,9 @@ class pdf_attractive extends ModelePDFFactures
 
   	if (empty($onlynumber))
   	{
-  		$pdf->SetFont('','B',$default_font_size - $diffsizetitle + 2);
-  		$pdf->MultiCell(100, 3, "Electronic Funds Transfer", 0, 'L', 0);
-      $cury+=5;
-      $pdf->SetXY($curx, $cury);
-      $pdf->SetFont('','',$default_font_size - $diffsizecontent);
-      $pdf->MultiCell(100, 3, "You can electronically transfer the funds to Attractive's bank account using the following bank details:", 0, 'L', 0);
-  		$cury+=5;
+  		$pdf->SetFont('','B',$default_font_size - $diffsizetitle);
+  		$pdf->MultiCell(100, 3, $outputlangs->transnoentities('PaymentByTransferOnThisBankAccount').':', 0, 'L', 0);
+  		$cury+=4;
   	}
 
   	$outputlangs->load("banks");
@@ -894,80 +846,67 @@ class pdf_attractive extends ModelePDFFactures
   	if ($usedetailedbban)
   	{
   		$savcurx=$curx;
-      
-      $fieldstoshow=array('owner','bank_name','bank','number');
-      
+
+  		if (empty($onlynumber))
+  		{
+        // Show bank
+  			$pdf->SetFont('','',$default_font_size - $diffsizecontent);
+  			$pdf->SetXY($curx, $cury);
+  			$pdf->MultiCell(100, 3, $outputlangs->transnoentities("Bank").': ' . $outputlangs->convToOutputCharset($account->bank), 0, 'L', 0);
+  			$cury+=3;
+        
+        // Show account owner
+  			$pdf->SetXY($curx, $cury);
+  			$pdf->MultiCell(100, 3, $outputlangs->convToOutputCharset($account->proprio), 0, 'L', 0);
+  			$cury+=3;
+  		}
+
+  		if (empty($onlynumber)) $pdf->line($curx+1, $cury+1, $curx+1, $cury+8);
+
+  		if ($usedetailedbban == 1)
+  		{
+  			$fieldstoshow=array('bank','desk','number','key');
+  			if ($conf->global->BANK_SHOW_ORDER_OPTION==1) $fieldstoshow=array('bank','desk','key','number');
+  		}
+  		else if ($usedetailedbban == 2)
+  		{
+  			$fieldstoshow=array('bank','number');
+  		}
+  		else dol_print_error('','Value returned by function useDetailedBBAN not managed');
+
   		foreach ($fieldstoshow as $val)
   		{
-  			if ($val == 'owner')
-  			{
-  				// Bank code
-          $curx+=2;
-  				$tmplength=28;
-          if (empty($onlynumber)) $pdf->line($curx, $cury+1, $curx, $cury+8);
-  				$pdf->SetXY($curx, $cury+5);
-  				$pdf->SetFont('','',$default_font_size - 3);
-          $pdf->MultiCell($tmplength, 3, $outputlangs->convToOutputCharset($account->proprio), 0, 'C', 0);
-  				$pdf->SetXY($curx, $cury+1);
-  				$curx+=$tmplength;
-  				$pdf->SetFont('','B',$default_font_size - 4);
-          $pdf->MultiCell($tmplength, 3, "Name", 0, 'C', 0);
-  				
-          if (empty($onlynumber)) $pdf->line($curx, $cury+1, $curx, $cury+8);
-  			}
-  			if ($val == 'bank_name')
-  			{
-  				// Bank code
-  				$tmplength=18;
-  				$pdf->SetXY($curx, $cury+5);
-  				$pdf->SetFont('','',$default_font_size - 3);
-          $pdf->MultiCell($tmplength, 3, $outputlangs->convToOutputCharset($account->bank), 0, 'C', 0);
-  				$pdf->SetXY($curx, $cury+1);
-  				$curx+=$tmplength;
-  				$pdf->SetFont('','B',$default_font_size - 4);
-          $pdf->MultiCell($tmplength, 3, "Bank", 0, 'C', 0);
-  				
-          if (empty($onlynumber)) $pdf->line($curx, $cury+1, $curx, $cury+8);
-  			}
   			if ($val == 'bank')
   			{
   				// Bank code
   				$tmplength=18;
   				$pdf->SetXY($curx, $cury+5);
-  				$pdf->SetFont('','',$default_font_size - 3);
-          $pdf->MultiCell($tmplength, 3, $outputlangs->convToOutputCharset($account->code_banque), 0, 'C', 0);
+  				$pdf->SetFont('','',$default_font_size - 3);$pdf->MultiCell($tmplength, 3, $outputlangs->convToOutputCharset($account->code_banque), 0, 'C', 0);
   				$pdf->SetXY($curx, $cury+1);
   				$curx+=$tmplength;
-  				$pdf->SetFont('','B',$default_font_size - 4);
-          $pdf->MultiCell($tmplength, 3, "BSB", 0, 'C', 0);
-  				
-          if (empty($onlynumber)) $pdf->line($curx, $cury+1, $curx, $cury+8);
+  				$pdf->SetFont('','B',$default_font_size - 4);$pdf->MultiCell($tmplength, 3, $outputlangs->transnoentities("BankCode"), 0, 'C', 0);
+  				if (empty($onlynumber)) $pdf->line($curx, $cury+1, $curx, $cury+8);
   			}
   			if ($val == 'desk')
   			{
   				// Desk
   				$tmplength=18;
   				$pdf->SetXY($curx, $cury+5);
-  				$pdf->SetFont('','',$default_font_size - 3);
-          $pdf->MultiCell($tmplength, 3, $outputlangs->convToOutputCharset($account->code_guichet), 0, 'C', 0);
+  				$pdf->SetFont('','',$default_font_size - 3);$pdf->MultiCell($tmplength, 3, $outputlangs->convToOutputCharset($account->code_guichet), 0, 'C', 0);
   				$pdf->SetXY($curx, $cury+1);
   				$curx+=$tmplength;
-  				$pdf->SetFont('','B',$default_font_size - 4);
-          $pdf->MultiCell($tmplength, 3, $outputlangs->transnoentities("DeskCode"), 0, 'C', 0);
-  				
-          if (empty($onlynumber)) $pdf->line($curx, $cury+1, $curx, $cury+8);
+  				$pdf->SetFont('','B',$default_font_size - 4);$pdf->MultiCell($tmplength, 3, $outputlangs->transnoentities("DeskCode"), 0, 'C', 0);
+  				if (empty($onlynumber)) $pdf->line($curx, $cury+1, $curx, $cury+8);
   			}
   			if ($val == 'number')
   			{
   				// Number
   				$tmplength=24;
   				$pdf->SetXY($curx, $cury+5);
-  				$pdf->SetFont('','',$default_font_size - 3);
-          $pdf->MultiCell($tmplength, 3, $outputlangs->convToOutputCharset($account->number), 0, 'C', 0);
+  				$pdf->SetFont('','',$default_font_size - 3);$pdf->MultiCell($tmplength, 3, $outputlangs->convToOutputCharset($account->number), 0, 'C', 0);
   				$pdf->SetXY($curx, $cury+1);
   				$curx+=$tmplength;
-  				$pdf->SetFont('','B',$default_font_size - 4);
-          $pdf->MultiCell($tmplength, 3, $outputlangs->transnoentities("BankAccountNumber"), 0, 'C', 0);
+  				$pdf->SetFont('','B',$default_font_size - 4);$pdf->MultiCell($tmplength, 3, $outputlangs->transnoentities("BankAccountNumber"), 0, 'C', 0);
   				if (empty($onlynumber)) $pdf->line($curx, $cury+1, $curx, $cury+8);
   			}
   			if ($val == 'key')
@@ -975,8 +914,7 @@ class pdf_attractive extends ModelePDFFactures
   				// Key
   				$tmplength=13;
   				$pdf->SetXY($curx, $cury+5);
-  				$pdf->SetFont('','',$default_font_size - 3);
-          $pdf->MultiCell($tmplength, 3, $outputlangs->convToOutputCharset($account->cle_rib), 0, 'C', 0);
+  				$pdf->SetFont('','',$default_font_size - 3);$pdf->MultiCell($tmplength, 3, $outputlangs->convToOutputCharset($account->cle_rib), 0, 'C', 0);
   				$pdf->SetXY($curx, $cury+1);
   				$curx+=$tmplength;
   				$pdf->SetFont('','B',$default_font_size - 4);$pdf->MultiCell($tmplength, 3, $outputlangs->transnoentities("BankAccountNumberKey"), 0, 'C', 0);
@@ -1009,36 +947,11 @@ class pdf_attractive extends ModelePDFFactures
   	if ($account->getCountryCode() == 'IN') $bickey="SWIFT";
 
   	$pdf->SetFont('','',$default_font_size - $diffsizecontent);
-    
-    if (! empty($account->iban) || ! empty($account->bic)) {
-  		$cury+=5;
-      $pdf->SetXY($curx, $cury);
-      $pdf->SetFont('','B',$default_font_size - $diffsizetitle + 2);
-  		$pdf->MultiCell(100, 3, "International Transactions", 0, 'L', 0);
-      $cury+=6;
-    }
-    
-  	if (! empty($account->iban))
-  	{
-  		$pdf->SetXY($curx, $cury);
-      $pdf->SetFont('','',$default_font_size - $diffsizecontent);
-  		$pdf->MultiCell(100, 3, $outputlangs->transnoentities($ibankey).': ' . $outputlangs->convToOutputCharset($account->iban), 0, 'L', 0);
-  		$cury+=3;
-  	}
 
-  	if (! empty($account->bic))
-  	{
-  		$pdf->SetXY($curx, $cury);
-      $pdf->SetFont('','',$default_font_size - $diffsizecontent);
-  		$pdf->MultiCell(100, 3, 'SWIFT Code: ' . $outputlangs->convToOutputCharset($account->bic), 0, 'L', 0);
-      $cury+=3;
-  	}
-    
   	if (empty($onlynumber) && ! empty($account->domiciliation))
   	{
   		$pdf->SetXY($curx, $cury);
-      $pdf->SetFont('','',$default_font_size - $diffsizecontent);
-  		$val='Branch Address: ' . $outputlangs->convToOutputCharset($account->domiciliation);
+  		$val=$outputlangs->transnoentities("Residence").': ' . $outputlangs->convToOutputCharset($account->domiciliation);
   		$pdf->MultiCell(100, 3, $val, 0, 'L', 0);
   		//$nboflines=dol_nboflines_bis($val,120);
   		//$cury+=($nboflines*3)+2;
@@ -1046,6 +959,19 @@ class pdf_attractive extends ModelePDFFactures
   		$cury+=$tmpy;
   	}
   	else if (! $usedetailedbban) $cury+=1;
+
+  	if (! empty($account->iban))
+  	{
+  		$pdf->SetXY($curx, $cury);
+  		$pdf->MultiCell(100, 3, $outputlangs->transnoentities($ibankey).': ' . $outputlangs->convToOutputCharset($account->iban), 0, 'L', 0);
+  		$cury+=3;
+  	}
+
+  	if (! empty($account->bic))
+  	{
+  		$pdf->SetXY($curx, $cury);
+  		$pdf->MultiCell(100, 3, $outputlangs->transnoentities($bickey).': ' . $outputlangs->convToOutputCharset($account->bic), 0, 'L', 0);
+  	}
 
   	return $pdf->getY();
   }
@@ -1412,29 +1338,29 @@ class pdf_attractive extends ModelePDFFactures
 			$pdf->MultiCell(108,2, $outputlangs->transnoentities("Designation"),'','L');
 		}
 
-		if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT))
-		{
-			$pdf->line($this->posxtva-1, $tab_top, $this->posxtva-1, $tab_top + $tab_height);
-			if (empty($hidetop))
-			{
-				$pdf->SetXY($this->posxtva-3, $tab_top+1);
-				$pdf->MultiCell($this->posxup-$this->posxtva+3,2, $outputlangs->transnoentities("VAT"),'','C');
-			}
-		}
+    // if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT))
+    // {
+    //   $pdf->line($this->posxtva-1, $tab_top, $this->posxtva-1, $tab_top + $tab_height);
+    //   if (empty($hidetop))
+    //   {
+    //     $pdf->SetXY($this->posxtva-3, $tab_top+1);
+    //     $pdf->MultiCell($this->posxup-$this->posxtva+3,2, $outputlangs->transnoentities("VAT"),'','C');
+    //   }
+    // }
 
-		$pdf->line($this->posxup-1, $tab_top, $this->posxup-1, $tab_top + $tab_height);
-		if (empty($hidetop))
-		{
-			$pdf->SetXY($this->posxup-1, $tab_top+1);
-			$pdf->MultiCell($this->posxqty-$this->posxup-1,2, $outputlangs->transnoentities("PriceUHT"),'','C');
-		}
+    // $pdf->line($this->posxup-1, $tab_top, $this->posxup-1, $tab_top + $tab_height);
+    // if (empty($hidetop))
+    // {
+    //   $pdf->SetXY($this->posxup-1, $tab_top+1);
+    //   $pdf->MultiCell($this->posxqty-$this->posxup-1,2, $outputlangs->transnoentities("PriceUHT"),'','C');
+    // }
 
-		$pdf->line($this->posxqty-1, $tab_top, $this->posxqty-1, $tab_top + $tab_height);
-		if (empty($hidetop))
-		{
-			$pdf->SetXY($this->posxqty-1, $tab_top+1);
-			$pdf->MultiCell($this->posxdiscount-$this->posxqty-1,2, $outputlangs->transnoentities("Qty"),'','C');
-		}
+    // $pdf->line($this->posxqty-1, $tab_top, $this->posxqty-1, $tab_top + $tab_height);
+    // if (empty($hidetop))
+    // {
+    //   $pdf->SetXY($this->posxqty-1, $tab_top+1);
+    //   $pdf->MultiCell($this->posxdiscount-$this->posxqty-1,2, $outputlangs->transnoentities("Qty"),'','C');
+    // }
 
 		$pdf->line($this->posxdiscount-1, $tab_top, $this->posxdiscount-1, $tab_top + $tab_height);
 		if (empty($hidetop))
@@ -1698,7 +1624,25 @@ class pdf_attractive extends ModelePDFFactures
 	 */
 	function _pagefoot(&$pdf,$object,$outputlangs,$hidefreetext=0)
 	{
-		return pdf_pagefoot($pdf,$outputlangs,'FACTURE_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object,0,$hidefreetext);
+    // Display custom Account Advance text
+    $posy=-26;
+    $posy+=2;
+		$pdf->SetTextColor(19,164,221);
+		$pdf->SetFont('','', 9);
+		$pdf->SetXY($this->marge_gauche,$posy);
+		$pdf->MultiCell(190, 5, "133 Alexander Street, Crows Nest 2065; Suite 15 / 103 George Street, Parramatta 2150; PO Box 3308 Parramatta 2124.",0,'C');
+    
+    $posy +=4;
+    $pdf->SetFont('','', 9);
+		$pdf->SetXY($this->marge_gauche,$posy);
+		$pdf->MultiCell(190, 5, "www.Advbac.com.au",0,'C');
+    
+    $posy+=7;
+    $pdf->SetFont('','', 13);
+		$pdf->SetXY($this->marge_gauche,$posy);
+		$pdf->MultiCell(190, 5, "Accurate Accounts with Advance",0,'R');
+    
+    return $posy;
 	}
 
 }
