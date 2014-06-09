@@ -775,7 +775,6 @@ class pdf_attractive extends ModelePDFFactures
 				if (! empty($object->fk_bank) || ! empty($conf->global->FACTURE_RIB_NUMBER))
 				{
           
-          
 					$bankid=(empty($object->fk_bank)?$conf->global->FACTURE_RIB_NUMBER:$object->fk_bank);
 					$account = new Account($this->db);
 					$account->fetch(1); // cashflow advantage
@@ -786,7 +785,7 @@ class pdf_attractive extends ModelePDFFactures
           
           // Display Bank Details and Credit Card form
 					$curx=$this->marge_gauche;
-					$posy+=5;
+					$posy+=4;
           $cury=$posy;
           
           // Draw Bank details
@@ -820,35 +819,35 @@ class pdf_attractive extends ModelePDFFactures
     $pdf->SetXY($curx, $cury);
 		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
 		$pdf->MultiCell(100, 3, "We accept both Visa and MasterCard. Please send the complete authority below to Tory Angele", 0, 'L', 0);
-    $cury+=4;
+    $cury+=3;
     $pdf->SetXY($curx, $cury);
     $pdf->MultiCell(100, 3, "e: tory@staple.com.au | fax: (03) 8354 2700 | ph:(03) 8354 2702", 0, 'L', 0);
+    $cury+=5;
+    
+    $pdf->SetXY($curx, $cury);
+		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
+		$pdf->MultiCell(100, 3, "Card Number:    __  __  __  __    __  __  __  __    __  __  __  __    __  __  __  __  ", 0, 'L', 0);
+    $cury+=5;
+    
+    $pdf->SetXY($curx, $cury);
+		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
+		$pdf->MultiCell(100, 3, "Expiry:    __  __  /  __  __                             CVN:    __  __  __", 0, 'L', 0);
+    $cury+=5;
+    
+    $pdf->SetXY($curx, $cury);
+		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
+		$pdf->MultiCell(100, 3, "Cardholder Name: _________________________________________________", 0, 'L', 0);
+    $cury+=6;
+    
+    $pdf->SetXY($curx, $cury);
+		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
+		$pdf->MultiCell(100, 3, "Signature                                                                           Amount", 0, 'L', 0);
+    $cury+=6;
+    
+    $pdf->SetXY($curx, $cury);
+		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
+		$pdf->MultiCell(100, 3, "___________________________________________   \$__________________", 0, 'L', 0);
     $cury+=4;
-    
-    $pdf->SetXY($curx, $cury);
-		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
-		$pdf->MultiCell(100, 3, "Card Number:  _ _ _ _  _ _ _ _  _ _ _ _  _ _ _ _  ", 0, 'L', 0);
-    $cury+=3;
-    
-    $pdf->SetXY($curx, $cury);
-		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
-		$pdf->MultiCell(100, 3, "Expiry:  _ _ / _ _    CVN:  _ _ _", 0, 'L', 0);
-    $cury+=3;
-    
-    $pdf->SetXY($curx, $cury);
-		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
-		$pdf->MultiCell(100, 3, "Cardholder Name: __________________________________________________", 0, 'L', 0);
-    $cury+=3;
-    
-    $pdf->SetXY($curx, $cury);
-		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
-		$pdf->MultiCell(100, 3, "Signature                                      Amount", 0, 'L', 0);
-    $cury+=3;
-    
-    $pdf->SetXY($curx, $cury);
-		$pdf->SetFont('','C',$default_font_size - $diffsizecontent );
-		$pdf->MultiCell(100, 3, "___________________________________________   \$__________", 0, 'L', 0);
-    $cury+=3;
     
     
     return $cury;
@@ -879,7 +878,7 @@ class pdf_attractive extends ModelePDFFactures
   	{
   		$pdf->SetFont('','B',$default_font_size - $diffsizetitle + 2);
   		$pdf->MultiCell(100, 3, "Electronic Funds Transfer", 0, 'L', 0);
-      $cury+=7;
+      $cury+=5;
       $pdf->SetXY($curx, $cury);
       $pdf->SetFont('','',$default_font_size - $diffsizecontent);
       $pdf->MultiCell(100, 3, "You can electronically transfer the funds to Attractive's bank account using the following bank details:", 0, 'L', 0);
@@ -895,33 +894,6 @@ class pdf_attractive extends ModelePDFFactures
   	if ($usedetailedbban)
   	{
   		$savcurx=$curx;
-
-      // if (empty($onlynumber))
-      // {
-      //         // Show bank
-      //   $pdf->SetFont('','B',$default_font_size - $diffsizecontent);
-      //   $pdf->SetXY($curx, $cury);
-      //   $pdf->MultiCell(100, 3, $outputlangs->transnoentities("Bank").': ' . $outputlangs->convToOutputCharset($account->bank), 0, 'L', 0);
-      //   $cury+=3;
-      //         
-      //         // Show account owner
-      //   $pdf->SetXY($curx, $cury);
-      //   $pdf->MultiCell(100, 3, 'Name: ' . $outputlangs->convToOutputCharset($account->proprio), 0, 'L', 0);
-      //   $cury+=3;
-      // }
-
-      // if (empty($onlynumber)) $pdf->line($curx+1, $cury+1, $curx+1, $cury+8);
-      // 
-      // if ($usedetailedbban == 1)
-      // {
-      //   $fieldstoshow=array('bank','desk','number','key');
-      //   if ($conf->global->BANK_SHOW_ORDER_OPTION==1) $fieldstoshow=array('bank','desk','key','number');
-      // }
-      // else if ($usedetailedbban == 2)
-      // {
-      //   $fieldstoshow=array('bank','number');
-      // }
-      // else dol_print_error('','Value returned by function useDetailedBBAN not managed');
       
       $fieldstoshow=array('owner','bank_name','bank','number');
       
@@ -1043,7 +1015,7 @@ class pdf_attractive extends ModelePDFFactures
       $pdf->SetXY($curx, $cury);
       $pdf->SetFont('','B',$default_font_size - $diffsizetitle + 2);
   		$pdf->MultiCell(100, 3, "International Transactions", 0, 'L', 0);
-      $cury+=8;
+      $cury+=6;
     }
     
   	if (! empty($account->iban))
