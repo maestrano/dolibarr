@@ -55,5 +55,5 @@ AccountParameter=Konto parametre
 UsageParameter=Usage parametre
 InformationToFindParameters=Hjælp til at finde din %s kontooplysninger
 PAYBOX_CGI_URL_V2=URL PAYBOX CGI-modul til betaling
-VendorName=Navn på leverandør
+SupplierName=Navn på leverandør
 // STOP - Lines generated via autotranslator.php tool (2012-02-29 15:59:36).

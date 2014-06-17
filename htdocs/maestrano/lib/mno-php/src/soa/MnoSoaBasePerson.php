@@ -129,27 +129,27 @@ class MnoSoaBasePerson extends MnoSoaBaseEntity
     * @return Organization the organization json object
     */
     protected function build() {
-		$this->_log->debug(__FUNCTION__ . " start build function");
+		MnoSoaLogger::debug(__FUNCTION__ . " start build function");
 		$this->pushId();
-		$this->_log->debug(__FUNCTION__ . " after Id");
+		MnoSoaLogger::debug(__FUNCTION__ . " after Id");
 		$this->pushName();
-		$this->_log->debug(__FUNCTION__ . " after Name");
+		MnoSoaLogger::debug(__FUNCTION__ . " after Name");
 		$this->pushBirthDate();
-		$this->_log->debug(__FUNCTION__ . " after Birth Date");
+		MnoSoaLogger::debug(__FUNCTION__ . " after Birth Date");
 		$this->pushGender();
-		$this->_log->debug(__FUNCTION__ . " after Annual Revenue");
+		MnoSoaLogger::debug(__FUNCTION__ . " after Annual Revenue");
 		$this->pushAddresses();
-		$this->_log->debug(__FUNCTION__ . " after Addresses");
+		MnoSoaLogger::debug(__FUNCTION__ . " after Addresses");
 		$this->pushEmails();
-		$this->_log->debug(__FUNCTION__ . " after Emails");
+		MnoSoaLogger::debug(__FUNCTION__ . " after Emails");
 		$this->pushTelephones();
-		$this->_log->debug(__FUNCTION__ . " after Telephones");
+		MnoSoaLogger::debug(__FUNCTION__ . " after Telephones");
 		$this->pushWebsites();
-		$this->_log->debug(__FUNCTION__ . " after Websites");
+		MnoSoaLogger::debug(__FUNCTION__ . " after Websites");
 		$this->pushEntity();
-		$this->_log->debug(__FUNCTION__ . " after Entity");
+		MnoSoaLogger::debug(__FUNCTION__ . " after Entity");
         $this->pushRole();
-        $this->_log->debug(__FUNCTION__ . " after Role");
+        MnoSoaLogger::debug(__FUNCTION__ . " after Role");
         
         if ($this->_name != null) { $msg['person']->name = $this->_name; }
         if ($this->_birth_date != null) { $msg['person']->birthDate = $this->_birth_date; }
@@ -161,16 +161,16 @@ class MnoSoaBasePerson extends MnoSoaBaseEntity
         if ($this->_entity != null) { $msg['person']->entity = $this->_entity; }
         if ($this->_role != null) { $msg['person']->role = $this->_role; }
 	
-		$this->_log->debug(__FUNCTION__ . " after creating message array");
+		MnoSoaLogger::debug(__FUNCTION__ . " after creating message array");
 		$result = json_encode($msg['person']);
 	
-		$this->_log->debug(__FUNCTION__ . " result = " . $result);
+		MnoSoaLogger::debug(__FUNCTION__ . " result = " . $result);
 	
 		return json_encode($msg['person']);
     }
     
     protected function persist($mno_entity) {
-        $this->_log->debug(__CLASS__ . " " . __FUNCTION__ . " mno_entity = " . json_encode($mno_entity));
+        MnoSoaLogger::debug(__CLASS__ . " " . __FUNCTION__ . " mno_entity = " . json_encode($mno_entity));
         
         if (!empty($mno_entity->person)) {
             $mno_entity = $mno_entity->person;
@@ -192,35 +192,35 @@ class MnoSoaBasePerson extends MnoSoaBaseEntity
             $this->set_if_array_key_has_value($this->_entity, 'entity', $mno_entity);
             $this->set_if_array_key_has_value($this->_role, 'role', $mno_entity);
 
-            $this->_log->debug(__FUNCTION__ . " persist person id = " . $this->_id);
+            MnoSoaLogger::debug(__FUNCTION__ . " persist person id = " . $this->_id);
 
             $status = $this->pullId();
             $is_new_id = $status == constant('MnoSoaBaseEntity::STATUS_NEW_ID');
             $is_existing_id = $status == constant('MnoSoaBaseEntity::STATUS_EXISTING_ID');
 
-            $this->_log->debug(__FUNCTION__ . " is_new_id = " . $is_new_id);
-            $this->_log->debug(__FUNCTION__ . " is_existing_id = " . $is_existing_id);
+            MnoSoaLogger::debug(__FUNCTION__ . " is_new_id = " . $is_new_id);
+            MnoSoaLogger::debug(__FUNCTION__ . " is_existing_id = " . $is_existing_id);
             
             if ($is_new_id || $is_existing_id) {
-                $this->_log->debug(__FUNCTION__ . " start pull functions");
+                MnoSoaLogger::debug(__FUNCTION__ . " start pull functions");
                 $this->pullName();
-                $this->_log->debug(__FUNCTION__ . " after name");
+                MnoSoaLogger::debug(__FUNCTION__ . " after name");
                 $this->pullBirthDate();
-                $this->_log->debug(__FUNCTION__ . " after birth date");
+                MnoSoaLogger::debug(__FUNCTION__ . " after birth date");
                 $this->pullGender();
-                $this->_log->debug(__FUNCTION__ . " after gender");
+                MnoSoaLogger::debug(__FUNCTION__ . " after gender");
                 $this->pullAddresses();
-                $this->_log->debug(__FUNCTION__ . " after addresses");
+                MnoSoaLogger::debug(__FUNCTION__ . " after addresses");
                 $this->pullEmails();
-                $this->_log->debug(__FUNCTION__ . " after emails");
+                MnoSoaLogger::debug(__FUNCTION__ . " after emails");
                 $this->pullTelephones();
-                $this->_log->debug(__FUNCTION__ . " after telephones");
+                MnoSoaLogger::debug(__FUNCTION__ . " after telephones");
                 $this->pullWebsites();
-                $this->_log->debug(__FUNCTION__ . " after websites");
+                MnoSoaLogger::debug(__FUNCTION__ . " after websites");
                 $this->pullEntity();
-                $this->_log->debug(__FUNCTION__ . " after entity");
+                MnoSoaLogger::debug(__FUNCTION__ . " after entity");
                 $this->pullRole();
-                $this->_log->debug(__FUNCTION__ . " after role");
+                MnoSoaLogger::debug(__FUNCTION__ . " after role");
 
                 $this->saveLocalEntity(false, $status);
             }
@@ -232,7 +232,7 @@ class MnoSoaBasePerson extends MnoSoaBaseEntity
                 $this->addIdMapEntry($local_entity_id, $mno_entity_id);
             }
         }
-        $this->_log->debug(__FUNCTION__ . " end persist");
+        MnoSoaLogger::debug(__FUNCTION__ . " end persist");
     }
 }
 

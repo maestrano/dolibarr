@@ -26,6 +26,7 @@
  *	\brief      File of class to manage predefined products or services
  */
 require_once DOL_DOCUMENT_ROOT .'/core/class/commonobject.class.php';
+require_once DOL_DOCUMENT_ROOT .'/maestrano/app/init/base.php';
 
 
 /**
@@ -199,7 +200,7 @@ class Product extends CommonObject
 	 *  @param	int		$notrigger		Disable triggers
 	 *	@return int			     		Id of product/service if OK or number of error < 0
 	 */
-	function create($user,$notrigger=0)
+	function create($user,$notrigger=0,$push_to_maestrano=true)
 	{
 		global $conf, $langs;
 
@@ -315,7 +316,7 @@ class Product extends CommonObject
 				$sql.= ", ".$this->status;
 				$sql.= ", ".$this->status_buy;
 				$sql.= ", '".$this->canvas."'";
-				$sql.= ", ".((empty($this->finished) || $this->finished < 0)?'null':$this->finished);
+				$sql.= ", ".((empty($this->finished) && $this->finished !== '0')?'null':$this->finished);
 				$sql.= ")";
 
 				dol_syslog(get_class($this)."::Create sql=".$sql);
@@ -335,7 +336,7 @@ class Product extends CommonObject
 						$result = $this->_log_price($user);
 						if ($result > 0)
 						{
-							if ($this->update($id, $user, true, 'add') > 0)
+							if ($this->update($id, $user, true, 'add', $push_to_maestrano) > 0)
 							{
 								// FIXME: not use here
 								/*
@@ -406,6 +407,15 @@ class Product extends CommonObject
 			return -$error;
 		}
 	}
+        
+        function push_product_to_maestrano($entity, $push_to_maestrano, $is_delete=false) {
+            if ($push_to_maestrano) {
+                $mno_item = new MnoSoaItem($this->db);
+                $mno_item->_local_element_type = ($entity->type==0) ? "PRODUCT" : (($entity->type==1) ? "SERVICE" : null);
+                $mno_item->_is_delete = $is_delete;
+                $mno_item->send($entity);
+            }
+        }
 
 	/**
 	 *	Update a record into database
@@ -416,7 +426,7 @@ class Product extends CommonObject
 	 *	@param	string	$action		Current action for hookmanager
 	 *	@return int         		1 if OK, -1 if ref already exists, -2 if other error
 	 */
-	function update($id, $user, $notrigger=false, $action='update')
+	function update($id, $user, $notrigger=false, $action='update', $push_to_maestrano=true)
 	{
 		global $langs, $conf, $hookmanager;
 
@@ -463,7 +473,7 @@ class Product extends CommonObject
 
 		$sql.= ",tosell = " . $this->status;
 		$sql.= ",tobuy = " . $this->status_buy;
-		$sql.= ",finished = " . ((empty($this->finished) || $this->finished < 0) ? "null" : $this->finished);
+		$sql.= ",finished = " . ((empty($this->finished) && $this->finished !== '0') ? "null" : $this->finished);
 		$sql.= ",weight = " . ($this->weight!='' ? "'".$this->weight."'" : 'null');
 		$sql.= ",weight_units = " . ($this->weight_units!='' ? "'".$this->weight_units."'": 'null');
 		$sql.= ",length = " . ($this->length!='' ? "'".$this->length."'" : 'null');
@@ -480,6 +490,9 @@ class Product extends CommonObject
 		$sql.= ",duration = '" . $this->duration_value . $this->duration_unit ."'";
 		$sql.= ",accountancy_code_buy = '" . $this->accountancy_code_buy."'";
 		$sql.= ",accountancy_code_sell= '" . $this->accountancy_code_sell."'";
+                if (!empty($this->type) || $this->type === '0') {
+                    $sql.=",fk_product_type= '".$this->type."'";
+                }
 		$sql.= " WHERE rowid = " . $id;
 
 		dol_syslog(get_class($this)."update sql=".$sql);
@@ -488,66 +501,71 @@ class Product extends CommonObject
 		{
 			$this->id = $id;
 
-			// Multilangs
-			if (! empty($conf->global->MAIN_MULTILANGS))
-			{
-				if ( $this->setMultiLangs() < 0)
-				{
-					$this->error=$langs->trans("Error")." : ".$this->db->error()." - ".$sql;
-					return -2;
-				}
-			}
+                        if (!$push_to_maestrano) {
+                        
+                                // Multilangs
+                                if (! empty($conf->global->MAIN_MULTILANGS))
+                                {
+                                        if ( $this->setMultiLangs() < 0)
+                                        {
+                                                $this->error=$langs->trans("Error")." : ".$this->db->error()." - ".$sql;
+                                                return -2;
+                                        }
+                                }
 
-			// Actions on extra fields (by external module or standard code)
-			$hookmanager->initHooks(array('productdao'));
-			$parameters=array('id'=>$this->id);
-			$reshook=$hookmanager->executeHooks('insertExtraFields',$parameters,$this,$action);    // Note that $action and $object may have been modified by some hooks
-			if (empty($reshook))
-			{
-				if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
-				{
-					$result=$this->insertExtraFields();
-					if ($result < 0)
-					{
-						$error++;
-					}
-				}
-			}
-			else if ($reshook < 0) $error++;
+                                // Actions on extra fields (by external module or standard code)
+                                $hookmanager->initHooks(array('productdao'));
+                                $parameters=array('id'=>$this->id);
+                                $reshook=$hookmanager->executeHooks('insertExtraFields',$parameters,$this,$action);    // Note that $action and $object may have been modified by some hooks
+                                if (empty($reshook))
+                                {
+                                        if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
+                                        {
+                                                $result=$this->insertExtraFields();
+                                                if ($result < 0)
+                                                {
+                                                        $error++;
+                                                }
+                                        }
+                                }
+                                else if ($reshook < 0) $error++;
 
-			if (! $error && ! $notrigger)
-			{
-				// Appel des triggers
-				include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
-				$interface=new Interfaces($this->db);
-				$result=$interface->run_triggers('PRODUCT_MODIFY',$this,$user,$langs,$conf);
-				if ($result < 0) { $error++; $this->errors=$interface->errors; }
-				// Fin appel triggers
-			}
+                                if (! $error && ! $notrigger)
+                                {
+                                        // Appel des triggers
+                                        include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                                        $interface=new Interfaces($this->db);
+                                        $result=$interface->run_triggers('PRODUCT_MODIFY',$this,$user,$langs,$conf);
+                                        if ($result < 0) { $error++; $this->errors=$interface->errors; }
+                                        // Fin appel triggers
+                                }
 
-			if (! $error && (is_object($this->oldcopy) && $this->oldcopy->ref != $this->ref))
-			{
-				// We remove directory
-				if ($conf->product->dir_output)
-				{
-					$olddir = $conf->product->dir_output . "/" . dol_sanitizeFileName($this->oldcopy->ref);
-					$newdir = $conf->product->dir_output . "/" . dol_sanitizeFileName($this->ref);
-					if (file_exists($olddir))
-					{
-						include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
-						$res=@dol_move($olddir, $newdir);
-						if (! $res)
-						{
-							$this->error='ErrorFailToMoveDir';
-							$error++;
-						}
-					}
-				}
-			}
+                                if (! $error && (is_object($this->oldcopy) && $this->oldcopy->ref != $this->ref))
+                                {
+                                        // We remove directory
+                                        if ($conf->product->dir_output)
+                                        {
+                                                $olddir = $conf->product->dir_output . "/" . dol_sanitizeFileName($this->oldcopy->ref);
+                                                $newdir = $conf->product->dir_output . "/" . dol_sanitizeFileName($this->ref);
+                                                if (file_exists($olddir))
+                                                {
+                                                        include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+                                                        $res=@dol_move($olddir, $newdir);
+                                                        if (! $res)
+                                                        {
+                                                                $this->error='ErrorFailToMoveDir';
+                                                                $error++;
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
 
 			if (! $error)
 			{
 				$this->db->commit();
+                                $this->push_product_to_maestrano($this, $push_to_maestrano, false);
+                                
 				return 1;
 			}
 			else
@@ -579,7 +597,7 @@ class Product extends CommonObject
 	 *	@param      int		$id         Product id
 	 * 	@return		int					< 0 if KO, 0 = Not possible, > 0 if OK
 	 */
-	function delete($id)
+	function delete($id, $push_to_maestrano=true)
 	{
 		global $conf,$user,$langs;
 
@@ -671,6 +689,7 @@ class Product extends CommonObject
 				if (! $error)
 				{
 					$this->db->commit();
+                                        $this->push_product_to_maestrano($this, $push_to_maestrano, true);
 					return 1;
 				}
 				else
@@ -1084,6 +1103,8 @@ class Product extends CommonObject
 			}
 		}
 
+                $this->push_product_to_maestrano($this, $push_to_maestrano, false);
+                
 		return 1;
 	}
 

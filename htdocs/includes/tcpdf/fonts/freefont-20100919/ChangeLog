@@ -4745,7 +4745,7 @@ $Id: ChangeLog,v 1.257 2010/09/19 13:15:07 Stevan_White Exp $
 2008-03-03  Steve White
 	* sfd/FreeSerif.sfd: TT strings updates.
 		updated Copyright to 2008
-		Added Vendor URL as the Savannah freefont site
+		Added Supplier URL as the Savannah freefont site
 	* sfd/FreeMono.sfd: A standard pangram as the Sample Text for Russian
 		It reads: In the thickets of the South once there was a citrus
 		...--yes, but a fake specimen!

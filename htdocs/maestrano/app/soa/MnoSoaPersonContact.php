@@ -10,57 +10,57 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
     // DONE
     protected function pushId() 
     {
-        $this->_log->debug(__CLASS__ . '.' . __FUNCTION__ . " start");
+        MnoSoaLogger::debug(__CLASS__ . '.' . __FUNCTION__ . " start");
 	$id = $this->getLocalEntityIdentifier();
 	
 	if (!empty($id)) {
 	    $mno_id = $this->getMnoIdByLocalId($id);
 
 	    if ($this->isValidIdentifier($mno_id)) {
-                $this->_log->debug(__FUNCTION__ . " this->getMnoIdByLocalId(id) = " . json_encode($mno_id));
+                MnoSoaLogger::debug(__FUNCTION__ . " this->getMnoIdByLocalId(id) = " . json_encode($mno_id));
 		$this->_id = $mno_id->_id;
 	    }
 	}
-        $this->_log->debug(__CLASS__ . '.' . __FUNCTION__ . " end");
+        MnoSoaLogger::debug(__CLASS__ . '.' . __FUNCTION__ . " end");
     }
     
     // DONE
     protected function pullId() 
     {
-        $this->_log->debug(__CLASS__ . '.' . __FUNCTION__ . " start");
+        MnoSoaLogger::debug(__CLASS__ . '.' . __FUNCTION__ . " start");
 	if (!empty($this->_id)) {
 	    $local_id = $this->getLocalIdByMnoId($this->_id);
-	    $this->_log->debug(__FUNCTION__ . " this->getLocalIdByMnoId(this->_id) = " . json_encode($local_id));
+	    MnoSoaLogger::debug(__FUNCTION__ . " this->getLocalIdByMnoId(this->_id) = " . json_encode($local_id));
 	    
 	    if ($this->isValidIdentifier($local_id)) {
-                $this->_log->debug(__FUNCTION__ . " is STATUS_EXISTING_ID");
+                MnoSoaLogger::debug(__FUNCTION__ . " is STATUS_EXISTING_ID");
 		$this->_local_entity = new Contact($this->_db);
                 $this->_local_entity->fetch($local_id->_id);
 		return constant('MnoSoaBaseEntity::STATUS_EXISTING_ID');
 	    } else if ($this->isDeletedIdentifier($local_id)) {
-                $this->_log->debug(__CLASS__ . '.' . __FUNCTION__ . " is STATUS_DELETED_ID");
+                MnoSoaLogger::debug(__CLASS__ . '.' . __FUNCTION__ . " is STATUS_DELETED_ID");
                 return constant('MnoSoaBaseEntity::STATUS_DELETED_ID');
             } else {
-                $this->_log->debug(__FUNCTION__ . " is STATUS_NEW_ID");
+                MnoSoaLogger::debug(__FUNCTION__ . " is STATUS_NEW_ID");
 		$this->_local_entity = new Contact($this->_db);		
 		return constant('MnoSoaBaseEntity::STATUS_NEW_ID');
 	    }
 	}
-        $this->_log->debug(__CLASS__ . '.' . __FUNCTION__ . " return STATUS_ERROR");
+        MnoSoaLogger::debug(__CLASS__ . '.' . __FUNCTION__ . " return STATUS_ERROR");
         return constant('MnoSoaBaseEntity::STATUS_ERROR');
     }
     
     // DONE
     protected function pushName() {
-        $this->_log->debug(__FUNCTION__ . " start");
+        MnoSoaLogger::debug(__FUNCTION__ . " start");
         $this->_name->givenNames = $this->push_set_or_delete_value($this->_local_entity->firstname);
         $this->_name->familyName = $this->push_set_or_delete_value($this->_local_entity->lastname);
-        $this->_log->debug(__FUNCTION__ . " end");
+        MnoSoaLogger::debug(__FUNCTION__ . " end");
     }
     
     // DONE
     protected function pullName() {
-        $this->_log->debug(__FUNCTION__ . " start");
+        MnoSoaLogger::debug(__FUNCTION__ . " start");
         
         $this->_local_entity->firstname = $this->pull_set_or_delete_value($this->_name->givenNames);
         $this->_local_entity->lastname = $this->pull_set_or_delete_value($this->_name->familyName);
@@ -69,21 +69,21 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
         $hp = $this->mapHonorificPrefixToSalutation($this->_name->honorificPrefix);
         $this->_local_entity->civilite_id = $this->pull_set_or_delete_value($hp);
         
-        $this->_log->debug(__FUNCTION__ . " end");
+        MnoSoaLogger::debug(__FUNCTION__ . " end");
     }
     
     // DONE
     protected function pushBirthDate() {
-        $this->_log->debug(__FUNCTION__ . " start");
+        MnoSoaLogger::debug(__FUNCTION__ . " start");
         $this->_birth_date = $this->push_set_or_delete_value($this->_local_entity->birthday);
-	$this->_log->debug(__FUNCTION__ . " end " . $this->_birth_date);
+	MnoSoaLogger::debug(__FUNCTION__ . " end " . $this->_birth_date);
     }
     
     // DONE
     protected function pullBirthDate() {
-        $this->_log->debug(__FUNCTION__ . " start");
+        MnoSoaLogger::debug(__FUNCTION__ . " start");
         $this->_local_entity->birthday = $this->pull_set_or_delete_value($this->_birth_date);        
-        $this->_log->debug(__FUNCTION__ . " end " . $this->_local_entity->birthday);
+        MnoSoaLogger::debug(__FUNCTION__ . " end " . $this->_local_entity->birthday);
     }
     
     // DONE
@@ -98,7 +98,7 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
     
     // DONE
     protected function pushAddresses() {
-        $this->_log->debug(__FUNCTION__ . " start ");
+        MnoSoaLogger::debug(__FUNCTION__ . " start ");
         // POSTAL ADDRESS
         $this->_address->work->postalAddress->streetAddress = $this->push_set_or_delete_value($this->_local_entity->address);
         $this->_address->work->postalAddress->postalCode = $this->push_set_or_delete_value($this->_local_entity->zip, "");
@@ -125,12 +125,12 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
             }
             
         }
-        $this->_log->debug(__FUNCTION__ . " end ");
+        MnoSoaLogger::debug(__FUNCTION__ . " end ");
     }
     
     // DONE
     protected function pullAddresses() {
-        $this->_log->debug(__FUNCTION__ . " start ");
+        MnoSoaLogger::debug(__FUNCTION__ . " start ");
 	// POSTAL ADDRESS
         $this->_local_entity->address = $this->pull_set_or_delete_value($this->_address->work->postalAddress->streetAddress, "");
         $this->_local_entity->town = $this->pull_set_or_delete_value($this->_address->work->postalAddress->locality, "");
@@ -147,41 +147,41 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
                 }
             }
         }
-        $this->_log->debug(__FUNCTION__ . " end ");
+        MnoSoaLogger::debug(__FUNCTION__ . " end ");
     }
     
     // DONE
     protected function pushEmails() {
-        $this->_log->debug(__FUNCTION__ . " start ");
+        MnoSoaLogger::debug(__FUNCTION__ . " start ");
         $this->_email->emailAddress = $this->push_set_or_delete_value($this->_local_entity->email, "");
-        $this->_log->debug(__FUNCTION__ . " end ");
+        MnoSoaLogger::debug(__FUNCTION__ . " end ");
     }
     
     // DONE
     protected function pullEmails() {      
-	$this->_log->debug(__FUNCTION__ . " start ");
+	MnoSoaLogger::debug(__FUNCTION__ . " start ");
         $this->_local_entity->email = $this->pull_set_or_delete_value($this->_email->emailAddress, "");
-        $this->_log->debug(__FUNCTION__ . " end ");
+        MnoSoaLogger::debug(__FUNCTION__ . " end ");
     }
     
     // DONE
     protected function pushTelephones() {
-        $this->_log->debug(__FUNCTION__ . " start ");
+        MnoSoaLogger::debug(__FUNCTION__ . " start ");
         $this->_telephone->work->voice = $this->push_set_or_delete_value($this->_local_entity->phone_pro, "");
         $this->_telephone->home->voice = $this->push_set_or_delete_value($this->_local_entity->phone_perso, "");
         $this->_telephone->home->mobile = $this->push_set_or_delete_value($this->_local_entity->phone_mobile, "");
         $this->_telephone->work->fax = $this->push_set_or_delete_value($this->_local_entity->fax, "");
-        $this->_log->debug(__FUNCTION__ . " end ");
+        MnoSoaLogger::debug(__FUNCTION__ . " end ");
     }
     
     // DONE
     protected function pullTelephones() {
-        $this->_log->debug(__FUNCTION__ . " end ");
+        MnoSoaLogger::debug(__FUNCTION__ . " end ");
         $this->_local_entity->phone_pro = $this->pull_set_or_delete_value($this->_telephone->work->voice, "");
         $this->_local_entity->phone_perso = $this->pull_set_or_delete_value($this->_telephone->home->voice, "");
         $this->_local_entity->phone_mobile = $this->pull_set_or_delete_value($this->_telephone->home->mobile, "");
         $this->_local_entity->fax = $this->pull_set_or_delete_value($this->_telephone->work->fax, "");
-        $this->_log->debug(__FUNCTION__ . " end ");
+        MnoSoaLogger::debug(__FUNCTION__ . " end ");
     }
     
     // DONE
@@ -206,13 +206,13 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
     
     // DONE
     protected function pushRole() {
-        $this->_log->debug(__CLASS__ . '.' . __FUNCTION__ . " start ");
+        MnoSoaLogger::debug(__CLASS__ . '.' . __FUNCTION__ . " start ");
         
         if (!empty($this->_local_entity->socid) && $this->_local_entity->socid != -1) {
             $mno_id = $this->getMnoIdByLocalIdName($this->_local_entity->socid, "societe");
 	    
 	    if ($this->isValidIdentifier($mno_id)) {
-                $this->_log->debug(__FUNCTION__ . " mno_id = " . json_encode($mno_id));
+                MnoSoaLogger::debug(__FUNCTION__ . " mno_id = " . json_encode($mno_id));
 		$this->_role->organization->id = $mno_id->_id;
                 $this->_role->title = $this->push_set_or_delete_value($this->_local_entity->poste, "");
             } else if ($this->isDeletedIdentifier($mno_id)) {
@@ -222,7 +222,7 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
                 $soc = new Societe($this->_db);
                 $soc->fetch($this->_local_entity->socid);
                 
-                $organization = new MnoSoaOrganization($this->_db, $this->_log);		
+                $organization = new MnoSoaOrganization($this->_db);		
                 $organization->send($soc);
                 
 				if ($status) {
@@ -238,7 +238,7 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
             $this->_role = (object) array();
         }
         
-        $this->_log->debug(__CLASS__ . '.' . __FUNCTION__ . " end ");
+        MnoSoaLogger::debug(__CLASS__ . '.' . __FUNCTION__ . " end ");
     }
     
     // DONE
@@ -249,7 +249,7 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
         } else {
             $local_id = $this->getLocalIdByMnoIdName($this->_role->organization->id, "organizations");
             if ($this->isValidIdentifier($local_id)) {
-                $this->_log->debug(__FUNCTION__ . " local_id = " . json_encode($local_id));
+                MnoSoaLogger::debug(__FUNCTION__ . " local_id = " . json_encode($local_id));
                 $this->_local_entity->socid = $local_id->_id;
             } else if ($this->isDeletedIdentifier($local_id)) {
                 // do not update
@@ -257,7 +257,7 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
             } else {
                 $notification->entity = "organizations";
                 $notification->id = $this->_role->organization->id;
-                $organization = new MnoSoaOrganization($this->_db, $this->_log);		
+                $organization = new MnoSoaOrganization($this->_db);		
                 $status = $organization->receiveNotification($notification);
 				if ($status) {
 	                $this->_local_entity->socid = $organization->_local_entity->id;
@@ -269,14 +269,14 @@ class MnoSoaPersonContact extends MnoSoaBasePerson
     
     // DONE
     protected function saveLocalEntity($push_to_maestrano, $status) {
-        $this->_log->debug(__FUNCTION__ . " start ");
+        MnoSoaLogger::debug(__FUNCTION__ . " start ");
 	// status = 2 update status = 1 new
         if ($status == constant('MnoSoaBaseEntity::STATUS_NEW_ID')) {
             $this->_local_entity->create(0, $push_to_maestrano);
         } else if ($status == constant('MnoSoaBaseEntity::STATUS_EXISTING_ID')) {
             $this->_local_entity->update($this->_local_entity->id, 0, 0, 'update', $push_to_maestrano);
         }
-        $this->_log->debug(__FUNCTION__ . " end ");
+        MnoSoaLogger::debug(__FUNCTION__ . " end ");
     }
     
     // DONE

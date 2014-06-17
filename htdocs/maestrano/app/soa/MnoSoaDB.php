@@ -20,9 +20,9 @@ class MnoSoaDB extends MnoSoaBaseDB {
     public function addIdMapEntry($local_id, $local_entity_name, $mno_id, $mno_entity_name) {	
 	// Fetch record
 	$query = "INSERT INTO mno_id_map (mno_entity_guid, mno_entity_name, app_entity_id, app_entity_name, db_timestamp) VALUES ('".$this->_db->escape($mno_id)."','".$this->_db->escape(strtoupper($mno_entity_name))."','".$this->_db->escape($local_id)."','".$this->_db->escape(strtoupper($local_entity_name))."',UTC_TIMESTAMP)";	
-        $this->_log->debug("addIdMapEntry query = ".$query);
+        MnoSoaLogger::debug("addIdMapEntry query = ".$query);
 	$result = $this->_db->query($query);
-	$this->_log->debug("after insert");
+	MnoSoaLogger::debug("after insert");
 	
 	if ($result) {
 	    return true;
@@ -45,9 +45,9 @@ class MnoSoaDB extends MnoSoaBaseDB {
         
 	// Fetch record
 	$query = "SELECT mno_entity_guid, mno_entity_name, deleted_flag from mno_id_map where app_entity_id='" . $this->_db->escape($localId) . "' and app_entity_name='" . $this->_db->escape(strtoupper($localEntityName)) . "'";
-        $this->_log->debug("getMnoIdByLocalIdName query = ".$query);
+        MnoSoaLogger::debug("getMnoIdByLocalIdName query = ".$query);
 	$result = $this->_db->query($query);
-        $this->_log->debug("after fetch");
+        MnoSoaLogger::debug("after fetch");
 	
 	// Return id value
 	if (!empty($result->num_rows)) {
@@ -66,7 +66,7 @@ class MnoSoaDB extends MnoSoaBaseDB {
             }
 	}
         
-        $this->_log->debug("returning mno_entity = ".json_encode($mno_entity));
+        MnoSoaLogger::debug("returning mno_entity = ".json_encode($mno_entity));
 	
 	return $mno_entity;
     }
@@ -77,9 +77,9 @@ class MnoSoaDB extends MnoSoaBaseDB {
         
 	// Fetch record
 	$query = "SELECT app_entity_id, app_entity_name, deleted_flag from mno_id_map where mno_entity_guid='". $this->_db->escape($mnoId) ."' and mno_entity_name='". $this->_db->escape(strtoupper($mnoEntityName)) . "'";
-        $this->_log->debug("getLocalIdByMnoIdName query = ".$query);
+        MnoSoaLogger::debug("getLocalIdByMnoIdName query = ".$query);
 	$result = $this->_db->query($query);
-        $this->_log->debug("after fetch");
+        MnoSoaLogger::debug("after fetch");
 	
 	// Return id value
 	if (!empty($result->num_rows)) {           
@@ -99,7 +99,7 @@ class MnoSoaDB extends MnoSoaBaseDB {
             }
 	}
 	
-        $this->_log->debug("returning local_entity = ".json_encode($local_entity));
+        MnoSoaLogger::debug("returning local_entity = ".json_encode($local_entity));
         
 	return $local_entity;
     }
@@ -108,9 +108,9 @@ class MnoSoaDB extends MnoSoaBaseDB {
     {
         // Logically delete record
         $query = "UPDATE mno_id_map SET deleted_flag=1 WHERE app_entity_id='".$this->_db->escape($localId)."' and app_entity_name='".$this->_db->escape(strtoupper($localEntityName)) . "'";
-        $this->_log->debug("deleteIdMapEntry query = ".$query);
+        MnoSoaLogger::debug("deleteIdMapEntry query = ".$query);
         $result = $this->_db->query($query);
-        $this->_log->debug("result = ".json_encode($result));
+        MnoSoaLogger::debug("result = ".json_encode($result));
         
         if ($result) {
             return true;
