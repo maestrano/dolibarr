@@ -44,6 +44,6 @@ AccountParameter=アカウントのパラメータ
 UsageParameter=使用パラメータ
 InformationToFindParameters=あなたの%sアカウント情報を見つけるのを助ける
 PAYBOX_CGI_URL_V2=支払いのために切符売り場CGIモジュールのurl
-VendorName=ベンダーの名前
+SupplierName=ベンダーの名前
 CSSUrlForPaymentForm=支払いフォームのCSSスタイルシートのURL
 // STOP - Lines generated via autotranslator.php tool (2012-02-29 16:43:32).

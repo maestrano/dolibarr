@@ -9,7 +9,7 @@ class MaestranoService
 {
   protected static $_settings;
   protected static $_instance;
-  public static $_after_sso_sign_in_path = '/';
+  protected static $_default_after_sso_sign_in_path = '/';
   
   /**
    * constructor
@@ -124,7 +124,7 @@ class MaestranoService
      */
     public function getSsoUnauthorizedUrl()
     {
-      return self::$_settings->sso_access_unauthorized_url;
+      return self::$_settings->sso_access_logout_url;
     }
     
     /**
@@ -132,12 +132,15 @@ class MaestranoService
      *
      * @return string url
      */
-    public static function setAfterSsoSignInPath($path)
+    public function setAfterSsoSignInPath($path)
     {
-      self::$_after_sso_sign_in_path = $path;
+      if ($this->getPhpSession()) {
+				$session = & $this->getPhpSession();
+        $session['mno_previous_url'] = $path;
+      }
     }
-
-	/**
+    
+    /**
      * Check if Maestrano integration is enabled
      *
      * @return boolean
@@ -175,13 +178,13 @@ class MaestranoService
     public function getAfterSsoSignInPath()
     {
       if ($this->getPhpSession()) {
-				$session = & $this->getPhpSession();
-				if (isset($session['mno_previous_url'])) {
-					return $session['mno_previous_url'];
-				}
-        
-			}
-			return self::$_after_sso_sign_in_path;
+	      $session = & $this->getPhpSession();
+	      if (isset($session['mno_previous_url'])) {
+		      return $session['mno_previous_url'];
+	      }
+
+      }
+      return self::$_default_after_sso_sign_in_path;
     }
   
 }

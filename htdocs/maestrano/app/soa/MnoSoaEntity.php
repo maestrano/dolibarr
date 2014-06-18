@@ -9,32 +9,30 @@
 class MnoSoaEntity extends MnoSoaBaseEntity {    
     public function getUpdates($timestamp)
     {
-        $this->_log->info(__FUNCTION__ .  " start getUpdates (timestamp=" . $timestamp . ")");
+        MnoSoaLogger::info("start (timestamp=$timestamp)");
         $msg = $this->callMaestrano("GET", "updates" . '/' . $timestamp);
         if (empty($msg)) { return false; }
-        $this->_log->debug(__FUNCTION__ .  " after maestrano call");
-        if (!empty($msg->organizations) && class_exists('MnoSoaOrganization')) {
-            $this->_log->debug(__FUNCTION__ .  " has organizations");
-            foreach ($msg->organizations as $organization) {
-                $this->_log->debug(__FUNCTION__ .  " org id = " . $organization->id);
-				try {
-	                $mno_org = new MnoSoaOrganization($this->_db, $this->_log);
-					$mno_org->receive($organization);
-				} catch (Exception $e) {
-				}
+        
+        $this->updateEntity($msg, "MnoSoaOrganization", "organizations");
+        $this->updateEntity($msg, "MnoSoaPersonContact", "persons");
+        $this->updateEntity($msg, "MnoSoaItem", "items");
+        $this->updateEntity($msg, "MnoSoaAccount", "accounts");
+        
+        MnoSoaLogger::info( "successfully completed (timestamp=$timestamp)");
+    }
+    
+    public function updateEntity($msg, $class_name, $mno_element_name)
+    {
+        if (empty($msg->{$mno_element_name}) || !class_exists($class_name)) { return; }
+        
+        foreach ($msg->{$mno_element_name} as $x) {
+            MnoSoaLogger::debug($mno_element_name . " updating id=" . $x->id);
+            try {
+                $mno_x = new $class_name($this->_db);
+                $mno_x->receive($x);
+            } catch (Exception $ex) {
+                MnoSoaLogger::error("id={$x->id} exception={$ex->getMessage()}");
             }
         }
-        if (!empty($msg->persons) && class_exists('MnoSoaPersonContact')) {
-            $this->_log->debug(__FUNCTION__ . " has persons");
-            foreach ($msg->persons as $person) {
-                $this->_log->debug(__FUNCTION__ .  " person id = " . $person->id);
-				try {
-	                $mno_person = new MnoSoaPersonContact($this->_db, $this->_log);
-	                $mno_person->receive($person);
-				} catch (Exception $e) {
-				}
-            }
-        }
-        $this->_log->info(__FUNCTION__ .  " getUpdates successful (timestamp=" . $timestamp . ")");
     }
 }

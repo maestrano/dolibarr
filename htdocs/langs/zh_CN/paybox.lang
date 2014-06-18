@@ -48,7 +48,7 @@ InformationToFindParameters=帮助，找到你的%s帐户信息
 // Reference language: en_US -> zh_CN
 ToOfferALinkForOnlinePayment=网址为%s支付
 PAYBOX_CGI_URL_V2=付款出纳CGI模块的网址
-VendorName=供应商名称
+SupplierName=供应商名称
 CSSUrlForPaymentForm=付款方式的CSS样式表的URL
 MessageOK=讯息验证支付返回页面
 MessageKO=取消支付返回页面的讯息

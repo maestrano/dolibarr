@@ -36,7 +36,7 @@ class MnoSoaBaseEntity
     *
     * @return null
     */
-    public function __construct($db, $log)
+    public function __construct($db, $log=null)
     {
 	$this->_db = $db;
         $this->_log = $log;
@@ -49,11 +49,11 @@ class MnoSoaBaseEntity
     * @return MaestranoEntity the maestrano entity json object
     */
     protected function build() {
-		throw new Exception('Function '. __FUNCTION__ . ' must be overriden in Entity class!');
+        throw new Exception('Function '. __FUNCTION__ . ' must be overriden in Entity class!');
     }
     
     protected function persist($mno_entity) {
-		throw new Exception('Function '. __FUNCTION__ . ' must be overriden in Entity class!');
+        throw new Exception('Function '. __FUNCTION__ . ' must be overriden in Entity class!');
     }
     
     public function getLocalEntityIdentifier() {
@@ -61,14 +61,14 @@ class MnoSoaBaseEntity
     }
         
     public function send($local_entity) {
-		$this->_log->debug(__FUNCTION__ . " start");
-        
-		$this->_local_entity = $local_entity;
-		$message = $this->build();
+        MnoSoaLogger::debug(__FUNCTION__ . " start");
+
+        $this->_local_entity = $local_entity;
+        $message = $this->build();
         $mno_had_no_id = empty($this->_id);
         
-		if ($mno_had_no_id) {
-            $this->_log->debug(__FUNCTION__ . " $this->_id = ".$this->_id);
+        if ($mno_had_no_id) {
+            MnoSoaLogger::debug(__FUNCTION__ . " $this->_id = ".$this->_id);
             $response = $this->callMaestrano($this->_create_http_operation, $this->_create_rest_entity_name, $message);
         } else {
             $response = $this->callMaestrano($this->_update_http_operation, $this->_update_rest_entity_name . '/' . $this->_id, $message);
@@ -81,12 +81,14 @@ class MnoSoaBaseEntity
         $local_entity_id = $this->getLocalEntityIdentifier();
         $local_entity_now_has_id = !empty($local_entity_id);
         
-		$mno_response_id = $response->id;
+        $mno_response_id = $response->id;
         $mno_response_has_id = !empty($mno_response_id);
 	
         if ($mno_had_no_id && $local_entity_now_has_id && $mno_response_has_id) {
 	    	$this->addIdMapEntry($local_entity_id,$mno_response_id);
-		}
+        }
+        
+        MnoSoaLogger::debug("sent $mno_response_id");
         
         return true;
     }
@@ -96,7 +98,7 @@ class MnoSoaBaseEntity
     }
     
     public function receiveNotification($notification) {
-		$mno_entity = $this->callMaestrano($this->_receive_http_operation, $this->_receive_rest_entity_name . '/' . $notification->id);
+        $mno_entity = $this->callMaestrano($this->_receive_http_operation, $this->_receive_rest_entity_name . '/' . $notification->id);
 
         if (empty($mno_entity)) { return false; }
         
@@ -105,11 +107,11 @@ class MnoSoaBaseEntity
     }
     
     public function sendDeleteNotification($local_id) {
-        $this->_log->debug(__FUNCTION__ .  " start local_id = " . $local_id);
+        MnoSoaLogger::debug(__FUNCTION__ .  " start local_id = " . $local_id);
         $mno_id =  $this->getMnoIdByLocalId($local_id);
 	
         if ($this->isValidIdentifier($mno_id)) {
-            $this->_log->debug(__FUNCTION__ . " corresponding mno_id = " . $mno_id->_id);
+            MnoSoaLogger::debug(__FUNCTION__ . " corresponding mno_id = " . $mno_id->_id);
             
             if ($this->_enable_delete_notifications) {
                 $response = $this->callMaestrano($this->_delete_http_operation, $this->_delete_rest_entity_name . '/' . $mno_id->_id);
@@ -119,7 +121,7 @@ class MnoSoaBaseEntity
             }
             
             $this->deleteIdMapEntry($local_id);
-            $this->_log->debug(__FUNCTION__ .  " after deleting ID entry");
+            MnoSoaLogger::debug(__FUNCTION__ .  " after deleting ID entry");
         }
         
         return true;
@@ -139,17 +141,17 @@ class MnoSoaBaseEntity
      */
     protected function callMaestrano($operation, $entity, $msg='')
     {            
-      $this->_log->debug(__FUNCTION__ .  " start");
+      MnoSoaLogger::debug(__FUNCTION__ .  " start");
       $maestrano = MaestranoService::getInstance();
       $curl = curl_init($maestrano->getSoaUrl() . $entity);
-      $this->_log->debug(__FUNCTION__ . " path = " . $maestrano->getSoaUrl() . $entity);
-      $this->_log->debug(__FUNCTION__ . " maestrano msg = ".$msg);
+      MnoSoaLogger::debug(__FUNCTION__ . " path = " . $maestrano->getSoaUrl() . $entity);
+      MnoSoaLogger::debug(__FUNCTION__ . " maestrano msg = ".$msg);
       curl_setopt($curl, CURLOPT_HEADER, false);
       curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
       curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-type: application/json"));
       curl_setopt($curl, CURLOPT_TIMEOUT, '60');
       
-      $this->_log->debug(__FUNCTION__ . " before switch");
+      MnoSoaLogger::debug(__FUNCTION__ . " before switch");
       
       switch ($operation) {
 	  case "POST":
@@ -167,16 +169,16 @@ class MnoSoaBaseEntity
               break;
       }
 
-      $this->_log->debug(__FUNCTION__ . " before curl_exec");
+      MnoSoaLogger::debug(__FUNCTION__ . " before curl_exec");
       $response = trim(curl_exec($curl));
-      $this->_log->debug(__FUNCTION__ . " after curl_exec");
-      $this->_log->debug(__FUNCTION__ . " response = ". $response);
+      MnoSoaLogger::debug(__FUNCTION__ . " after curl_exec");
+      MnoSoaLogger::debug(__FUNCTION__ . " response = ". $response);
       $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
       
-      $this->_log->debug(__FUNCTION__ . " status = ". $status);
+      MnoSoaLogger::debug(__FUNCTION__ . " status = ". $status);
       
       if ( $status != 200 ) {
-            $this->_log->debug(__FUNCTION__ . " Error: call to URL $url failed with status $status, response $response, curl_error " . curl_error($curl) . ", curl_errno " . curl_errno($curl), 0);
+            MnoSoaLogger::debug(__FUNCTION__ . " Error: call to URL $url failed with status $status, response $response, curl_error " . curl_error($curl) . ", curl_errno " . curl_errno($curl), 0);
             curl_close($curl);
             return null;
       }
@@ -192,9 +194,13 @@ class MnoSoaBaseEntity
         return $this->_mno_soa_db_interface->addIdMapEntry($local_id, $this->_local_entity_name, $mno_id, $this->_mno_entity_name);
     }
     
+    protected function addIdMapEntryName($local_id, $local_entity_name, $mno_id, $mno_entity_name) {
+        return $this->_mno_soa_db_interface->addIdMapEntry($local_id, $local_entity_name, $mno_id, $mno_entity_name);
+    }
+    
     protected function getMnoIdByLocalId($localId)
     {
-        $this->_log->debug(__FUNCTION__ . " reached getMnoIdByLocalId = " . $localId);
+        MnoSoaLogger::debug(__FUNCTION__ . " reached getMnoIdByLocalId = " . $localId);
         return $this->getMnoIdByLocalIdName($localId, $this->_local_entity_name);
     }
     
@@ -236,12 +242,12 @@ class MnoSoaBaseEntity
     }
     
     protected function isValidIdentifier($id_obj) {
-        $this->_log->debug(__FUNCTION__ . " in is valid identifier");
+        MnoSoaLogger::debug(__FUNCTION__ . " in is valid identifier");
         return !empty($id_obj) && (!empty($id_obj->_id) || (array_key_exists('_id',$id_obj) && $id_obj->_id == 0)) && array_key_exists('_deleted_flag',$id_obj) && $id_obj->_deleted_flag == 0;
     }
     
     protected function isDeletedIdentifier($id_obj) {
-        $this->_log->debug(__FUNCTION__ . " in is deleted identifier");
+        MnoSoaLogger::debug(__FUNCTION__ . " in is deleted identifier");
         return !empty($id_obj) && (!empty($id_obj->_id) || (array_key_exists('_id',$id_obj) && $id_obj->_id == 0)) && array_key_exists('_deleted_flag',$id_obj) && $id_obj->_deleted_flag == 1;
     }
 
@@ -275,9 +281,9 @@ class MnoSoaBaseEntity
     
     protected function pull_set_or_delete_value(&$source, $empty_value="")
     {
-        if ($source == null) { $this->_log->debug('source==null'); return null; }
-        else if (!empty($source)) { $this->_log->debug('!empty(source)'); return $source; }
-        else { $this->_log->debug('empty(source)'); return $empty_value; }
+        if ($source == null) { MnoSoaLogger::debug('source==null'); return null; }
+        else if (!empty($source)) { MnoSoaLogger::debug('!empty(source)'); return $source; }
+        else { MnoSoaLogger::debug('empty(source)'); return $empty_value; }
     }
     
     protected function mapCountryToISO3166($country) {

@@ -44,7 +44,7 @@ ToOfferALinkForOnlinePaymentOnMemberSubscription=عنوان الموقع لتق�
 // Reference language: en_US -> ar_SA
 YourPaymentHasBeenRecorded=هذه الصفحة يؤكد أنه قد تم تسجيلها دفعتك. شكرا لك.
 PAYBOX_CGI_URL_V2=عزيزي من وحدة لدفع CGI Paybox
-VendorName=اسم البائع
+SupplierName=اسم البائع
 CSSUrlForPaymentForm=عزيزي ورقة النمط المغلق للنموذج الدفع
 MessageOK=رسالة على الصفحة التحقق من صحة الدفع عودة
 // STOP - Lines generated via autotranslator.php tool (2011-10-10 12:07:32).

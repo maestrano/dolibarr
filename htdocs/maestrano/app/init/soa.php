@@ -26,6 +26,7 @@ $langs=new Translate("",$conf);
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+require_once DOL_DOCUMENT_ROOT . '/compta/bank/class/account.class.php';
 
 $opts = array();
 

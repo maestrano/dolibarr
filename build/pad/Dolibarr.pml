@@ -42,10 +42,14 @@
 			<Char_Desc_80>Dolibarr ERP &amp; CRM, the easy to use open source software to manage your activity</Char_Desc_80>
 			<Char_Desc_250>Dolibarr ERP &amp; CRM, the easy to use open source software to manage your activity (invoices, customers, suppliers, contracts, agenda, emailings...) and any other things a small or mid-sized business or a foundation needs to follow.</Char_Desc_250>
 			<Char_Desc_450>Dolibarr ERP &amp; CRM is a software built by modules addition (you enable only features you need), to manage small or medium companies, freelancers or foundations. We can say Dolibarr is an ERP or CRM. Dolibarr is also available with an auto-installer for Windows users with no technical knowledge to install Dolibarr and all its prerequisites (Apache, Mysql, PHP) with just one auto-exe file. See DoliWamp software for this.</Char_Desc_450>
-			<Char_Desc_2000>Dolibarr ERP &amp; CRM is a software built by modules addition (you enable only features you need), to manage small or mid-sized businesses, freelancers or foundations. We can say Dolibarr is an ERP or CRM (or both depending on activated modules). It's an OpenSource project base on a WAMP, MAMP or LAMP server (Apache, Mysql, PHP for all Operating Systems). Dolibarr differs from other ERP or CRM softwares (like OpenAguila, OpenBravo, OpenERP, Neogia, Compiere, etc) because everything was made to be more simple:
-Simple to install
-Simple to use
-Simple to develop 
+			<Char_Desc_2000>Dolibarr ERP &amp; CRM is a software built by modules addition (you enable only features you need), to manage small or mid-sized businesses, freelancers or foundations. We can say Dolibarr is an ERP or CRM (or both depending on activated modules). It's an OpenSource project base on a WAMP, MAMP or LAMP server (Apache, Mysql, PHP for all Operating Systems). Dolibarr differs from other ERP or CRM softwares (like OpenAguila, OpenBravo, OpenERP, Neogia, Compiere, etc) because everything was made to be more simple:
+
+Simple to install
+
+Simple to use
+
+Simple to develop 
+
 Note that Dolibarr is also available with an auto-installer for Windows or Ubuntu users with no technical knowledge to install Dolibarr and all its prerequisites (Apache, Mysql, PHP) with just one auto-exe file. This version is called DoliWamp (for Windows) or DoliBuntu (for Ubuntu/Debian).</Char_Desc_2000>
 		</English>
 		<Italian>
@@ -62,10 +66,14 @@ Note that Dolibarr is also available with an auto-installer for Windows or Ubunt
 			<Char_Desc_80>Dolibarr ERP &amp; CRM, le gestionnaire simple pour gérer votre activité</Char_Desc_80>
 			<Char_Desc_250>Dolibarr ERP &amp; CRM, le logiciel simple et OpenSource pour gérer votre activité (factures, devis, facturation, commandes, compta, trésorerie, stocks, produits, agenda, comptes bancaires, associations)</Char_Desc_250>
 			<Char_Desc_450>Dolibarr ERP/CRM est un logiciel modulaire (on n'active que les fonctions que l'on désire) de gestions de TPE/PME, d'indépendants, d'entrepreneurs ou d'associations. En terme plus techniques, c'est un ERP et CRM. C'est un projet OpenSource qui s'exécute au sein d'un serveur Web et peut donc être accessible depuis n'importe quel lieu disposant d'une connexion Internet (Projet basé sur un serveur WAMP, MAMP ou LAMP: Apache, MySQL, PHP).</Char_Desc_450>
-			<Char_Desc_2000>Dolibarr ERP/CRM est un logiciel modulaire (on n'active que les fonctions que l'on désire) de gestions de TPE/PME, d'indépendants, d'entrepreneurs ou d'associations. En terme plus techniques, c'est un ERP et CRM. C'est un projet OpenSource qui s'exécute au sein d'un serveur Web et peut donc être accessible depuis n'importe quel lieu disposant d'une connexion Internet (Projet basé sur un serveur WAMP, MAMP ou LAMP: Apache, MySQL, PHP). Dolibarr vient compléter les offres déjà nombreuses de logiciels de cette catégorie (comme OpenBravo, OpenERP, SugarCRM, Neogia, Compiere, etc.) mais se démarque par le fait qu'ici tout est fait pour offrir de la simplicité (règle des 3 S):
-Simple pour l'installation (avec au choix des installeurs clé en main pour ceux qui ignorent comment installer un serveur Web, ou une installation manuelle)
-Simple pour l'utilisation (fonctions modulaires pour ne pas surcharger les menus, informations claires à la saisie)
-Simple pour le développement (pas de frameworks lourds). 
+			<Char_Desc_2000>Dolibarr ERP/CRM est un logiciel modulaire (on n'active que les fonctions que l'on désire) de gestions de TPE/PME, d'indépendants, d'entrepreneurs ou d'associations. En terme plus techniques, c'est un ERP et CRM. C'est un projet OpenSource qui s'exécute au sein d'un serveur Web et peut donc être accessible depuis n'importe quel lieu disposant d'une connexion Internet (Projet basé sur un serveur WAMP, MAMP ou LAMP: Apache, MySQL, PHP). Dolibarr vient compléter les offres déjà nombreuses de logiciels de cette catégorie (comme OpenBravo, OpenERP, SugarCRM, Neogia, Compiere, etc.) mais se démarque par le fait qu'ici tout est fait pour offrir de la simplicité (règle des 3 S):
+
+Simple pour l'installation (avec au choix des installeurs clé en main pour ceux qui ignorent comment installer un serveur Web, ou une installation manuelle)
+
+Simple pour l'utilisation (fonctions modulaires pour ne pas surcharger les menus, informations claires à la saisie)
+
+Simple pour le développement (pas de frameworks lourds). 
+
 Dolibarr intègre en effet sa propre architecture (design patterns) permettant à tout développeur d'être tout de suite opérationnel sans connaissances particulières autre que le PHP. </Char_Desc_2000>
 		</French>
 	</Program_Descriptions>
@@ -94,103 +102,103 @@ Dolibarr intègre en effet sa propre architecture (design patterns) permettant �
 		<Affiliates_URL>http://pad.asp-software.org/extensions/Affiliates.htm</Affiliates_URL>
 		<Affiliates_Information_Page />
 		<Affiliates_Avangate_Order_Page />
-		<Affiliates_Avangate_Vendor_ID />
+		<Affiliates_Avangate_Supplier_ID />
 		<Affiliates_Avangate_Product_ID />
 		<Affiliates_Avangate_Maximum_Commission_Rate />
 		<Affiliates_BMTMicro_Order_Page />
-		<Affiliates_BMTMicro_Vendor_ID />
+		<Affiliates_BMTMicro_Supplier_ID />
 		<Affiliates_BMTMicro_Product_ID />
 		<Affiliates_BMTMicro_Maximum_Commission_Rate />
 		<Affiliates_Cleverbridge_Order_Page />
-		<Affiliates_Cleverbridge_Vendor_ID />
+		<Affiliates_Cleverbridge_Supplier_ID />
 		<Affiliates_Cleverbridge_Product_ID />
 		<Affiliates_Cleverbridge_Maximum_Commission_Rate />
 		<Affiliates_clixGalore_Order_Page />
-		<Affiliates_clixGalore_Vendor_ID />
+		<Affiliates_clixGalore_Supplier_ID />
 		<Affiliates_clixGalore_Product_ID />
 		<Affiliates_clixGalore_Maximum_Commission_Rate />
 		<Affiliates_CommissionJunction_Order_Page />
-		<Affiliates_CommissionJunction_Vendor_ID />
+		<Affiliates_CommissionJunction_Supplier_ID />
 		<Affiliates_CommissionJunction_Product_ID />
 		<Affiliates_CommissionJunction_Maximum_Commission_Rate />
 		<Affiliates_DigiBuy_Order_Page />
-		<Affiliates_DigiBuy_Vendor_ID />
+		<Affiliates_DigiBuy_Supplier_ID />
 		<Affiliates_DigiBuy_Product_ID />
 		<Affiliates_DigiBuy_Maximum_Commission_Rate />
 		<Affiliates_DigitalCandle_Order_Page />
-		<Affiliates_DigitalCandle_Vendor_ID />
+		<Affiliates_DigitalCandle_Supplier_ID />
 		<Affiliates_DigitalCandle_Product_ID />
 		<Affiliates_DigitalCandle_Maximum_Commission_Rate />
 		<Affiliates_Emetrix_Order_Page />
-		<Affiliates_Emetrix_Vendor_ID />
+		<Affiliates_Emetrix_Supplier_ID />
 		<Affiliates_Emetrix_Product_ID />
 		<Affiliates_Emetrix_Maximum_Commission_Rate />
 		<Affiliates_eSellerate_Order_Page />
-		<Affiliates_eSellerate_Vendor_ID />
+		<Affiliates_eSellerate_Supplier_ID />
 		<Affiliates_eSellerate_Product_ID />
 		<Affiliates_eSellerate_Maximum_Commission_Rate />
 		<Affiliates_Kagi_Order_Page />
-		<Affiliates_Kagi_Vendor_ID />
+		<Affiliates_Kagi_Supplier_ID />
 		<Affiliates_Kagi_Product_ID />
 		<Affiliates_Kagi_Maximum_Commission_Rate />
 		<Affiliates_LinkShare_Order_Page />
-		<Affiliates_LinkShare_Vendor_ID />
+		<Affiliates_LinkShare_Supplier_ID />
 		<Affiliates_LinkShare_Product_ID />
 		<Affiliates_LinkShare_Maximum_Commission_Rate />
 		<Affiliates_NorthStarSol_Order_Page />
-		<Affiliates_NorthStarSol_Vendor_ID />
+		<Affiliates_NorthStarSol_Supplier_ID />
 		<Affiliates_NorthStarSol_Product_ID />
 		<Affiliates_NorthStarSol_Maximum_Commission_Rate />
 		<Affiliates_OneNetworkDirect_Order_Page />
-		<Affiliates_OneNetworkDirect_Vendor_ID />
+		<Affiliates_OneNetworkDirect_Supplier_ID />
 		<Affiliates_OneNetworkDirect_Product_ID />
 		<Affiliates_OneNetworkDirect_Maximum_Commission_Rate />
 		<Affiliates_Order1_Order_Page />
-		<Affiliates_Order1_Vendor_ID />
+		<Affiliates_Order1_Supplier_ID />
 		<Affiliates_Order1_Product_ID />
 		<Affiliates_Order1_Maximum_Commission_Rate />
 		<Affiliates_Osolis_Order_Page />
-		<Affiliates_Osolis_Vendor_ID />
+		<Affiliates_Osolis_Supplier_ID />
 		<Affiliates_Osolis_Product_ID />
 		<Affiliates_Osolis_Maximum_Commission_Rate />
 		<Affiliates_Plimus_Order_Page />
-		<Affiliates_Plimus_Vendor_ID />
+		<Affiliates_Plimus_Supplier_ID />
 		<Affiliates_Plimus_Product_ID />
 		<Affiliates_Plimus_Maximum_Commission_Rate />
 		<Affiliates_Regnet_Order_Page />
-		<Affiliates_Regnet_Vendor_ID />
+		<Affiliates_Regnet_Supplier_ID />
 		<Affiliates_Regnet_Product_ID />
 		<Affiliates_Regnet_Maximum_Commission_Rate />
 		<Affiliates_Regnow_Order_Page />
-		<Affiliates_Regnow_Vendor_ID />
+		<Affiliates_Regnow_Supplier_ID />
 		<Affiliates_Regnow_Product_ID />
 		<Affiliates_Regnow_Maximum_Commission_Rate />
 		<Affiliates_Regsoft_Order_Page />
-		<Affiliates_Regsoft_Vendor_ID />
+		<Affiliates_Regsoft_Supplier_ID />
 		<Affiliates_Regsoft_Product_ID />
 		<Affiliates_Regsoft_Maximum_Commission_Rate />
 		<Affiliates_ShareIt_Order_Page />
-		<Affiliates_ShareIt_Vendor_ID />
+		<Affiliates_ShareIt_Supplier_ID />
 		<Affiliates_ShareIt_Product_ID />
 		<Affiliates_ShareIt_Maximum_Commission_Rate />
 		<Affiliates_Shareasale_Order_Page />
-		<Affiliates_Shareasale_Vendor_ID />
+		<Affiliates_Shareasale_Supplier_ID />
 		<Affiliates_Shareasale_Product_ID />
 		<Affiliates_Shareasale_Maximum_Commission_Rate />
 		<Affiliates_SWReg_Order_Page />
-		<Affiliates_SWReg_Vendor_ID />
+		<Affiliates_SWReg_Supplier_ID />
 		<Affiliates_SWReg_Product_ID />
 		<Affiliates_SWReg_Maximum_Commission_Rate />
 		<Affiliates_V-Share_Order_Page />
-		<Affiliates_V-Share_Vendor_ID />
+		<Affiliates_V-Share_Supplier_ID />
 		<Affiliates_V-Share_Product_ID />
 		<Affiliates_V-Share_Maximum_Commission_Rate />
 		<Affiliates_VFree_Order_Page />
-		<Affiliates_VFree_Vendor_ID />
+		<Affiliates_VFree_Supplier_ID />
 		<Affiliates_VFree_Product_ID />
 		<Affiliates_VFree_Maximum_Commission_Rate />
 		<Affiliates_Yaskifo_Order_Page />
-		<Affiliates_Yaskifo_Vendor_ID />
+		<Affiliates_Yaskifo_Supplier_ID />
 		<Affiliates_Yaskifo_Product_ID />
 		<Affiliates_Yaskifo_Maximum_Commission_Rate />
 	</Affiliates>
