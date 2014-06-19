@@ -1519,6 +1519,7 @@ class pdf_attractive extends ModelePDFFactures
 		$pdf->SetXY($posx,$posy);
 		$pdf->SetTextColor(0,0,60);
 		$title=$outputlangs->transnoentities("Invoice");
+    $title="Tax Invoice";
 		if ($object->type == 1) $title=$outputlangs->transnoentities("InvoiceReplacement");
 		if ($object->type == 2) $title=$outputlangs->transnoentities("InvoiceAvoir");
 		if ($object->type == 3) $title=$outputlangs->transnoentities("InvoiceDeposit");
