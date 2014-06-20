@@ -1628,9 +1628,16 @@ class pdf_attractive extends ModelePDFFactures
 			$pdf->SetFont('','B', $default_font_size);
 			$pdf->MultiCell(80, 4, $outputlangs->convToOutputCharset($this->emetteur->name), 0, 'L');
 			$posy=$pdf->getY();
+      
+      // Show sender Professional Id
+			$pdf->SetXY($posx+2,$posy);
+			$pdf->SetFont('','', $default_font_size - 2);
+			$pdf->MultiCell(80, 4, "ABN: " . $outputlangs->convToOutputCharset($this->emetteur->idprof1), 0, 'L');
+			$posy=$pdf->getY();
+      
 
 			// Show sender information
-			$pdf->SetXY($posx+2,$posy);
+			$pdf->SetXY($posx+2,$posy+2);
 			$pdf->SetFont('','', $default_font_size - 1);
 			$pdf->MultiCell(80, 4, $carac_emetteur, 0, 'L');
 
