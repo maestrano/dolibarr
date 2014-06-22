@@ -9,6 +9,7 @@ class MnoSoaItem extends MnoSoaBaseItem
     // PRODUCT OR SERVICE
     public $_local_element_type;
     public $_is_delete;
+    public $_is_new;
     
     protected function pushItem()
     {
@@ -17,6 +18,7 @@ class MnoSoaItem extends MnoSoaBaseItem
         if (empty($id)) { return; }
         $mno_id = $this->getMnoIdByLocalIdName($id, $this->_local_entity_name);
         $this->_id = ($this->isValidIdentifier($mno_id)) ? $mno_id->_id : null;
+        $this->_is_new = (empty($this->_id)) ? true : false;
         // PUSH CODE
         $this->_code = $this->push_set_or_delete_value($this->_local_entity->ref);
         // PUSH NAME
@@ -34,6 +36,15 @@ class MnoSoaItem extends MnoSoaBaseItem
             case "SERVICE":
                 $this->_type = "SERVICE";
                 break;
+        }
+        
+        if ($this->_is_new) {
+            // PUSH SALE->PRICE
+            $this->_sale->price = $this->push_set_or_delete_value($this->_local_entity->price);
+            // PUSH SALE->CURRENCY
+            if (!empty($this->_sale->price)) {
+                $this->_sale->currency = $this->push_set_or_delete_value($this->getMainCurrency());
+            }
         }
     }
     
@@ -71,6 +82,7 @@ class MnoSoaItem extends MnoSoaBaseItem
         } else {
             $return_status = constant('MnoSoaBaseEntity::STATUS_NEW_ID');
             if ($mno_status_format == 'INACTIVE') { return constant('MnoSoaBaseEntity::STATUS_DELETED_ID'); }
+            $this->_local_entity->note = '';
         }
         
         $this->_local_entity->ref = $this->pull_set_or_delete_value($this->_code);
@@ -83,6 +95,21 @@ class MnoSoaItem extends MnoSoaBaseItem
             MnoSoaLogger::debug("is service");
             $this->_local_entity->type = '1';
         }
+        
+        MnoSoaLogger::debug("main currency=".$this->getMainCurrency());
+        
+        if (!empty($this->_sale->currency)) {
+            $sale_currency = strtoupper($this->pull_set_or_delete_value($this->_sale->currency));
+            MnoSoaLogger::debug("sale currency=".$sale_currency);
+            if ($this->getMainCurrency() == $sale_currency) {
+                MnoSoaLogger::debug("main currency=sale currency");
+                $this->_local_entity->price = $this->pull_set_or_delete_value($this->_sale->price,"0");
+                $this->_local_entity->price_base_type = 'HT';
+            }
+        }
+        
+        $this->_local_entity->status = (empty($this->_sale)) ? 0 : 1;
+        $this->_local_entity->status_buy = (empty($this->_purchase)) ? 0 : 1;
         
         return $return_status;
     }
@@ -124,6 +151,9 @@ class MnoSoaItem extends MnoSoaBaseItem
         $user->id = "1";
         $temp = json_encode($this->_local_entity);
         MnoSoaLogger::debug("this->_local_entity={$temp}");
+        $id = $this->getLocalEntityIdentifier();
+        $newprice = $this->_local_entity->price;
+        $newpricebase = $this->_local_entity->price_base_type;
         
         if ($status == constant('MnoSoaBaseEntity::STATUS_NEW_ID')) {
             MnoSoaLogger::debug("new id");
@@ -133,7 +163,8 @@ class MnoSoaItem extends MnoSoaBaseItem
             }
         } else if ($status == constant('MnoSoaBaseEntity::STATUS_EXISTING_ID')) {
             MnoSoaLogger::debug("existing id");
-            $this->_local_entity->update($this->getLocalEntityIdentifier(), $user, true, 'update', $push_to_maestrano);
+            $this->_local_entity->update($id, $user, true, 'update', $push_to_maestrano);
+            $this->_local_entity->updatePriceOnly($id, $newprice, $newpricebase);
         }
     }
     
@@ -155,7 +186,7 @@ class MnoSoaItem extends MnoSoaBaseItem
             case "1": return "MANUFACTURED";
         }
         
-        return null;
+        return "PURCHASED";
     }
     
     protected function mapMnoTypeToLocalProductNature($mno_item_type)
@@ -167,7 +198,7 @@ class MnoSoaItem extends MnoSoaBaseItem
             case "MANUFACTURED": return "1";
         }
         
-        return null;
+        return "0";
     }
 }
 

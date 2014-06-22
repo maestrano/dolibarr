@@ -411,7 +411,7 @@ class Account extends CommonObject
         {
             $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX."bank_account");
 
-            $result=$this->update();
+            $result=$this->update('', $push_to_maestrano);
             if ($result > 0)
             {
                 $sql = "INSERT INTO ".MAIN_DB_PREFIX."bank (";
