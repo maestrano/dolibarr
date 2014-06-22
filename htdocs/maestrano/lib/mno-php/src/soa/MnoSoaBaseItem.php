@@ -120,10 +120,10 @@ class MnoSoaBaseItem extends MnoSoaBaseEntity
             $this->set_if_array_key_has_value($this->_parent, 'parent', $mno_entity->parent);
             
             if (!empty($mno_entity->sale)) {
-                $this->set_if_array_key_has_value($this->_sale, 'sale', $mno_entity->sale);
+                $this->set_if_array_key_has_value($this->_sale, 'sale', $mno_entity);
             }
             if (!empty($mno_entity->purchase)) {
-                $this->set_if_array_key_has_value($this->_purchase, 'purchase', $mno_entity->purchase);
+                $this->set_if_array_key_has_value($this->_purchase, 'purchase', $mno_entity);
             }
 
             MnoSoaLogger::debug("id = " . $this->_id);

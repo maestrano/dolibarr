@@ -300,6 +300,7 @@ class Product extends CommonObject
 				$sql.= ", tosell";
 				$sql.= ", canvas";
 				$sql.= ", finished";
+                                $sql.= ", description";
 				$sql.= ") VALUES (";
 				$sql.= $this->db->idate($now);
 				$sql.= ", ".$conf->entity;
@@ -317,6 +318,7 @@ class Product extends CommonObject
 				$sql.= ", ".$this->status_buy;
 				$sql.= ", '".$this->canvas."'";
 				$sql.= ", ".((empty($this->finished) && $this->finished !== '0')?'null':$this->finished);
+                                $sql.= ", '".$this->db->escape($this->description)."'";
 				$sql.= ")";
 
 				dol_syslog(get_class($this)."::Create sql=".$sql);
@@ -1108,7 +1110,64 @@ class Product extends CommonObject
 		return 1;
 	}
 
+        function updatePriceOnly($id, $newprice, $newpricebase)
+	{
+		global $conf,$langs;
 
+		// Clean parameters
+		if (empty($this->tva_tx))  $this->tva_tx=0;
+                if (empty($newnpr)) $newnpr=0;
+
+		// Check parameters
+		if ($newvat == '') $newvat=$this->tva_tx;
+
+		if ($newprice!='' || $newprice==0)
+		{
+			if ($newpricebase == 'TTC')
+			{
+				$price_ttc = price2num($newprice,'MU');
+				$price = price2num($newprice) / (1 + ($newvat / 100));
+				$price = price2num($price,'MU');
+			}
+			else
+			{
+				$price = price2num($newprice,'MU');
+				$price_ttc = ( $newnpr != 1 ) ? price2num($newprice) * (1 + ($newvat / 100)) : $price;
+				$price_ttc = price2num($price_ttc,'MU');
+			}
+
+			//Local taxes
+			$localtax1=get_localtax($newvat,1);
+			$localtax2=get_localtax($newvat,2);
+			if (empty($localtax1)) $localtax1=0;	// If = '' then = 0
+			if (empty($localtax2)) $localtax2=0;	// If = '' then = 0
+
+			// Ne pas mettre de quote sur les numeriques decimaux.
+			// Ceci provoque des stockages avec arrondis en base au lieu des valeurs exactes.
+			$sql = "UPDATE ".MAIN_DB_PREFIX."product SET";
+			$sql.= " price_base_type='".$newpricebase."',";
+			$sql.= " price=".$price.",";
+			$sql.= " price_ttc=".$price_ttc;
+			$sql.= " WHERE rowid = ".$id;
+                        
+                        error_log(__FUNCTION__. " sql=".$sql);
+
+			$resql=$this->db->query($sql);
+			if ($resql)
+			{
+				$this->price = $price;
+				$this->price_ttc = $price_ttc;
+				$this->price_base_type = $newpricebase;
+			}
+			else
+			{
+				dol_print_error($this->db);
+			}
+		}
+                
+		return 1;
+	}
+        
 	/**
 	 *  Load a product in memory from database
 	 *
