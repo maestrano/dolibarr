@@ -1682,9 +1682,17 @@ class pdf_attractive extends ModelePDFFactures
 			$pdf->Rect($posx, $posy, $widthrecbox, $hautcadre);
 
 			// Show recipient name
-			$pdf->SetXY($posx+2,$posy+3);
+			$pdf->SetXY($posx+2,$posy+2);
 			$pdf->SetFont('','B', $default_font_size);
 			$pdf->MultiCell($widthrecbox, 4, $carac_client_name, 0, 'L');
+      
+      // Show recipient Professional Id
+      if (property_exists($object->client,'idprof1') && !empty($object->client->idprof1)){
+  			$pdf->SetXY($posx+2,$posy+7);
+  			$pdf->SetFont('','', $default_font_size - 2);
+  			$pdf->MultiCell(80, 4, "ABN: " . $outputlangs->convToOutputCharset($object->client->idprof1), 0, 'L');
+  			$posy=$pdf->getY();
+      }
 
 			// Show recipient information
 			$pdf->SetFont('','', $default_font_size - 1);
