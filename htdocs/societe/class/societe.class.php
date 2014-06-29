@@ -309,7 +309,7 @@ class Societe extends CommonObject
 		      
             if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {	                 
                 if ($this->particulier != "1") {
-                    $mno_org=new MnoSoaOrganization($this->db, new MnoSoaBaseLogger());
+                    $mno_org=new MnoSoaOrganization($this->db, new MnoSoaLogger());
                     $mno_org->send($this);
                 }
             }
@@ -323,7 +323,7 @@ class Societe extends CommonObject
 
         // DISABLED DELETE NOTIFICATIONS
         if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {
-            $mno_org=new MnoSoaOrganization($this->db, new MnoSoaBaseLogger());
+            $mno_org=new MnoSoaOrganization($this->db, new MnoSoaLogger());
             $mno_org->sendDeleteNotification($this->id);
         }
     }

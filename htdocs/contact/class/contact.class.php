@@ -207,7 +207,7 @@ class Contact extends CommonObject
                 $maestrano = MaestranoService::getInstance();
 
                 if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {	  
-                    $mno_org=new MnoSoaPersonContact($this->db, new MnoSoaBaseLogger());
+                    $mno_org=new MnoSoaPersonContact($this->db, new MnoSoaLogger());
                     $mno_org->send($this);
                 }
             }
@@ -220,7 +220,7 @@ class Contact extends CommonObject
 
             // DISABLED DELETE NOTIFICATIONS
             if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {
-                $mno_org=new MnoSoaPersonContact($this->db, new MnoSoaBaseLogger());
+                $mno_org=new MnoSoaPersonContact($this->db, new MnoSoaLogger());
                 $mno_org->sendDeleteNotification($this->id);
             }
         }
