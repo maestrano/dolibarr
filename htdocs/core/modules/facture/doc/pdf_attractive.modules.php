@@ -792,10 +792,10 @@ class pdf_attractive extends ModelePDFFactures
 					$bank_posy=$this->pdf_bank_custom($pdf,$outputlangs,$curx,$cury,$account,0,$default_font_size);
           
           // Draw Credit Card form
-          $curx += 100;
-          $form_posy=$this->pdf_credit_card_form($pdf,$outputlangs,$curx,$cury,$default_font_size);
+          #$curx += 100;
+          #$form_posy=$this->pdf_credit_card_form($pdf,$outputlangs,$curx,$cury,$default_font_size);
           
-          $posy=max($bank_posy,$form_posy);
+          #$posy=max($bank_posy,$form_posy);
           
 					$posy+=8;
 				}
