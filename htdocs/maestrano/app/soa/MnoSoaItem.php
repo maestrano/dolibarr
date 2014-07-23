@@ -60,7 +60,7 @@ class MnoSoaItem extends MnoSoaBaseItem
             case "PURCHASED": $this->_local_element_type = "PRODUCT"; break;
             case "MANUFACTURED": $this->_local_element_type = "PRODUCT"; break;
             case "SERVICE": $this->_local_element_type = "SERVICE"; break;
-            default: break;
+            default: $this->_local_element_type = "PRODUCT"; break;
         }
         
         $local_id = $this->getLocalIdByMnoIdName($this->_id, $this->_mno_entity_name);
@@ -87,6 +87,13 @@ class MnoSoaItem extends MnoSoaBaseItem
         
         $this->_local_entity->ref = $this->pull_set_or_delete_value($this->_code);
         $this->_local_entity->label = $this->_local_entity->libelle = $this->pull_set_or_delete_value($this->_name);
+        if (empty($this->_local_entity->label)) {
+            if (!empty($this->_local_entity->ref)) {
+                $this->_local_entity->label = $this->_local_entity->libelle = $this->_local_entity->ref;
+            } else {
+                $this->_local_entity->label = $this->_local_entity->libelle = "N/A";
+            }
+        }
         $this->_local_entity->description = $this->pull_set_or_delete_value($this->_description);
         $this->_local_entity->type = '0';
         if ($this->_local_element_type == "PRODUCT") {
