@@ -65,6 +65,7 @@ class MnoSoaBaseEntity
 
         $this->_local_entity = $local_entity;
         $message = $this->build();
+        if (empty($message)) { return false; }
         $mno_had_no_id = empty($this->_id);
         
         if ($mno_had_no_id) {
@@ -85,7 +86,7 @@ class MnoSoaBaseEntity
         $mno_response_has_id = !empty($mno_response_id);
 	
         if ($mno_had_no_id && $local_entity_now_has_id && $mno_response_has_id) {
-	    	$this->addIdMapEntry($local_entity_id,$mno_response_id);
+            $this->addIdMapEntry($local_entity_id,$mno_response_id);
         }
         
         MnoSoaLogger::debug("sent $mno_response_id");
