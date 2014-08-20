@@ -102,7 +102,7 @@ function test_sql_and_script_inject($val, $type)
     }
     // For XSS Injection done by adding javascript closing html tags like with onmousemove, etc... (closing a src or href tag with not cleaned param)
     if ($type == 1) $sql_inj += preg_match('/"/i', $val);		// We refused " in GET parameters value
-    if ($type == 2) $sql_inj += preg_match('/[;"]/', $val);		// PHP_SELF is a file system path. It can contains spaces. 
+    if ($type == 2) $sql_inj += preg_match('/[;"]/', $val);		// PHP_SELF is a file system path. It can contains spaces.
     return $sql_inj;
 }
 
@@ -358,7 +358,7 @@ if (! defined('NOLOGIN'))
 		    if ($maestrano->isSsoEnabled()) {
 		      header("Location: " . $maestrano->getSsoInitUrl());
 		    }
-				
+
         // It is not already authenticated and it requests the login / password
         include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 
@@ -529,7 +529,7 @@ if (! defined('NOLOGIN'))
         // We are already into an authenticated session
         $login=$_SESSION["dol_login"];
         dol_syslog("This is an already logged session. _SESSION['dol_login']=".$login);
-				
+
 			  // Hook:Maestrano
 		    // Check Maestrano session is still valid
 		    if ($maestrano->isSsoEnabled()) {
@@ -537,7 +537,7 @@ if (! defined('NOLOGIN'))
 		        header("Location: " . $maestrano->getSsoInitUrl());
 		      }
 		    }
-				
+
         $resultFetchUser=$user->fetch('',$login);
         if ($resultFetchUser <= 0)
         {
@@ -958,6 +958,7 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
     //print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">';
     //print '<!DOCTYPE HTML>';
     print "\n";
+    print '<script src="//cdn.maestrano.com/apps/mno_libs/mno-loader.js" type="text/javascript"></script>\n<script type="text/javascript">window.mnoLoader.init("dolibarr","1");</script>\n';
     if (! empty($conf->global->MAIN_USE_CACHE_MANIFEST)) print '<html manifest="cache.manifest">'."\n";
     else print '<html>'."\n";
     //print '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr">'."\n";
@@ -1402,11 +1403,11 @@ function top_menu($head, $title='', $target='', $disablejs=0, $disablehead=0, $a
 	        $companylink=' ('.$thirdpartystatic->getNomUrl('','').')';
 	        $company=' ('.$langs->trans("Company").': '.$thirdpartystatic->name.')';
 	    }
-			
-			
+
+
 			$logintext='<div class="login"><a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$user->id.'"';
 	    $logintext.=$target?(' target="'.$target.'"'):'';
-			
+
 			// Hook:Maestrano
 			// Modify displayed name
 			$maestrano = MaestranoService::getInstance();
@@ -1415,7 +1416,7 @@ function top_menu($head, $title='', $target='', $disablejs=0, $disablehead=0, $a
 			} else {
 				$logintext.='>'.$user->login.'</a>';
 			}
-	    
+
 	    if ($user->societe_id) $logintext.=$companylink;
 	    $logintext.='</div>';
 	    $loginhtmltext.='<u>'.$langs->trans("User").'</u>';
