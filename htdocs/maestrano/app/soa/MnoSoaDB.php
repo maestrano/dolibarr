@@ -73,21 +73,25 @@ class MnoSoaDB extends MnoSoaBaseDB {
     
     public function getLocalIdByMnoIdName($mnoId, $mnoEntityName)
     {
-	$local_entity = null;
-        
-	// Fetch record
-	$query = "SELECT app_entity_id, app_entity_name, deleted_flag from mno_id_map where mno_entity_guid='". $this->_db->escape($mnoId) ."' and mno_entity_name='". $this->_db->escape(strtoupper($mnoEntityName)) . "'";
+      	$local_entity = null;
+              
+      	// Fetch record
+      	$query = "SELECT app_entity_id, app_entity_name, deleted_flag from mno_id_map where mno_entity_guid='". $this->_db->escape($mnoId) ."' and mno_entity_name='". $this->_db->escape(strtoupper($mnoEntityName)) . "'";
         MnoSoaLogger::debug("getLocalIdByMnoIdName query = ".$query);
-	$result = $this->_db->query($query);
-        MnoSoaLogger::debug("after fetch");
-	
-	// Return id value
-	if (!empty($result->num_rows)) {           
-            $obj = $this->_db->fetch_object($result);
+      	$result = $this->_db->query($query);
+        if (!$result) {
+            die('Invalid query: ' . mysql_error());
+        }
+
+        $row = mysql_fetch_assoc($result);
+
+      	// Return id value
+      	if ($row) {
+            MnoSoaLogger::debug("fetched object " . $row);
             
-            $app_entity_id = trim($obj->app_entity_id);
-            $app_entity_name = trim($obj->app_entity_name);
-            $deleted_flag = trim($obj->deleted_flag);
+            $app_entity_id = trim($row["app_entity_id"]);
+            $app_entity_name = trim($row["app_entity_name"]);
+            $deleted_flag = trim($row["deleted_flag"]);
             
             if (!empty($app_entity_id) && !empty($app_entity_name)) {
             
@@ -97,11 +101,11 @@ class MnoSoaDB extends MnoSoaBaseDB {
                     "_deleted_flag" => $deleted_flag
                 );
             }
-	}
-	
+      	}
+	      mysql_free_result($result);
         MnoSoaLogger::debug("returning local_entity = ".json_encode($local_entity));
         
-	return $local_entity;
+	      return $local_entity;
     }
     
     public function deleteIdMapEntry($localId, $localEntityName) 

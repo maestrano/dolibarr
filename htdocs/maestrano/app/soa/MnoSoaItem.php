@@ -70,7 +70,8 @@ class MnoSoaItem extends MnoSoaBaseItem
         MnoSoaLogger::debug("before local entity");
         $this->_local_entity = new Product($this->_db);
         MnoSoaLogger::debug("after local entity");
-        if ($this->isValidIdentifier(($local_id))) { 
+        if ($this->isValidIdentifier(($local_id))) {
+            MnoSoaLogger::debug("ID is valid");
             $return_status = constant('MnoSoaBaseEntity::STATUS_EXISTING_ID'); 
             $this->_local_entity->fetch($local_id->_id);
             
@@ -80,6 +81,7 @@ class MnoSoaItem extends MnoSoaBaseItem
                 return constant('MnoSoaBaseEntity::STATUS_DELETED_ID'); 
             }
         } else {
+            MnoSoaLogger::debug("ID is invalid");
             $return_status = constant('MnoSoaBaseEntity::STATUS_NEW_ID');
             if ($mno_status_format == 'INACTIVE') { return constant('MnoSoaBaseEntity::STATUS_DELETED_ID'); }
             $this->_local_entity->note = '';
