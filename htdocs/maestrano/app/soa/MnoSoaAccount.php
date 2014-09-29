@@ -56,7 +56,13 @@ class MnoSoaAccount extends MnoSoaBaseAccount
             $this->_local_entity->date_solde = date("y-m-d");
         }
         
-        $this->_local_entity->ref = $this->pull_set_or_delete_value($this->_code);
+        if (empty($this->_code)) {
+            # Generate a random account reference if missing
+            $this->_local_entity->ref = 'ACC-' . rand();
+        } else {
+            $this->_local_entity->ref = $this->pull_set_or_delete_value($this->_code);
+        }
+
         $this->_local_entity->label = $this->pull_set_or_delete_value($this->_name);
         $this->_local_entity->comment = $this->pull_set_or_delete_value($this->_description);
         
@@ -65,7 +71,9 @@ class MnoSoaAccount extends MnoSoaBaseAccount
         if ($mno_classification == "ASSET_BANK_SAVINGS") { $local_courant = "0"; }
         else if ($mno_classification == "LIABILITY_CREDITCARD_CREDITCARD") { $local_courant = "1"; }
         else if ($mno_classification == "ASSET_BANK_CASHONHAND") { $local_courant = "2"; }
-        else { return constant('MnoSoaBaseEntity::STATUS_ERROR'); }
+        else { $local_courant = "0"; }
+        // Default to SAVING account otherwise account sare ignored
+        // else { return constant('MnoSoaBaseEntity::STATUS_ERROR'); }
         
         $this->_local_entity->courant = $local_courant;
         
