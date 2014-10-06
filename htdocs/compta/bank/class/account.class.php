@@ -470,9 +470,9 @@ class Account extends CommonObject
             $result = ob_get_clean();
 
             MnoSoaLogger::debug("object=".$result);
-            $mno_item = new MnoSoaAccount($this->db, new MnoSoaLogger());
-            $mno_item->_is_delete = $is_delete;
-            $mno_item->send($entity);
+            $mno_account = new MnoSoaAccount($this->db, new MnoSoaLogger());
+            $mno_account->_is_delete = $is_delete;
+            $mno_account->send($entity);
         }
     }
 

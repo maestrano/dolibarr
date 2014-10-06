@@ -47,6 +47,12 @@ if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {
                     $mno_account->receiveNotification($notification);
                 }
                 break;
+        case "INVOICES":
+                if (class_exists('MnoSoaInvoice')) {
+                    $mno_invoice = new MnoSoaInvoice($opts['db_connection']);
+                    $mno_invoice->receiveNotification($notification);
+                }
+                break;
     }
 }
 

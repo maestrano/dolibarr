@@ -46,16 +46,15 @@ class MnoSoaDB extends MnoSoaBaseDB {
 	// Fetch record
 	$query = "SELECT mno_entity_guid, mno_entity_name, deleted_flag from mno_id_map where app_entity_id='" . $this->_db->escape($localId) . "' and app_entity_name='" . $this->_db->escape(strtoupper($localEntityName)) . "'";
         MnoSoaLogger::debug("getMnoIdByLocalIdName query = ".$query);
-	$result = $this->_db->query($query);
-        MnoSoaLogger::debug("after fetch");
-	
-	// Return id value
-	if (!empty($result->num_rows)) {
-            $obj = $this->_db->fetch_object($result);
-            
-            $mno_entity_guid = trim($obj->mno_entity_guid);
-            $mno_entity_name = trim($obj->mno_entity_name);
-            $deleted_flag = trim($obj->deleted_flag);
+  $result = $this->_db->query($query);
+  // Return id value
+  $row = mysql_fetch_assoc($result);
+  MnoSoaLogger::debug("FETCHED ROW ".json_encode($row));
+  if ($row) {
+      MnoSoaLogger::debug("mno_entity_guid ".json_encode($row['mno_entity_guid']));
+            $mno_entity_guid = trim($row['mno_entity_guid']);
+            $mno_entity_name = trim($row['mno_entity_name']);
+            $deleted_flag = trim($row['deleted_flag']);
             
             if (!empty($mno_entity_guid) && !empty($mno_entity_name)) {
                 $mno_entity = (object) array (

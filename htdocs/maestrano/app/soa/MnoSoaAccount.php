@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Mno Organization Class
+ * Mno Account Class
  */
 class MnoSoaAccount extends MnoSoaBaseAccount
 {

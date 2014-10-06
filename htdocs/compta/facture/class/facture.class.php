@@ -37,7 +37,7 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/commoninvoice.class.php';
 require_once DOL_DOCUMENT_ROOT .'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT .'/societe/class/client.class.php';
 require_once DOL_DOCUMENT_ROOT .'/margin/lib/margins.lib.php';
-
+require_once DOL_DOCUMENT_ROOT .'/maestrano/app/init/base.php';
 
 /**
  *	Class to manage invoices
@@ -127,6 +127,20 @@ class Facture extends CommonInvoice
 		$this->db = $db;
 	}
 
+	// Push invoice to Maestrano
+	function push_invoice_to_maestrano($entity, $push_to_maestrano, $is_delete=false) {
+        if ($push_to_maestrano) {
+            ob_start();
+            var_dump($entity);
+            $result = ob_get_clean();
+
+            MnoSoaLogger::debug("object=".$result);
+            $mno_invoice = new MnoSoaInvoice($this->db, new MnoSoaLogger());
+            $mno_invoice->_is_delete = $is_delete;
+            $mno_invoice->send($entity);
+        }
+    }
+
 	/**
 	 *	Create invoice in database
 	 *  Note: this->ref can be set or empty. If empty, we will use "(PROV)"
@@ -136,7 +150,7 @@ class Facture extends CommonInvoice
 	 * 	@param	int		$forceduedate	1=Do not recalculate due date from payment condition but force it with value
 	 *	@return	int						<0 if KO, >0 if OK
 	 */
-	function create($user,$notrigger=0,$forceduedate=0)
+	function create($user,$notrigger=0,$forceduedate=0,$push_to_maestrano=true)
 	{
 		global $langs,$conf,$mysoc,$hookmanager;
 		$error=0;
@@ -470,6 +484,7 @@ class Facture extends CommonInvoice
 					if (! $error)
 					{
 						$this->db->commit();
+						$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 						return $this->id;
 					}
 					else
@@ -645,6 +660,7 @@ class Facture extends CommonInvoice
 		if (! $error)
 		{
 			$this->db->commit();
+			$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 			return $this->id;
 		}
 		else
@@ -1110,6 +1126,7 @@ class Facture extends CommonInvoice
 		else
 		{
 			$this->db->commit();
+			$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 			return 1;
 		}
 	}
@@ -1174,6 +1191,7 @@ class Facture extends CommonInvoice
 					}
 
 					$this->db->commit();
+					$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 					return 1;
 				}
 				else
@@ -1214,6 +1232,7 @@ class Facture extends CommonInvoice
 		if ($this->db->query($sql))
 		{
 			$this->ref_client = $ref_client;
+			$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 			return 1;
 		}
 		else
@@ -1354,6 +1373,7 @@ class Facture extends CommonInvoice
 					}
 
 					$this->db->commit();
+					$this->push_invoice_to_maestrano($this, $push_to_maestrano, true);
 					return 1;
 				}
 				else
@@ -1497,6 +1517,7 @@ class Facture extends CommonInvoice
 			if (! $error)
 			{
 				$this->db->commit();
+				$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 				return 1;
 			}
 			else
@@ -1554,6 +1575,7 @@ class Facture extends CommonInvoice
 		if (! $error)
 		{
 			$this->db->commit();
+			$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 			return 1;
 		}
 		else
@@ -1612,6 +1634,7 @@ class Facture extends CommonInvoice
 				// Fin appel triggers
 
 				$this->db->commit();
+				$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 				return 1;
 			}
 			else
@@ -1845,6 +1868,7 @@ class Facture extends CommonInvoice
 		if (! $error)
 		{
 			$this->db->commit();
+			$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 			return 1;
 		}
 		else
@@ -1927,6 +1951,7 @@ class Facture extends CommonInvoice
 			if ($error == 0)
 			{
 				$this->db->commit();
+				$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 				return 1;
 			}
 			else
@@ -2092,6 +2117,7 @@ class Facture extends CommonInvoice
 				if ($result > 0)
 				{
 					$this->db->commit();
+					$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 					return $this->line->rowid;
 				}
 				else
@@ -2238,6 +2264,7 @@ class Facture extends CommonInvoice
 				// Mise a jour info denormalisees au niveau facture
 				$this->update_price(1);
 				$this->db->commit();
+				$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 				return $result;
 			}
 			else
@@ -2300,6 +2327,7 @@ class Facture extends CommonInvoice
 			if ($result > 0)
 			{
 				$this->db->commit();
+				$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 				return 1;
 			}
 			else
@@ -2342,6 +2370,7 @@ class Facture extends CommonInvoice
 			{
 				$this->remise_percent = $remise;
 				$this->update_price(1);
+				$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 				return 1;
 			}
 			else
@@ -2379,6 +2408,7 @@ class Facture extends CommonInvoice
 			{
 				$this->remise_absolue = $remise;
 				$this->update_price(1);
+				$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 				return 1;
 			}
 			else
@@ -3751,6 +3781,7 @@ class FactureLigne
 			return -2;
 		}
 	}
+
 }
 
 ?>
