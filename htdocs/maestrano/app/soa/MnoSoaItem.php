@@ -87,7 +87,12 @@ class MnoSoaItem extends MnoSoaBaseItem
             $this->_local_entity->note = '';
         }
         
-        $this->_local_entity->ref = $this->pull_set_or_delete_value($this->_code);
+        if (empty($this->_code)) {
+            # Generate a random item reference if missing
+            $this->_local_entity->ref = 'ITE-' . rand();
+        } else {
+            $this->_local_entity->ref = $this->pull_set_or_delete_value($this->_code);
+        }
         $this->_local_entity->label = $this->_local_entity->libelle = $this->pull_set_or_delete_value($this->_name);
         $this->_local_entity->description = $this->pull_set_or_delete_value($this->_description);
         $this->_local_entity->type = '0';

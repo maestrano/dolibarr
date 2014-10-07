@@ -134,7 +134,7 @@ class Facture extends CommonInvoice
             var_dump($entity);
             $result = ob_get_clean();
 
-            MnoSoaLogger::debug("object=".$result);
+            MnoSoaLogger::debug("Sending entity to Maestrano: " . $result);
             $mno_invoice = new MnoSoaInvoice($this->db, new MnoSoaLogger());
             $mno_invoice->_is_delete = $is_delete;
             $mno_invoice->send($entity);
@@ -164,7 +164,6 @@ class Facture extends CommonInvoice
 		if (! $this->cond_reglement_id) $this->cond_reglement_id = 0;
 		if (! $this->mode_reglement_id) $this->mode_reglement_id = 0;
 		$this->brouillon = 1;
-
 		dol_syslog(get_class($this)."::create user=".$user->id);
 
 		// Check parameters
@@ -257,6 +256,7 @@ class Facture extends CommonInvoice
 
 		dol_syslog(get_class($this)."::create sql=".$sql);
 		$resql=$this->db->query($sql);
+
 		if ($resql)
 		{
 			$this->id = $this->db->last_insert_id(MAIN_DB_PREFIX.'facture');
@@ -1030,7 +1030,7 @@ class Facture extends CommonInvoice
 	 *      @param      int		$notrigger	    0=launch triggers after, 1=disable triggers
 	 *      @return     int      			   	<0 if KO, >0 if OK
 	 */
-	function update($user=0, $notrigger=0)
+	function update($user=0, $notrigger=0, $push_to_maestrano=true)
 	{
 		global $conf, $langs;
 		$error=0;
@@ -1250,7 +1250,7 @@ class Facture extends CommonInvoice
 	 *	@param		int		$idwarehouse	Id warehouse to use for stock change.
 	 *	@return		int						<0 if KO, >0 if OK
 	 */
-	function delete($rowid=0, $notrigger=0, $idwarehouse=-1)
+	function delete($rowid=0, $notrigger=0, $idwarehouse=-1, $push_to_maestrano=true)
 	{
 		global $user,$langs,$conf;
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
@@ -1373,7 +1373,7 @@ class Facture extends CommonInvoice
 					}
 
 					$this->db->commit();
-					$this->push_invoice_to_maestrano($this, $push_to_maestrano, true);
+					$this->push_invoice_to_maestrano($rowid, $push_to_maestrano, true);
 					return 1;
 				}
 				else
@@ -1478,7 +1478,7 @@ class Facture extends CommonInvoice
 	 *	@param  string	$close_note	Commentaire renseigne si on classe a payee alors que paiement incomplet (cas escompte par exemple)
 	 *  @return int         		<0 if KO, >0 if OK
 	 */
-	function set_paid($user,$close_code='',$close_note='')
+	function set_paid($user,$close_code='',$close_note='', $push_to_maestrano=true)
 	{
 		global $conf,$langs;
 		$error=0;
@@ -1541,7 +1541,7 @@ class Facture extends CommonInvoice
 	 *  @param	User	$user       Object user that change status
 	 *  @return int         		<0 if KO, >0 if OK
 	 */
-	function set_unpaid($user)
+	function set_unpaid($user, $push_to_maestrano=true)
 	{
 		global $conf,$langs;
 		$error=0;
@@ -1596,7 +1596,7 @@ class Facture extends CommonInvoice
 	 *	@param	string	$close_note		Comment
 	 *	@return int         			<0 if KO, >0 if OK
 	 */
-	function set_canceled($user,$close_code='',$close_note='')
+	function set_canceled($user,$close_code='',$close_note='', $push_to_maestrano=true)
 	{
 		global $conf,$langs;
 
@@ -1661,7 +1661,7 @@ class Facture extends CommonInvoice
 	 * @param	int		$idwarehouse	Id of warehouse to use for stock decrease
 	 * @return	int						<0 if KO, >0 if OK
 	 */
-	function validate($user, $force_number='', $idwarehouse=0)
+	function validate($user, $force_number='', $idwarehouse=0, $push_to_maestrano=true)
 	{
 		global $conf,$langs;
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
@@ -1886,7 +1886,7 @@ class Facture extends CommonInvoice
 	 *	@param	int		$idwarehouse	Id warehouse to use for stock change.
 	 *	@return	int						<0 if KO, >0 if OK
 	 */
-	function set_draft($user,$idwarehouse=-1)
+	function set_draft($user,$idwarehouse=-1, $push_to_maestrano=true)
 	{
 		global $conf,$langs;
 
@@ -2003,7 +2003,7 @@ class Facture extends CommonInvoice
 	 * 		@param		string		$label				Label of the line
 	 *    	@return    	int             				<0 if KO, Id of line if OK
 	 */
-	function addline($facid, $desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits=0, $fk_remise_except='', $price_base_type='HT', $pu_ttc=0, $type=0, $rang=-1, $special_code=0, $origin='', $origin_id=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='')
+	function addline($facid, $desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits=0, $fk_remise_except='', $price_base_type='HT', $pu_ttc=0, $type=0, $rang=-1, $special_code=0, $origin='', $origin_id=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='', $push_to_maestrano=true)
 	{
 		dol_syslog(get_class($this)."::Addline facid=$facid,desc=$desc,pu_ht=$pu_ht,qty=$qty,txtva=$txtva, txlocaltax1=$txlocaltax1, txlocaltax2=$txlocaltax2, fk_product=$fk_product,remise_percent=$remise_percent,date_start=$date_start,date_end=$date_end,ventil=$ventil,info_bits=$info_bits,fk_remise_except=$fk_remise_except,price_base_type=$price_base_type,pu_ttc=$pu_ttc,type=$type", LOG_DEBUG);
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
@@ -2161,7 +2161,7 @@ class Facture extends CommonInvoice
 	 * 	@param		int			$special_code		Special code (also used by externals modules!)
 	 *  @return    	int             				< 0 if KO, > 0 if OK
 	 */
-	function updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $txlocaltax1=0, $txlocaltax2=0, $price_base_type='HT', $info_bits=0, $type=0, $fk_parent_line=0, $skip_update_total=0, $fk_fournprice=null, $pa_ht=0, $label='', $special_code=0)
+	function updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $txlocaltax1=0, $txlocaltax2=0, $price_base_type='HT', $info_bits=0, $type=0, $fk_parent_line=0, $skip_update_total=0, $fk_fournprice=null, $pa_ht=0, $label='', $special_code=0, $push_to_maestrano=true)
 	{
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
 
@@ -2286,7 +2286,7 @@ class Facture extends CommonInvoice
 	 *	@param		int		$rowid		Id of line to delete
 	 *	@return		int					<0 if KO, >0 if OK
 	 */
-	function deleteline($rowid)
+	function deleteline($rowid, $push_to_maestrano=true)
 	{
 		global $langs, $conf;
 
@@ -2352,7 +2352,7 @@ class Facture extends CommonInvoice
 	 *	@param     	double	$remise		Discount
 	 *	@return		int 		<0 if ko, >0 if ok
 	 */
-	function set_remise($user, $remise)
+	function set_remise($user, $remise, $push_to_maestrano=true)
 	{
 		// Clean parameters
 		if (empty($remise)) $remise=0;
@@ -2389,7 +2389,7 @@ class Facture extends CommonInvoice
 	 *	@param     	double	$remise		Discount
 	 *	@return		int 				<0 if KO, >0 if OK
 	 */
-	function set_remise_absolue($user, $remise)
+	function set_remise_absolue($user, $remise, $push_to_maestrano=true)
 	{
 		if (empty($remise)) $remise=0;
 
@@ -3457,7 +3457,7 @@ class FactureLigne
 	 *	@param      int		$notrigger		1 no triggers
 	 *	@return		int						<0 if KO, >0 if OK
 	 */
-	function insert($notrigger=0)
+	function insert($notrigger=0, $push_to_maestrano=true)
 	{
 		global $langs,$user,$conf;
 
@@ -3594,6 +3594,11 @@ class FactureLigne
 			}
 
 			$this->db->commit();
+			
+			$invoice = new Facture($this->db);
+			$invoice->fetch($this->fk_facture);
+			$invoice->push_invoice_to_maestrano($invoice, $push_to_maestrano, false);
+
 			return $this->rowid;
 
 		}
@@ -3613,7 +3618,7 @@ class FactureLigne
 	 *	@param		int		$notrigger	Disable triggers
 	 *	@return		int					<0 if KO, >0 if OK
 	 */
-	function update($user='',$notrigger=0)
+	function update($user='',$notrigger=0, $push_to_maestrano=true)
 	{
 		global $user,$langs,$conf;
 
@@ -3692,6 +3697,11 @@ class FactureLigne
 				// Fin appel triggers
 			}
 			$this->db->commit();
+
+			$invoice = new Facture($this->db);
+			$invoice->fetch($this->fk_facture);
+			$invoice->push_invoice_to_maestrano($invoice, $push_to_maestrano, false);
+
 			return 1;
 		}
 		else
@@ -3708,7 +3718,7 @@ class FactureLigne
 	 *
 	 *	@return		int		<0 if KO, >0 if OK
 	 */
-	function delete()
+	function delete($push_to_maestrano=true)
 	{
 		global $conf,$langs,$user;
 
@@ -3730,6 +3740,12 @@ class FactureLigne
 			// Fin appel triggers
 
 			$this->db->commit();
+
+			$invoice = new Facture($this->db);
+			$invoice->fetch($this->fk_facture);
+			// Add line to be removed
+			$invoice->deleted_line = $this->rowid;
+			$invoice->push_invoice_to_maestrano($invoice, $push_to_maestrano, false);
 
 			return 1;
 		}

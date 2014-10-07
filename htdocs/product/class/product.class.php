@@ -371,6 +371,7 @@ class Product extends CommonObject
 				else
 				{
 					$error++;
+MnoSoaLogger::debug("DATABASE ERROR: " . json_encode($this->db->lasterror()));
 				    $this->error=$this->db->lasterror();
 				}
 			}
