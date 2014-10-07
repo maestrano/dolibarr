@@ -6,18 +6,19 @@
 class MnoSoaInvoice extends MnoSoaBaseInvoice
 {
   protected $_local_entity_name = "INVOICE";
-  public $_is_delete;
 
   protected function pushInvoice()
   {
     $id = $this->getLocalEntityIdentifier();
     if (empty($id)) { return; }
+
     $mno_id = $this->getMnoIdByLocalIdName($id, $this->_local_entity_name);
     $this->_id = ($this->isValidIdentifier($mno_id)) ? $mno_id->_id : null;
     $this->_transaction_number = $this->push_set_or_delete_value($this->_local_entity->ref);
     $this->_transaction_date = $this->push_set_or_delete_value($this->_local_entity->date);
     $this->_due_date = $this->push_set_or_delete_value($this->_local_entity->date_lim_reglement);
     $this->_amount = floatval($this->push_set_or_delete_value($this->_local_entity->total_ttc));
+    $this->_currency = $this->getMainCurrency();
 
     // Pull Organization ID
     $mno_id = $this->getMnoIdByLocalIdName($this->_local_entity->socid, "SOCIETE");
@@ -28,37 +29,37 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice
     if(!empty($this->_local_entity->lines)) {
       foreach($this->_local_entity->lines as $line) {
         $invoice_line = array();
-
-            // Find mno id if already exists
+        
+        // Find mno id if already exists
+        $active = true;
         $mno_entity = $this->getMnoIdByLocalIdName($line->rowid, "INVOICE_LINE");
-        if (!$this->isValidIdentifier($mno_entity)) {
-              // Generate and save ID
+        if($this->isDeletedIdentifier($mno_entity)) {
+          $invoice_line_mno_id = $mno_entity->_id;
+          $active = false;
+        } else if (!$this->isValidIdentifier($mno_entity)) {
+          // Generate and save ID
           $invoice_line_mno_id = uniqid();
           $this->_mno_soa_db_interface->addIdMapEntry($line->rowid, "INVOICE_LINE", $invoice_line_mno_id, "INVOICE_LINE");
         } else {
           $invoice_line_mno_id = $mno_entity->_id;
         }
 
-            // Pull Product
+        // Pull Product
         $local_product_id = $this->push_set_or_delete_value($line->fk_product);
         $mno_id = $this->getMnoIdByLocalIdName($line->fk_product, "ITEMS");
         $invoice_line['item']->id = $mno_id->_id;
 
-            // Pull attributes
+        // Pull attributes
         $invoice_line['id'] = $invoice_line_mno_id;
         $invoice_line['lineNumber'] = intval($line->rang);
         $invoice_line['amount'] = floatval($line->total_ttc);
         $invoice_line['quantity'] = intval($line->qty);
         $invoice_line['unitPrice'] = intval($line->subprice);
+        $invoice_line['reductionPercent'] = intval($line->remise_percent);
+        $invoice_line['taxRate'] = intval($line->tva_tx);
+        $invoice_line['status'] = $active ? 'ACTIVE' : 'INACTIVE';
 
         $this->_invoice_lines[$invoice_line_mno_id] = $invoice_line;
-      }
-    }
-        // Deleted line added as empty
-    if(!empty($this->_local_entity->deleted_line)) {
-      $mno_entity = $this->getMnoIdByLocalIdName($this->_local_entity->deleted_line, "INVOICE_LINE");
-      if ($this->isValidIdentifier($mno_entity)) {
-        $this->_invoice_lines[$mno_entity->_id] = "";
       }
     }
   }
@@ -145,52 +146,17 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice
       $invoice_local_id = $this->_local_entity->id;
     }
 
-    $this->saveLocalInvoiceLines($invoice_local_id, $push_to_maestrano);
-  }
-
-  protected function saveLocalInvoiceLines($invoice_local_id, $push_to_maestrano) {
-    if(!empty($this->_invoice_lines)) {
-      foreach($this->_invoice_lines as $line_id => $line) {
-        $local_line_id = $this->getLocalIdByMnoIdName($line_id, "INVOICE_LINE");
-        if($this->isDeletedIdentifier($local_line_id)) {
-          continue;
-        }
-
-        $invoice_line = new FactureLigne($this->_db);
-        $new_record = true;
-        if ($this->isValidIdentifier($local_line_id)) {
-          $new_record = false;
-          $invoice_line->fetch($local_line_id->_id);
-        }
-
-        $invoice_line->fk_facture = $invoice_local_id;
-        $invoice_line->rang = $line->lineNumber;
-        $invoice_line->total_ht = $line->amount;
-        $invoice_line->total_tva = $line->amount;
-        $invoice_line->total_ttc = $line->amount;
-        $invoice_line->qty = $line->quantity;
-        $invoice_line->subprice = $line->unit_price;
-
-        // Map item
-        if(!empty($line->item)) {
-          $local_item_id = $this->getLocalIdByMnoIdName($line->item->id, "items");
-          $invoice_line->fk_product = $local_item_id->_id;
-        }
-
-        if($new_record) {
-          $local_id = $invoice_line->insert(0, $push_to_maestrano);
-          if ($local_id > 0) {
-            $this->addIdMapEntryName($local_id, 'INVOICE_LINE', $this->_id, 'INVOICE_LINE');
-          }
-        } else {
-          $invoice_line->update('', 0, $push_to_maestrano);
-        }
-      }
-    }
+    $mno_invoice_line = new MnoSoaInvoiceLine($this->db);
+    $mno_invoice_line->saveLocalEntity($invoice_local_id, $this->_invoice_lines, $push_to_maestrano);
   }
 
   public function getLocalEntityIdentifier() {
     return $this->_local_entity->id;
+  }
+
+  protected function getMainCurrency() {
+    global $conf;
+    return $conf->currency;
   }
 }
 

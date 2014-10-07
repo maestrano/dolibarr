@@ -105,7 +105,7 @@ class Facture extends CommonInvoice
 	var $mode_reglement_code;		// Code in llx_c_paiement
 	var $fk_bank;					// Field to store bank id to use when payment mode is withdraw
 	var $modelpdf;
-	var $products=array();	// deprecated
+	var $products=array();	// delete
 	var $lines=array();
 	var $line;
 	var $extraparams=array();
@@ -3721,11 +3721,9 @@ class FactureLigne
 	function delete($push_to_maestrano=true)
 	{
 		global $conf,$langs,$user;
-
 		$error=0;
 
 		$this->db->begin();
-
 		$sql = "DELETE FROM ".MAIN_DB_PREFIX."facturedet WHERE rowid = ".$this->rowid;
 		dol_syslog(get_class($this)."::delete sql=".$sql, LOG_DEBUG);
 		if ($this->db->query($sql) )
@@ -3740,12 +3738,8 @@ class FactureLigne
 			// Fin appel triggers
 
 			$this->db->commit();
-
-			$invoice = new Facture($this->db);
-			$invoice->fetch($this->fk_facture);
-			// Add line to be removed
-			$invoice->deleted_line = $this->rowid;
-			$invoice->push_invoice_to_maestrano($invoice, $push_to_maestrano, false);
+			$mno_invoice_line = new MnoSoaInvoiceLine($this->db);
+			$mno_invoice_line->sendDeleteNotification($this->rowid);
 
 			return 1;
 		}
