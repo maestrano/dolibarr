@@ -100,6 +100,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice
 
     $this->_local_entity->date = $this->pull_set_or_delete_value($this->_transaction_date);
     $this->_local_entity->date_lim_reglement = $this->pull_set_or_delete_value($this->_due_date);
+    $this->_local_entity->total = $this->pull_set_or_delete_value($this->_amount);
     $this->_local_entity->total_ttc = $this->pull_set_or_delete_value($this->_amount);
 
     // Map local organization
@@ -139,14 +140,14 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice
       $local_id = $this->_local_entity->create($user, 0, 0, false);
       if ($local_id > 0) {
         $this->addIdMapEntryName($local_id, $this->_local_entity_name, $this->_id, $this->_mno_entity_name);
-        $invoice_local_id = $local_id->_id;
+        $invoice_local_id = $local_id;
       }
     } else if ($status == constant('MnoSoaBaseEntity::STATUS_EXISTING_ID')) {
       $this->_local_entity->update($user, 0, false);
-      $invoice_local_id = $this->_local_entity->id;
+      $invoice_local_id = $this->getLocalEntityIdentifier();
     }
 
-    $mno_invoice_line = new MnoSoaInvoiceLine($this->db);
+    $mno_invoice_line = new MnoSoaInvoiceLine($this->_db, $this->_log);
     $mno_invoice_line->saveLocalEntity($invoice_local_id, $this->_invoice_lines, $push_to_maestrano);
   }
 

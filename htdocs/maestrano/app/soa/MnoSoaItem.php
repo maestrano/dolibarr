@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Mno Organization Class
+ * Mno Item Class
  */
 class MnoSoaItem extends MnoSoaBaseItem
 {

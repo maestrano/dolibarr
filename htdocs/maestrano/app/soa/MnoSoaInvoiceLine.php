@@ -7,10 +7,14 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
 {
   protected $_local_entity_name = "INVOICE_LINE";
 
-  protected function saveLocalEntity($invoice_local_id, $invoice_lines, $push_to_maestrano) {
+  public function saveLocalEntity($invoice_local_id, $invoice_lines, $push_to_maestrano) {
+MnoSoaLogger::debug("start saving invoice lines for invoice " . $invoice_local_id . ", invoice_lines: " . json_encode($invoice_lines));
     if(!empty($invoice_lines)) {
+MnoSoaLogger::debug("processing invoice lines");
       foreach($invoice_lines as $line_id => $line) {
-        $local_line_id = $this->getLocalIdByMnoIdName($line_id, "INVOICE_LINE");
+MnoSoaLogger::debug("processing line " . json_encode($line));
+        $local_line_id = $this->getLocalIdByMnoId($line_id);
+MnoSoaLogger::debug("persisting " . json_encode($line) . " mno_id=" . json_encode($local_line_id));
         if($this->isDeletedIdentifier($local_line_id)) {
           continue;
         }
@@ -39,13 +43,14 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
         if($new_record) {
           $local_id = $invoice_line->insert(0, $push_to_maestrano);
           if ($local_id > 0) {
-            $this->addIdMapEntryName($local_id, 'INVOICE_LINE', $this->_id, 'INVOICE_LINE');
+            $this->addIdMapEntry($local_id, $line_id);
           }
         } else {
           $invoice_line->update('', 0, $push_to_maestrano);
         }
       }
     }
+MnoSoaLogger::debug("end");
   }
 
   protected function getMainCurrency() {
