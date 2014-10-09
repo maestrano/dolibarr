@@ -109,8 +109,10 @@ class MnoSoaItem extends MnoSoaBaseItem
             MnoSoaLogger::debug("sale currency=".$sale_currency);
             if ($this->getMainCurrency() == $sale_currency) {
                 MnoSoaLogger::debug("main currency=sale currency");
-                $this->_local_entity->price = $this->pull_set_or_delete_value($this->_sale->price,"0");
-                $this->_local_entity->price_base_type = 'HT';
+                $this->_local_entity->price = $this->pull_set_or_delete_value($this->_sale->price, "0");
+                // $this->_local_entity->price_ttc = $this->pull_set_or_delete_value($this->_sale->price, "0");
+                $this->_local_entity->tva_tx = $this->pull_set_or_delete_value($this->_sale->tax_rate, "0");
+                $this->_local_entity->price_base_type = 'TTC';
             }
         }
         
@@ -170,7 +172,7 @@ class MnoSoaItem extends MnoSoaBaseItem
         } else if ($status == constant('MnoSoaBaseEntity::STATUS_EXISTING_ID')) {
             MnoSoaLogger::debug("existing id");
             $this->_local_entity->update($id, $user, true, 'update', $push_to_maestrano);
-            $this->_local_entity->updatePriceOnly($id, $newprice, $newpricebase);
+            $this->_local_entity->updatePriceOnly($id, $newprice, $newpricebase, $push_to_maestrano);
         }
     }
     
