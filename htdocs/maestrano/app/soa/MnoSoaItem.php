@@ -38,13 +38,12 @@ class MnoSoaItem extends MnoSoaBaseItem
                 break;
         }
         
-        if ($this->_is_new) {
-            // PUSH SALE->PRICE
-            $this->_sale->price = $this->push_set_or_delete_value($this->_local_entity->price);
-            // PUSH SALE->CURRENCY
-            if (!empty($this->_sale->price)) {
-                $this->_sale->currency = $this->push_set_or_delete_value($this->getMainCurrency());
-            }
+        if (!empty($this->_local_entity->price)) {
+            $this->_sale->price = $this->push_set_or_delete_value($this->_local_entity->price_ttc);
+            $this->_sale->net_amount = $this->push_set_or_delete_value($this->_local_entity->price);
+            $this->_sale->tax_rate = $this->push_set_or_delete_value($this->_local_entity->tva_tx);
+            $this->_sale->tax_amount = $this->_sale->price - $this->_sale->net_amount;
+            $this->_sale->currency = $this->push_set_or_delete_value($this->getMainCurrency());
         }
     }
     
