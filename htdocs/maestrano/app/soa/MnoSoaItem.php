@@ -40,9 +40,9 @@ class MnoSoaItem extends MnoSoaBaseItem
         
         if (!empty($this->_local_entity->price)) {
             $this->_sale->price = $this->push_set_or_delete_value($this->_local_entity->price_ttc);
-            $this->_sale->net_amount = $this->push_set_or_delete_value($this->_local_entity->price);
-            $this->_sale->tax_rate = $this->push_set_or_delete_value($this->_local_entity->tva_tx);
-            $this->_sale->tax_amount = $this->_sale->price - $this->_sale->net_amount;
+            $this->_sale->netAmount = $this->push_set_or_delete_value($this->_local_entity->price);
+            $this->_sale->taxRate = $this->push_set_or_delete_value($this->_local_entity->tva_tx);
+            $this->_sale->taxAmount = $this->_sale->price - $this->_sale->net_amount;
             $this->_sale->currency = $this->push_set_or_delete_value($this->getMainCurrency());
         }
     }
@@ -110,8 +110,7 @@ class MnoSoaItem extends MnoSoaBaseItem
             if ($this->getMainCurrency() == $sale_currency) {
                 MnoSoaLogger::debug("main currency=sale currency");
                 $this->_local_entity->price = $this->pull_set_or_delete_value($this->_sale->price, "0");
-                // $this->_local_entity->price_ttc = $this->pull_set_or_delete_value($this->_sale->price, "0");
-                $this->_local_entity->tva_tx = $this->pull_set_or_delete_value($this->_sale->tax_rate, "0");
+                $this->_local_entity->tva_tx = $this->pull_set_or_delete_value($this->_sale->taxRate, "0");
                 $this->_local_entity->price_base_type = 'TTC';
             }
         }

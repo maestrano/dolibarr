@@ -17,8 +17,12 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice
     $this->_transaction_number = $this->push_set_or_delete_value($this->_local_entity->ref);
     $this->_transaction_date = $this->push_set_or_delete_value($this->_local_entity->date);
     $this->_due_date = $this->push_set_or_delete_value($this->_local_entity->date_lim_reglement);
-    $this->_amount = floatval($this->push_set_or_delete_value($this->_local_entity->total_ttc));
-    $this->_currency = $this->getMainCurrency();
+
+    $this->_amount->price = floatval($this->push_set_or_delete_value($this->_local_entity->total_ttc));
+    $this->_amount->netAmount = floatval($this->push_set_or_delete_value($this->_local_entity->total_ht));
+    $this->_amount->taxAmount = floatval($this->push_set_or_delete_value($this->_local_entity->total_tva));
+    $this->_amount->netAmount = floatval($this->push_set_or_delete_value($this->_local_entity->total_ht));
+    $this->_amount->currency = $this->getMainCurrency();
 
     // Pull Organization ID
     $mno_id = $this->getMnoIdByLocalIdName($this->_local_entity->socid, "SOCIETE");
@@ -52,11 +56,19 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice
         // Pull attributes
         $invoice_line['id'] = $invoice_line_mno_id;
         $invoice_line['lineNumber'] = intval($line->rang);
-        $invoice_line['amount'] = floatval($line->total_ttc);
         $invoice_line['quantity'] = intval($line->qty);
-        $invoice_line['unitPrice'] = intval($line->subprice);
-        $invoice_line['reductionPercent'] = intval($line->remise_percent);
-        $invoice_line['taxRate'] = intval($line->tva_tx);
+
+        $invoice_line['unitPrice'] = array();
+        $invoice_line['unitPrice']['price'] = floatval($line->subprice);
+        $invoice_line['unitPrice']['taxRate'] = floatval($line->tva_tx);
+
+        $invoice_line['totalPrice'] = array();
+        $invoice_line['totalPrice']['price'] = floatval($line->total_ttc);
+        $invoice_line['totalPrice']['taxRate'] = floatval($line->tva_tx);
+        $invoice_line['totalPrice']['taxAmount'] = floatval($line->total_tva);
+        $invoice_line['totalPrice']['netAmount'] = floatval($line->total_ht);
+
+        $invoice_line['reductionPercent'] = floatval($line->remise_percent);
         $invoice_line['status'] = $active ? 'ACTIVE' : 'INACTIVE';
 
         $this->_invoice_lines[$invoice_line_mno_id] = $invoice_line;
