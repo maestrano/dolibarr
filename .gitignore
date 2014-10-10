@@ -14,5 +14,4 @@ doxygen_warnings.log
 /.project
 .DS_Store
 htdocs/conf/*
-htdocs/conf/*
 htdocs/maestrano/app/config/2_maestrano.php

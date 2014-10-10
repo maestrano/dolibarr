@@ -3,12 +3,10 @@
 /**
  * Mno Invoice Class
  */
-class MnoSoaInvoice extends MnoSoaBaseInvoice
-{
+class MnoSoaInvoice extends MnoSoaBaseInvoice {
   protected $_local_entity_name = "INVOICE";
 
-  protected function pushInvoice()
-  {
+  protected function pushInvoice() {
     $id = $this->getLocalEntityIdentifier();
     if (empty($id)) { return; }
 
@@ -76,8 +74,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice
     }
   }
 
-  protected function pullInvoice()
-  {
+  protected function pullInvoice() {
     MnoSoaLogger::debug("start pullInvoice for " . json_encode($this->_id));
 
     if (empty($this->_id)) { return constant('MnoSoaBaseEntity::STATUS_ERROR'); }
