@@ -109,8 +109,8 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
 
     $this->_local_entity->date = $this->pull_set_or_delete_value($this->_transaction_date);
     $this->_local_entity->date_lim_reglement = $this->pull_set_or_delete_value($this->_due_date);
-    $this->_local_entity->total = $this->pull_set_or_delete_value($this->_amount);
-    $this->_local_entity->total_ttc = $this->pull_set_or_delete_value($this->_amount);
+    $this->_local_entity->total = $this->pull_set_or_delete_value($this->_amount->netAmount);
+    $this->_local_entity->total_ttc = $this->pull_set_or_delete_value($this->_amount->price);
 
     // Map local organization
     $local_id = $this->getLocalIdByMnoIdName($this->_organization_id, "organizations");
@@ -140,22 +140,24 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
   }
 
   protected function saveLocalEntity($push_to_maestrano, $status) {
-    MnoSoaLogger::debug("start status=$status");
+    MnoSoaLogger::debug("start saveLocalEntity status=$status " . json_encode($this->_local_entity));
 
     $user = (object) array();
     $user->id = "1";
 
     if ($status == constant('MnoSoaBaseEntity::STATUS_NEW_ID')) {
-      $local_id = $this->_local_entity->create($user, 0, 0, false);
-      if ($local_id > 0) {
-        $this->addIdMapEntryName($local_id, $this->_local_entity_name, $this->_id, $this->_mno_entity_name);
-        $invoice_local_id = $local_id;
+MnoSoaLogger::debug("CREATE NEW INVOICE");
+      $invoice_local_id = $this->_local_entity->create($user, 0, 0, $push_to_maestrano);
+      if ($invoice_local_id > 0) {
+MnoSoaLogger::debug("CREATED INVOICE WITH ID " . $invoice_local_id);
+        $this->addIdMapEntryName($invoice_local_id, $this->_local_entity_name, $this->_id, $this->_mno_entity_name);
       }
     } else if ($status == constant('MnoSoaBaseEntity::STATUS_EXISTING_ID')) {
-      $this->_local_entity->update($user, 0, false);
+MnoSoaLogger::debug("UPDATE INVOICE");
+      $this->_local_entity->update($user, 0, $push_to_maestrano);
       $invoice_local_id = $this->getLocalEntityIdentifier();
     }
-
+MnoSoaLogger::debug("SAVING INVOICE LINES");
     $mno_invoice_line = new MnoSoaInvoiceLine($this->_db, $this->_log);
     $mno_invoice_line->saveLocalEntity($invoice_local_id, $this->_invoice_lines, $push_to_maestrano);
   }

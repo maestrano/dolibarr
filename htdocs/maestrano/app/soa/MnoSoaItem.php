@@ -50,7 +50,6 @@ class MnoSoaItem extends MnoSoaBaseItem
     protected function pullItem()
     {
         $return_status = null;
-        // PULL SALE
         if (empty($this->_id)) { return constant('MnoSoaBaseEntity::STATUS_ERROR'); }
         
         $mno_type_format = strtoupper($this->pull_set_or_delete_value($this->_type));

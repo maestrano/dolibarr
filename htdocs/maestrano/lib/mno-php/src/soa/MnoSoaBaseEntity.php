@@ -177,7 +177,7 @@ class MnoSoaBaseEntity
       
       MnoSoaLogger::debug(__FUNCTION__ . " status = ". $status);
       
-      if ( $status != 200 ) {
+      if ( $status >= 300 ) {
             MnoSoaLogger::debug(__FUNCTION__ . " Error: call to URL $url failed with status $status, response $response, curl_error " . curl_error($curl) . ", curl_errno " . curl_errno($curl), 0);
             curl_close($curl);
             return null;

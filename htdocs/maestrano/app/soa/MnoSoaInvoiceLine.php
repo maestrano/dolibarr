@@ -28,11 +28,11 @@ MnoSoaLogger::debug("persisting " . json_encode($line) . " mno_id=" . json_encod
 
         $invoice_line->fk_facture = $invoice_local_id;
         $invoice_line->rang = $line->lineNumber;
-        $invoice_line->total_ht = $line->amount;
-        $invoice_line->total_tva = $line->amount;
-        $invoice_line->total_ttc = $line->amount;
+        $invoice_line->total_ht = $line->totalPrice->netAmount;
+        $invoice_line->total_tva = $line->totalPrice->taxAmount;
+        $invoice_line->total_ttc = $line->totalPrice->price;
         $invoice_line->qty = $line->quantity;
-        $invoice_line->subprice = $line->unit_price;
+        $invoice_line->subprice = $line->unitPrice->price;
 
         // Map item
         if(!empty($line->item)) {
