@@ -18,6 +18,7 @@ class MnoSoaEntity extends MnoSoaBaseEntity {
         $this->updateEntity($msg, "MnoSoaItem", "items");
         $this->updateEntity($msg, "MnoSoaAccount", "accounts");
         $this->updateEntity($msg, "MnoSoaInvoice", "invoices");
+        $this->updateEntity($msg, "MnoSoaCompany", "companys");
         
         MnoSoaLogger::info( "successfully completed (timestamp=$timestamp)");
     }
