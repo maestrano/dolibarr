@@ -132,8 +132,6 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
       }
     }
 
-    // TODO: Map other attributes
-
     MnoSoaLogger::debug("Returning entity " . json_encode($this->_local_entity));
 
     return $return_status;
@@ -146,18 +144,15 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     $user->id = "1";
 
     if ($status == constant('MnoSoaBaseEntity::STATUS_NEW_ID')) {
-MnoSoaLogger::debug("CREATE NEW INVOICE");
       $invoice_local_id = $this->_local_entity->create($user, 0, 0, $push_to_maestrano);
       if ($invoice_local_id > 0) {
-MnoSoaLogger::debug("CREATED INVOICE WITH ID " . $invoice_local_id);
         $this->addIdMapEntryName($invoice_local_id, $this->_local_entity_name, $this->_id, $this->_mno_entity_name);
       }
     } else if ($status == constant('MnoSoaBaseEntity::STATUS_EXISTING_ID')) {
-MnoSoaLogger::debug("UPDATE INVOICE");
       $this->_local_entity->update($user, 0, $push_to_maestrano);
       $invoice_local_id = $this->getLocalEntityIdentifier();
     }
-MnoSoaLogger::debug("SAVING INVOICE LINES");
+
     $mno_invoice_line = new MnoSoaInvoiceLine($this->_db, $this->_log);
     $mno_invoice_line->saveLocalEntity($invoice_local_id, $this->_invoice_lines, $push_to_maestrano);
   }
