@@ -121,10 +121,11 @@ class MnoSoaCompany extends MnoSoaBaseCompany
 
     if(isset($this->_local_entity->logo->logo)) {
       // Save logo file locally
-      $tmpLogoFilePath = $conf->mycompany->dir_output.'/logos/' . substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 10) . '.jpg';
+      $filename = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 10) . '.jpg';
+      $tmpLogoFilePath = $conf->mycompany->dir_output.'/logos/' . $filename;
       file_put_contents($tmpLogoFilePath, file_get_contents($this->_local_entity->logo->logo));
 
-      dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_LOGO", $tmpLogoFilePath);
+      dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_LOGO", $filename);
       $imgThumbSmall = vignette($tmpLogoFilePath, $maxwidthsmall, $maxheightsmall, '_small', $quality);
       if (preg_match('/([^\\/:]+)$/i',$imgThumbSmall,$reg)) {
           $imgThumbSmall = $reg[1];
