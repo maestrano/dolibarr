@@ -72,10 +72,9 @@ class MnoSoaCompany extends MnoSoaBaseCompany
 
     dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_NOM", $this->_local_entity->name);
     dolibarr_set_const($this->_db, "MAIN_MONNAIE", $this->_local_entity->currency);
-    
-    dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_LOGO", $this->_local_entity->logo->logo);
-    dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_LOGO_SMALL", $this->_local_entity->logo->thumb);
-    dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_LOGO_MINI", $this->_local_entity->logo->mini_thumb);
+
+    // Save logo
+    $this->saveLogo();
 
     // Map country
     if(isset($this->_local_entity->country)) {
@@ -110,6 +109,34 @@ class MnoSoaCompany extends MnoSoaBaseCompany
     dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_WEB", $this->_local_entity->website);
 
     MnoSoaLogger::debug(__FUNCTION__ . " end ");
+  }
+
+  protected function saveLogo() {
+    global $maxwidthsmall;
+    global $maxheightsmall;
+    global $maxwidthmini;
+    global $maxheightmini;
+    global $quality;
+    global $conf;
+
+    if(isset($this->_local_entity->logo->logo)) {
+      // Save logo file locally
+      $tmpLogoFilePath = $conf->mycompany->dir_output.'/logos/' . substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 10) . '.jpg';
+      file_put_contents($tmpLogoFilePath, file_get_contents($this->_local_entity->logo->logo));
+
+      dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_LOGO", $tmpLogoFilePath);
+      $imgThumbSmall = vignette($tmpLogoFilePath, $maxwidthsmall, $maxheightsmall, '_small', $quality);
+      if (preg_match('/([^\\/:]+)$/i',$imgThumbSmall,$reg)) {
+          $imgThumbSmall = $reg[1];
+          dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_LOGO_SMALL",$imgThumbSmall);
+      } else dol_syslog($imgThumbSmall);
+
+      $imgThumbMini = vignette($tmpLogoFilePath, $maxwidthmini, $maxheightmini, '_mini', $quality);
+      if (preg_match('/([^\\/:]+)$/i',$imgThumbMini,$reg)) {
+          $imgThumbMini = $reg[1];
+          dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_LOGO_MINI",$imgThumbMini);
+      } else dol_syslog($imgThumbMini);
+    }
   }
 
 }
