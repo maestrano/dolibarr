@@ -133,7 +133,7 @@ class MnoSoaOrganization extends MnoSoaBaseOrganization
             if (!empty($state) && array_key_exists('label', $state)) {
                 $this->_address->postalAddress->region = $this->push_set_or_delete_value($state['label']);
             } else {
-                $this->log->error(__FUNCTION__ . " failed to lookup state " . $this->_local_entity->state_id);
+                MnoSoaLogger::error(__FUNCTION__ . " failed to lookup state " . $this->_local_entity->state_id);
             }
         }
         
@@ -144,7 +144,7 @@ class MnoSoaOrganization extends MnoSoaBaseOrganization
             if (!empty($country_code) && $country_code != 'NotDefined' && $country_code != 'Error' && strlen($country_code) == 2) {
                 $this->_address->postalAddress->country = $this->push_set_or_delete_value(strtoupper($country_code));
             } else {
-                $this->log->error(__FUNCTION__ . " failed to lookup country " . $this->_address->postalAddress->country);
+                MnoSoaLogger::error(__FUNCTION__ . " failed to lookup country " . $this->_address->postalAddress->country);
             }
             
         }
@@ -166,7 +166,7 @@ class MnoSoaOrganization extends MnoSoaBaseOrganization
                 if (!empty($country_code) && $country_code != 'NotDefined' && $country_code != 'Error') {
                     $this->_local_entity->country_id = $country_code;
                 } else {
-                    $this->log->error(__FUNCTION__ . " failed to lookup country " . $this->_address->postalAddress->country);
+                    MnoSoaLogger::error(__FUNCTION__ . " failed to lookup country " . $this->_address->postalAddress->country);
                 }
             }
         } else {
