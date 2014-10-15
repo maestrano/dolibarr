@@ -96,8 +96,6 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     } else {
       if ($mno_status_format == "INACTIVE") { return constant('MnoSoaBaseEntity::STATUS_DELETED_ID'); }
       $return_status = constant('MnoSoaBaseEntity::STATUS_NEW_ID');
-      // TODO: Any default attributes
-      // $this->_local_entity->country_id = '11';
     }
 
     if (empty($this->_transaction_number)) {
@@ -111,6 +109,8 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     $this->_local_entity->date_lim_reglement = $this->pull_set_or_delete_value($this->_due_date);
     $this->_local_entity->total = $this->pull_set_or_delete_value($this->_amount->netAmount);
     $this->_local_entity->total_ttc = $this->pull_set_or_delete_value($this->_amount->price);
+    $this->_local_entity->total_ht = $this->pull_set_or_delete_value($this->_amount->netAmount);
+    $this->_local_entity->total_tva = $this->pull_set_or_delete_value($this->_amount->taxAmount);
 
     // Map local organization
     $local_id = $this->getLocalIdByMnoIdName($this->_organization_id, "organizations");

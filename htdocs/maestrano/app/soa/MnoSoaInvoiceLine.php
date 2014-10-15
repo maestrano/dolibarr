@@ -8,6 +8,8 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
   protected $_local_entity_name = "INVOICE_LINE";
 
   public function saveLocalEntity($invoice_local_id, $invoice_lines, $push_to_maestrano) {
+    MnoSoaLogger::debug("Saving invoice lines for invoice $invoice_local_id => " . json_encode($invoice_lines));
+    
     if(!empty($invoice_lines)) {
       foreach($invoice_lines as $line_id => $line) {
         $local_line_id = $this->getLocalIdByMnoId($line_id);
@@ -46,6 +48,8 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
         }
       }
     }
+
+    MnoSoaLogger::debug("Finished saving invoice lines");
   }
 
   protected function getMainCurrency() {
