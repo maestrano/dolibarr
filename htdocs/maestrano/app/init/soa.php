@@ -28,6 +28,7 @@ include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 include_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/modules/facture/mod_facture_terre.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/bank/class/account.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
@@ -53,13 +54,14 @@ $conf->db->prefix						= $dolibarr_main_db_prefix;
 $conf->db->character_set                                        = $dolibarr_main_db_character_set;
 $conf->db->dolibarr_main_db_collation                           = $dolibarr_main_db_collation;
 
-
-
 // Configure Dolibarr Database
 $db=getDoliDBInstance($dolibarr_main_db_type,$dolibarr_main_db_host,$dolibarr_main_db_user,$dolibarr_main_db_pass,$dolibarr_main_db_name,$dolibarr_main_db_port);
 $opts['db_connection'] = $db;
 
 $conf->setValues($db);
+
+// Dolibar root document
+$conf->file->dol_document_root=array(DOL_DOCUMENT_ROOT);
 
 // Dolibarr hookmanager (global)
 $hookmanager=new HookManager($db);

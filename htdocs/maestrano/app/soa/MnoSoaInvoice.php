@@ -22,6 +22,31 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     $this->_amount->netAmount = floatval($this->push_set_or_delete_value($this->_local_entity->total_ht));
     $this->_amount->currency = $this->getMainCurrency();
 
+    // Map status
+    $paid = $this->push_set_or_delete_value($this->_local_entity->paye);
+    if($paid == 1) {
+      $this->_status = 'PAID';
+    } else {
+      $status_code = $this->push_set_or_delete_value($this->_local_entity->statut);
+      if($status_code == 0) {
+        $this->_status = 'DRAFT';
+      } else if($status_code == 1) {
+        $this->_status = 'SUBMITTED';
+      } else if($status_code == 2) {
+        $this->_status = 'SUBMITTED';
+      } else if($status_code == 3) {
+        $this->_status = 'VOIDED';
+      } 
+    }
+
+    // Map type
+    $type = $this->push_set_or_delete_value($this->_local_entity->type);
+    if($type == 0) {
+      $this->_type = 'CUSTOMER';
+    } else if($type == 3) {
+      $this->_type = 'SUPPLIER';
+    }
+
     // Pull Organization ID
     $mno_id = $this->getMnoIdByLocalIdName($this->_local_entity->socid, "SOCIETE");
     $this->_organization_id = $mno_id->_id;
@@ -112,6 +137,13 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     $this->_local_entity->total_ht = $this->pull_set_or_delete_value($this->_amount->netAmount);
     $this->_local_entity->total_tva = $this->pull_set_or_delete_value($this->_amount->taxAmount);
 
+    // Map type
+    if($this->_type == 'SUPPLIER') {
+      $this->_local_entity->type = 3;
+    } else {
+      $this->_local_entity->type = 0;
+    }
+
     // Map local organization
     $local_id = $this->getLocalIdByMnoIdName($this->_organization_id, "organizations");
     if ($this->isValidIdentifier($local_id)) {
@@ -142,6 +174,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
 
     $user = (object) array();
     $user->id = "1";
+    $user->rights->facture->valider = true;
 
     if ($status == constant('MnoSoaBaseEntity::STATUS_NEW_ID')) {
       $invoice_local_id = $this->_local_entity->create($user, 0, 0, $push_to_maestrano);
@@ -155,6 +188,21 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
 
     $mno_invoice_line = new MnoSoaInvoiceLine($this->_db, $this->_log);
     $mno_invoice_line->saveLocalEntity($invoice_local_id, $this->_invoice_lines, $push_to_maestrano);
+
+    // Calculate invoice amounts
+    $this->_local_entity->update_price(1);
+
+    // Update invoice status
+    if($this->_status == 'PAID') {
+      $this->_local_entity->set_paid($user, '', '', false);
+    } else if($this->_status == 'SUBMITTED' || $this->_status == 'AUTHORISED') {
+      $this->_local_entity->validate($user, '', 0, false);
+    } else if($this->_status == 'VOIDED' || $this->_status == 'INACTIVE') {
+      $this->_local_entity->set_canceled($user, '', '', false);
+    } else  {
+      $this->_local_entity->set_draft($user, -1, false);
+    }
+
   }
 
   public function getLocalEntityIdentifier() {

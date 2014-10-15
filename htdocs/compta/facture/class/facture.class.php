@@ -1517,6 +1517,8 @@ class Facture extends CommonInvoice
 			if (! $error)
 			{
 				$this->db->commit();
+				$this->statut = 2;
+				$this->paye = 1;
 				$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 				return 1;
 			}
@@ -1575,6 +1577,7 @@ class Facture extends CommonInvoice
 		if (! $error)
 		{
 			$this->db->commit();
+			$this->statut = 1;
 			$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 			return 1;
 		}
@@ -1634,6 +1637,7 @@ class Facture extends CommonInvoice
 				// Fin appel triggers
 
 				$this->db->commit();
+				$this->statut = 3;
 				$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 				return 1;
 			}
