@@ -12,7 +12,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
 
     $mno_id = $this->getMnoIdByLocalIdName($id, $this->_local_entity_name);
     $this->_id = ($this->isValidIdentifier($mno_id)) ? $mno_id->_id : null;
-    $this->_transaction_number = $this->push_set_or_delete_value($this->_local_entity->ref);
+    $this->_transaction_number = $this->push_set_or_delete_value($this->_local_entity->ref_client);
     $this->_transaction_date = $this->push_set_or_delete_value($this->_local_entity->date);
     $this->_due_date = $this->push_set_or_delete_value($this->_local_entity->date_lim_reglement);
 
@@ -123,12 +123,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
       $return_status = constant('MnoSoaBaseEntity::STATUS_NEW_ID');
     }
 
-    if (empty($this->_transaction_number)) {
-      // Generate a random invoice reference if missing
-      $this->_local_entity->ref = 'INV-' . rand();
-    } else {
-      $this->_local_entity->ref = $this->pull_set_or_delete_value($this->_transaction_number);
-    }
+    $this->_local_entity->ref_client = $this->pull_set_or_delete_value($this->_transaction_number);
 
     $this->_local_entity->date = $this->pull_set_or_delete_value($this->_transaction_date);
     $this->_local_entity->date_lim_reglement = $this->pull_set_or_delete_value($this->_due_date);
