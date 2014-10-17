@@ -3,16 +3,15 @@
 /**
  * Mno Item Class
  */
-class MnoSoaItem extends MnoSoaBaseItem
-{
+class MnoSoaItem extends MnoSoaBaseItem {
+
     protected $_local_entity_name = "ITEMS";
     // PRODUCT OR SERVICE
     public $_local_element_type;
     public $_is_delete;
     public $_is_new;
     
-    protected function pushItem()
-    {
+    protected function pushItem() {
         // PUSH ID
         $id = $this->getLocalEntityIdentifier();
         if (empty($id)) { return; }
@@ -45,10 +44,11 @@ class MnoSoaItem extends MnoSoaBaseItem
             $this->_sale->taxAmount = $this->_sale->price - $this->_sale->netAmount;
             $this->_sale->currency = $this->push_set_or_delete_value($this->getMainCurrency());
         }
+
+        $this->pushTaxes();
     }
     
-    protected function pullItem()
-    {
+    protected function pullItem() {
         $return_status = null;
         if (empty($this->_id)) { return constant('MnoSoaBaseEntity::STATUS_ERROR'); }
         
@@ -150,7 +150,6 @@ class MnoSoaItem extends MnoSoaBaseItem
         // DO NOTHING
     }
     
-    // DONE
     protected function saveLocalEntity($push_to_maestrano, $status) {
         MnoSoaLogger::debug("start");
         $user = (object) array();
@@ -162,32 +161,27 @@ class MnoSoaItem extends MnoSoaBaseItem
         $newpricebase = $this->_local_entity->price_base_type;
         
         if ($status == constant('MnoSoaBaseEntity::STATUS_NEW_ID')) {
-            MnoSoaLogger::debug("new id");
             $local_id = $this->_local_entity->create($user,true,false);
             $this->_local_entity->updatePriceOnly($local_id, $newprice, $newpricebase, $push_to_maestrano);
             if ($local_id > 0) {
                 $this->addIdMapEntryName($local_id, $this->_local_entity_name, $this->_id, $this->_mno_entity_name);
             }
         } else if ($status == constant('MnoSoaBaseEntity::STATUS_EXISTING_ID')) {
-            MnoSoaLogger::debug("existing id");
             $this->_local_entity->update($id, $user, true, 'update', $push_to_maestrano);
             $this->_local_entity->updatePriceOnly($id, $newprice, $newpricebase, $push_to_maestrano);
         }
     }
     
-    // DONE
     public function getLocalEntityIdentifier() {
         return $this->_local_entity->id;
     }
     
-    protected function getMainCurrency()
-    {
+    protected function getMainCurrency() {
         global $conf;
         return $conf->currency;
     }
     
-    protected function mapLocalProductNatureToMnoType($local_product_nature)
-    {
+    protected function mapLocalProductNatureToMnoType($local_product_nature) {
         switch ($local_product_nature) {
             case "0": return "PURCHASED";
             case "1": return "MANUFACTURED";
@@ -196,8 +190,7 @@ class MnoSoaItem extends MnoSoaBaseItem
         return "PURCHASED";
     }
     
-    protected function mapMnoTypeToLocalProductNature($mno_item_type)
-    {
+    protected function mapMnoTypeToLocalProductNature($mno_item_type) {
         $mno_item_type_format = $this->pull_set_or_delete_value($mno_item_type);
         
         switch ($mno_item_type_format) {
@@ -207,6 +200,46 @@ class MnoSoaItem extends MnoSoaBaseItem
         
         return "0";
     }
+
+    protected function pushTaxes() {
+      global $mysoc;
+
+      if($this->_local_entity->tva_tx != null && $this->_local_entity->tva_tx != 0) {
+        $country_taxes = $this->fetchTaxes();
+
+        $this->_taxes = array();
+        foreach ($country_taxes as $country_tax) {
+          if($country_tax['taux'] == $this->_local_entity->tva_tx) {
+            $tax_name = strtok($country_tax['note'], " ");
+            // Hack to map Australian GST tax name
+            if($tax_name == 'VAT' && $mysoc->country_code == 'AU') {
+              $tax_name = 'GST';
+            }
+            $this->_taxes[$tax_name] = array('name' => $tax_name, 'rate' => $country_tax['taux']);
+          }
+        }
+      }
+    }
+
+    private function fetchTaxes() {
+      global $mysoc;
+
+      $sql = "SELECT t.rowid, t.taux, t.note";
+      $sql.= " FROM ".MAIN_DB_PREFIX."c_tva as t";
+      $sql.= ", ".MAIN_DB_PREFIX."c_pays as p";
+      $sql.= " WHERE t.fk_pays = p.rowid";
+      $sql.= " AND t.active = 1";
+      $sql.= " AND p.code = '".$mysoc->country_code."'";
+
+      $taxes = null;
+      $resql = $this->_db->query($sql);
+      for($i=0;$tax = $this->_db->fetch_array();$i++) {
+        $taxes[$i] = $tax;
+      }
+
+      return $taxes;
+    }
+
 }
 
 ?>
