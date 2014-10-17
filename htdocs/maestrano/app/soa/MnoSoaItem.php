@@ -42,7 +42,7 @@ class MnoSoaItem extends MnoSoaBaseItem
             $this->_sale->price = $this->push_set_or_delete_value($this->_local_entity->price_ttc);
             $this->_sale->netAmount = $this->push_set_or_delete_value($this->_local_entity->price);
             $this->_sale->taxRate = $this->push_set_or_delete_value($this->_local_entity->tva_tx);
-            $this->_sale->taxAmount = $this->_sale->price - $this->_sale->net_amount;
+            $this->_sale->taxAmount = $this->_sale->price - $this->_sale->netAmount;
             $this->_sale->currency = $this->push_set_or_delete_value($this->getMainCurrency());
         }
     }
@@ -164,6 +164,7 @@ class MnoSoaItem extends MnoSoaBaseItem
         if ($status == constant('MnoSoaBaseEntity::STATUS_NEW_ID')) {
             MnoSoaLogger::debug("new id");
             $local_id = $this->_local_entity->create($user,true,false);
+            $this->_local_entity->updatePriceOnly($local_id, $newprice, $newpricebase, $push_to_maestrano);
             if ($local_id > 0) {
                 $this->addIdMapEntryName($local_id, $this->_local_entity_name, $this->_id, $this->_mno_entity_name);
             }
