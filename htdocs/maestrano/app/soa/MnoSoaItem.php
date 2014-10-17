@@ -159,16 +159,17 @@ class MnoSoaItem extends MnoSoaBaseItem {
         $id = $this->getLocalEntityIdentifier();
         $newprice = $this->_local_entity->price;
         $newpricebase = $this->_local_entity->price_base_type;
+        $newvat = $this->_local_entity->tva_tx;
         
         if ($status == constant('MnoSoaBaseEntity::STATUS_NEW_ID')) {
             $local_id = $this->_local_entity->create($user,true,false);
-            $this->_local_entity->updatePriceOnly($local_id, $newprice, $newpricebase, $push_to_maestrano);
+            $this->_local_entity->updatePrice($local_id, $newprice, $newpricebase, $user, $newvat,'', 0, 0, 0, false);
             if ($local_id > 0) {
                 $this->addIdMapEntryName($local_id, $this->_local_entity_name, $this->_id, $this->_mno_entity_name);
             }
         } else if ($status == constant('MnoSoaBaseEntity::STATUS_EXISTING_ID')) {
             $this->_local_entity->update($id, $user, true, 'update', $push_to_maestrano);
-            $this->_local_entity->updatePriceOnly($id, $newprice, $newpricebase, $push_to_maestrano);
+            $this->_local_entity->updatePrice($id, $newprice, $newpricebase, $user, $newvat,'', 0, 0, 0, false);
         }
     }
     
