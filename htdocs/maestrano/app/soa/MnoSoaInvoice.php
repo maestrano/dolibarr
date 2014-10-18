@@ -8,10 +8,14 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
 
   protected function pushInvoice() {
     $id = $this->getLocalEntityIdentifier();
-    if (empty($id)) { return; }
+    MnoSoaLogger::debug("start pushInvoice for " . json_encode($id));
+
+    if (empty($id)) { return false; }
 
     $mno_id = $this->getMnoIdByLocalIdName($id, $this->_local_entity_name);
     $this->_id = ($this->isValidIdentifier($mno_id)) ? $mno_id->_id : null;
+    MnoSoaLogger::debug("mapped to mno invoice " . json_encode($mno_id));
+
     $this->_transaction_number = $this->push_set_or_delete_value($this->_local_entity->ref_client);
     $this->_transaction_date = $this->push_set_or_delete_value($this->_local_entity->date);
     $this->_due_date = $this->push_set_or_delete_value($this->_local_entity->date_lim_reglement);
@@ -31,9 +35,9 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
       if($status_code == 0) {
         $this->_status = 'DRAFT';
       } else if($status_code == 1) {
-        $this->_status = 'SUBMITTED';
+        $this->_status = 'AUTHORISED';
       } else if($status_code == 2) {
-        $this->_status = 'SUBMITTED';
+        $this->_status = 'AUTHORISED';
       } else if($status_code == 3) {
         $this->_status = 'VOIDED';
       } 
@@ -71,18 +75,18 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
           $invoice_line_mno_id = $mno_entity->_id;
         }
 
-        // Pull Product
+        // Map Product
         $local_product_id = $this->push_set_or_delete_value($line->fk_product);
         $mno_id = $this->getMnoIdByLocalIdName($line->fk_product, "ITEMS");
         $invoice_line['item']->id = $mno_id->_id;
 
-        // Pull attributes
+        // Push line price
         $invoice_line['id'] = $invoice_line_mno_id;
         $invoice_line['lineNumber'] = intval($line->rang);
         $invoice_line['quantity'] = intval($line->qty);
 
         $invoice_line['unitPrice'] = array();
-        $invoice_line['unitPrice']['price'] = floatval($line->subprice);
+        $invoice_line['unitPrice']['netAmount'] = floatval($line->subprice);
         $invoice_line['unitPrice']['taxRate'] = floatval($line->tva_tx);
 
         $invoice_line['totalPrice'] = array();
@@ -94,9 +98,13 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
         $invoice_line['reductionPercent'] = floatval($line->remise_percent);
         $invoice_line['status'] = $active ? 'ACTIVE' : 'INACTIVE';
 
+        $invoice_line['taxes'] = $this->addApplicableTaxes($line);
+
         $this->_invoice_lines[$invoice_line_mno_id] = $invoice_line;
       }
     }
+
+    return true;
   }
 
   protected function pullInvoice() {
@@ -207,6 +215,47 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
   protected function getMainCurrency() {
     global $conf;
     return $conf->currency;
+  }
+
+  protected function addApplicableTaxes($line) {
+    global $mysoc;
+
+    $taxes = array();
+    $line_tax_rate = floatval($line->tva_tx);
+    if($line_tax_rate > 0) {
+      $country_taxes = $this->fetchTaxes();
+
+      foreach ($country_taxes as $country_tax) {
+        if($country_tax['taux'] == $line_tax_rate) {
+          $tax_name = strtok($country_tax['note'], " ");
+          // Hack to map Australian GST tax name
+          if($tax_name == 'VAT' && $mysoc->country_code == 'AU') {
+            $tax_name = 'GST';
+          }
+          $taxes[$tax_name] = array('name' => $tax_name, 'rate' => $country_tax['taux']);
+        }
+      }
+    }
+    return $taxes;
+  }
+
+  private function fetchTaxes() {
+    global $mysoc;
+
+    $sql = "SELECT t.rowid, t.taux, t.note";
+    $sql.= " FROM ".MAIN_DB_PREFIX."c_tva as t";
+    $sql.= ", ".MAIN_DB_PREFIX."c_pays as p";
+    $sql.= " WHERE t.fk_pays = p.rowid";
+    $sql.= " AND t.active = 1";
+    $sql.= " AND p.code = '".$mysoc->country_code."'";
+
+    $taxes = null;
+    $resql = $this->_db->query($sql);
+    for($i=0;$tax = $this->_db->fetch_array();$i++) {
+      $taxes[$i] = $tax;
+    }
+
+    return $taxes;
   }
 }
 

@@ -3702,6 +3702,7 @@ class FactureLigne
 			}
 			$this->db->commit();
 
+			$this->fetch($this->rowid);
 			$invoice = new Facture($this->db);
 			$invoice->fetch($this->fk_facture);
 			$invoice->push_invoice_to_maestrano($invoice, $push_to_maestrano, false);
