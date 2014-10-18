@@ -29,8 +29,9 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
         $invoice_line->total_ht = $line->totalPrice->netAmount;
         $invoice_line->total_tva = $line->totalPrice->taxAmount;
         $invoice_line->total_ttc = $line->totalPrice->price;
+        $invoice_line->tva_tx = $line->totalPrice->taxRate;
         $invoice_line->qty = $line->quantity;
-        $invoice_line->subprice = $line->unitPrice->price;
+        $invoice_line->subprice = $line->unitPrice->netAmount;
 
         // Map item
         if(!empty($line->item)) {
