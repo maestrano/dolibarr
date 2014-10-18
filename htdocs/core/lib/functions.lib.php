@@ -218,8 +218,7 @@ function GETPOST($paramname,$check='',$method=0)
  */
 function dol_getprefix()
 {
-	// return dol_hash($_SERVER["SERVER_NAME"].$_SERVER["DOCUMENT_ROOT"].DOL_DOCUMENT_ROOT.DOL_URL_ROOT);
-	return "DOL_";
+	return dol_hash($_SERVER["SERVER_NAME"].$_SERVER["DOCUMENT_ROOT"].DOL_DOCUMENT_ROOT.DOL_URL_ROOT);
 }
 
 /**
