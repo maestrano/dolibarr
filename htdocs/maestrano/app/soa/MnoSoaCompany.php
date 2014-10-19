@@ -122,7 +122,12 @@ class MnoSoaCompany extends MnoSoaBaseCompany
     if(isset($this->_local_entity->logo->logo)) {
       // Save logo file locally
       $filename = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 10) . '.jpg';
-      $tmpLogoFilePath = $conf->mycompany->dir_output.'/logos/' . $filename;
+      $dir = $conf->mycompany->dir_output . '/logos/';
+      if (!file_exists($dir)) {
+        mkdir($dir, 0777, true);
+      }
+      $tmpLogoFilePath = $dir . $filename;
+      MnoSoaLogger::debug("saving company logo " . $tmpLogoFilePath);
       file_put_contents($tmpLogoFilePath, file_get_contents($this->_local_entity->logo->logo));
 
       dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_LOGO", $filename);
