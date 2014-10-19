@@ -49,9 +49,8 @@ class MnoSoaDB extends MnoSoaBaseDB {
   $result = $this->_db->query($query);
   // Return id value
   $row = $this->_db->fetch_object($result);
-  MnoSoaLogger::debug("FETCHED ROW ".json_encode($row));
   if ($row) {
-      MnoSoaLogger::debug("mno_entity_guid ".json_encode($row['mno_entity_guid']));
+      MnoSoaLogger::debug("mno_id_map ".json_encode($row));
             $mno_entity_guid = trim($row->mno_entity_guid);
             $mno_entity_name = trim($row->mno_entity_name);
             $deleted_flag = trim($row->deleted_flag);
