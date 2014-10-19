@@ -48,13 +48,13 @@ class MnoSoaDB extends MnoSoaBaseDB {
         MnoSoaLogger::debug("getMnoIdByLocalIdName query = ".$query);
   $result = $this->_db->query($query);
   // Return id value
-  $row = mysql_fetch_assoc($result);
+  $row = $this->_db->fetch_object($result);
   MnoSoaLogger::debug("FETCHED ROW ".json_encode($row));
   if ($row) {
       MnoSoaLogger::debug("mno_entity_guid ".json_encode($row['mno_entity_guid']));
-            $mno_entity_guid = trim($row['mno_entity_guid']);
-            $mno_entity_name = trim($row['mno_entity_name']);
-            $deleted_flag = trim($row['deleted_flag']);
+            $mno_entity_guid = trim($row->mno_entity_guid);
+            $mno_entity_name = trim($row->mno_entity_name);
+            $deleted_flag = trim($row->deleted_flag);
             
             if (!empty($mno_entity_guid) && !empty($mno_entity_name)) {
                 $mno_entity = (object) array (
@@ -82,15 +82,15 @@ class MnoSoaDB extends MnoSoaBaseDB {
             die('Invalid query: ' . mysql_error());
         }
 
-        $row = mysql_fetch_assoc($result);
+        $row = $this->_db->fetch_object($result);
 
       	// Return id value
       	if ($row) {
-            MnoSoaLogger::debug("fetched object " . $row);
+            MnoSoaLogger::debug("fetched object " . json_encode($row));
             
-            $app_entity_id = trim($row["app_entity_id"]);
-            $app_entity_name = trim($row["app_entity_name"]);
-            $deleted_flag = trim($row["deleted_flag"]);
+            $app_entity_id = trim($row->app_entity_id);
+            $app_entity_name = trim($row->app_entity_name);
+            $deleted_flag = trim($row->deleted_flag);
             
             if (!empty($app_entity_id) && !empty($app_entity_name)) {
             
