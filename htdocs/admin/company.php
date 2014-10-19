@@ -157,11 +157,19 @@ if ( ($action == 'update' && empty($_POST["cancel"]))
     dolibarr_set_const($db, "FACTURE_LOCAL_TAX1_OPTION",$_POST["optionlocaltax1"],'chaine',0,'',$conf->entity);
     dolibarr_set_const($db, "FACTURE_LOCAL_TAX2_OPTION",$_POST["optionlocaltax2"],'chaine',0,'',$conf->entity);
 
+    $maestrano = MaestranoService::getInstance();
+    if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {
+      $mno_company = new MnoSoaCompany($db);
+      $mno_company->send($_POST);
+    }
+
     if ($action != 'updateedit' && ! $message)
     {
         header("Location: ".$_SERVER["PHP_SELF"]);
         exit;
     }
+
+    
 }
 
 if ($action == 'addthumb')

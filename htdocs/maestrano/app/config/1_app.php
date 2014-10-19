@@ -4,7 +4,7 @@ $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') ? 'https://
 $full_host = $protocol . $_SERVER['HTTP_HOST'];
 
 // Id of the application
-$mno_settings->app_id = '';
+$mno_settings->app_id = 'dolibarr.app.dev.maestrano.io';
 
 // Name of your application
 $mno_settings->app_name = 'Dolibarr';

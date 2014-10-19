@@ -1,18 +1,17 @@
 <?php
 
 /**
- * Mno Organization Class
+ * Mno Item Class
  */
-class MnoSoaItem extends MnoSoaBaseItem
-{
+class MnoSoaItem extends MnoSoaBaseItem {
+
     protected $_local_entity_name = "ITEMS";
     // PRODUCT OR SERVICE
     public $_local_element_type;
     public $_is_delete;
     public $_is_new;
     
-    protected function pushItem()
-    {
+    protected function pushItem() {
         // PUSH ID
         $id = $this->getLocalEntityIdentifier();
         if (empty($id)) { return; }
@@ -38,20 +37,19 @@ class MnoSoaItem extends MnoSoaBaseItem
                 break;
         }
         
-        if ($this->_is_new) {
-            // PUSH SALE->PRICE
-            $this->_sale->price = $this->push_set_or_delete_value($this->_local_entity->price);
-            // PUSH SALE->CURRENCY
-            if (!empty($this->_sale->price)) {
-                $this->_sale->currency = $this->push_set_or_delete_value($this->getMainCurrency());
-            }
+        if (!empty($this->_local_entity->price)) {
+            $this->_sale->price = $this->push_set_or_delete_value($this->_local_entity->price_ttc);
+            $this->_sale->netAmount = $this->push_set_or_delete_value($this->_local_entity->price);
+            $this->_sale->taxRate = $this->push_set_or_delete_value($this->_local_entity->tva_tx);
+            $this->_sale->taxAmount = $this->_sale->price - $this->_sale->netAmount;
+            $this->_sale->currency = $this->push_set_or_delete_value($this->getMainCurrency());
         }
+
+        $this->pushTaxes();
     }
     
-    protected function pullItem()
-    {
+    protected function pullItem() {
         $return_status = null;
-        // PULL SALE
         if (empty($this->_id)) { return constant('MnoSoaBaseEntity::STATUS_ERROR'); }
         
         $mno_type_format = strtoupper($this->pull_set_or_delete_value($this->_type));
@@ -70,7 +68,8 @@ class MnoSoaItem extends MnoSoaBaseItem
         MnoSoaLogger::debug("before local entity");
         $this->_local_entity = new Product($this->_db);
         MnoSoaLogger::debug("after local entity");
-        if ($this->isValidIdentifier(($local_id))) { 
+        if ($this->isValidIdentifier(($local_id))) {
+            MnoSoaLogger::debug("ID is valid");
             $return_status = constant('MnoSoaBaseEntity::STATUS_EXISTING_ID'); 
             $this->_local_entity->fetch($local_id->_id);
             
@@ -80,12 +79,18 @@ class MnoSoaItem extends MnoSoaBaseItem
                 return constant('MnoSoaBaseEntity::STATUS_DELETED_ID'); 
             }
         } else {
+            MnoSoaLogger::debug("ID is invalid");
             $return_status = constant('MnoSoaBaseEntity::STATUS_NEW_ID');
             if ($mno_status_format == 'INACTIVE') { return constant('MnoSoaBaseEntity::STATUS_DELETED_ID'); }
             $this->_local_entity->note = '';
         }
         
-        $this->_local_entity->ref = $this->pull_set_or_delete_value($this->_code);
+        if (empty($this->_code)) {
+            # Generate a random item reference if missing
+            $this->_local_entity->ref = 'ITE-' . rand();
+        } else {
+            $this->_local_entity->ref = $this->pull_set_or_delete_value($this->_code);
+        }
         $this->_local_entity->label = $this->_local_entity->libelle = $this->pull_set_or_delete_value($this->_name);
         $this->_local_entity->description = $this->pull_set_or_delete_value($this->_description);
         $this->_local_entity->type = '0';
@@ -103,8 +108,9 @@ class MnoSoaItem extends MnoSoaBaseItem
             MnoSoaLogger::debug("sale currency=".$sale_currency);
             if ($this->getMainCurrency() == $sale_currency) {
                 MnoSoaLogger::debug("main currency=sale currency");
-                $this->_local_entity->price = $this->pull_set_or_delete_value($this->_sale->price,"0");
-                $this->_local_entity->price_base_type = 'HT';
+                $this->_local_entity->price = $this->pull_set_or_delete_value($this->_sale->price, "0");
+                $this->_local_entity->tva_tx = $this->pull_set_or_delete_value($this->_sale->taxRate, "0");
+                $this->_local_entity->price_base_type = 'TTC';
             }
         }
         
@@ -144,7 +150,6 @@ class MnoSoaItem extends MnoSoaBaseItem
         // DO NOTHING
     }
     
-    // DONE
     protected function saveLocalEntity($push_to_maestrano, $status) {
         MnoSoaLogger::debug("start");
         $user = (object) array();
@@ -154,33 +159,30 @@ class MnoSoaItem extends MnoSoaBaseItem
         $id = $this->getLocalEntityIdentifier();
         $newprice = $this->_local_entity->price;
         $newpricebase = $this->_local_entity->price_base_type;
+        $newvat = $this->_local_entity->tva_tx;
         
         if ($status == constant('MnoSoaBaseEntity::STATUS_NEW_ID')) {
-            MnoSoaLogger::debug("new id");
             $local_id = $this->_local_entity->create($user,true,false);
+            $this->_local_entity->updatePrice($local_id, $newprice, $newpricebase, $user, $newvat,'', 0, 0, 0, false);
             if ($local_id > 0) {
                 $this->addIdMapEntryName($local_id, $this->_local_entity_name, $this->_id, $this->_mno_entity_name);
             }
         } else if ($status == constant('MnoSoaBaseEntity::STATUS_EXISTING_ID')) {
-            MnoSoaLogger::debug("existing id");
             $this->_local_entity->update($id, $user, true, 'update', $push_to_maestrano);
-            $this->_local_entity->updatePriceOnly($id, $newprice, $newpricebase);
+            $this->_local_entity->updatePrice($id, $newprice, $newpricebase, $user, $newvat,'', 0, 0, 0, false);
         }
     }
     
-    // DONE
     public function getLocalEntityIdentifier() {
         return $this->_local_entity->id;
     }
     
-    protected function getMainCurrency()
-    {
+    protected function getMainCurrency() {
         global $conf;
         return $conf->currency;
     }
     
-    protected function mapLocalProductNatureToMnoType($local_product_nature)
-    {
+    protected function mapLocalProductNatureToMnoType($local_product_nature) {
         switch ($local_product_nature) {
             case "0": return "PURCHASED";
             case "1": return "MANUFACTURED";
@@ -189,8 +191,7 @@ class MnoSoaItem extends MnoSoaBaseItem
         return "PURCHASED";
     }
     
-    protected function mapMnoTypeToLocalProductNature($mno_item_type)
-    {
+    protected function mapMnoTypeToLocalProductNature($mno_item_type) {
         $mno_item_type_format = $this->pull_set_or_delete_value($mno_item_type);
         
         switch ($mno_item_type_format) {
@@ -200,6 +201,46 @@ class MnoSoaItem extends MnoSoaBaseItem
         
         return "0";
     }
+
+    protected function pushTaxes() {
+      global $mysoc;
+
+      if($this->_local_entity->tva_tx != null && $this->_local_entity->tva_tx != 0) {
+        $country_taxes = $this->fetchTaxes();
+
+        $this->_taxes = array();
+        foreach ($country_taxes as $country_tax) {
+          if($country_tax['taux'] == $this->_local_entity->tva_tx) {
+            $tax_name = strtok($country_tax['note'], " ");
+            // Hack to map Australian GST tax name
+            if($tax_name == 'VAT' && $mysoc->country_code == 'AU') {
+              $tax_name = 'GST';
+            }
+            $this->_taxes[$tax_name] = array('name' => $tax_name, 'rate' => $country_tax['taux']);
+          }
+        }
+      }
+    }
+
+    private function fetchTaxes() {
+      global $mysoc;
+
+      $sql = "SELECT t.rowid, t.taux, t.note";
+      $sql.= " FROM ".MAIN_DB_PREFIX."c_tva as t";
+      $sql.= ", ".MAIN_DB_PREFIX."c_pays as p";
+      $sql.= " WHERE t.fk_pays = p.rowid";
+      $sql.= " AND t.active = 1";
+      $sql.= " AND p.code = '".$mysoc->country_code."'";
+
+      $taxes = null;
+      $resql = $this->_db->query($sql);
+      for($i=0;$tax = $this->_db->fetch_array();$i++) {
+        $taxes[$i] = $tax;
+      }
+
+      return $taxes;
+    }
+
 }
 
 ?>

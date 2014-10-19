@@ -410,14 +410,14 @@ class Product extends CommonObject
 		}
 	}
         
-        function push_product_to_maestrano($entity, $push_to_maestrano, $is_delete=false) {
-            if ($push_to_maestrano) {
-                $mno_item = new MnoSoaItem($this->db);
-                $mno_item->_local_element_type = ($entity->type==0) ? "PRODUCT" : (($entity->type==1) ? "SERVICE" : null);
-                $mno_item->_is_delete = $is_delete;
-                $mno_item->send($entity);
-            }
-        }
+  function push_product_to_maestrano($entity, $push_to_maestrano, $is_delete=false) {
+      if ($push_to_maestrano) {
+          $mno_item = new MnoSoaItem($this->db);
+          $mno_item->_local_element_type = ($entity->type==0) ? "PRODUCT" : (($entity->type==1) ? "SERVICE" : null);
+          $mno_item->_is_delete = $is_delete;
+          $mno_item->send($entity);
+      }
+  }
 
 	/**
 	 *	Update a record into database
@@ -566,7 +566,7 @@ class Product extends CommonObject
 			if (! $error)
 			{
 				$this->db->commit();
-                                $this->push_product_to_maestrano($this, $push_to_maestrano, false);
+        $this->push_product_to_maestrano($this, $push_to_maestrano, false);
                                 
 				return 1;
 			}
@@ -691,7 +691,7 @@ class Product extends CommonObject
 				if (! $error)
 				{
 					$this->db->commit();
-                                        $this->push_product_to_maestrano($this, $push_to_maestrano, true);
+          $this->push_product_to_maestrano($this, $push_to_maestrano, true);
 					return 1;
 				}
 				else
@@ -993,7 +993,7 @@ class Product extends CommonObject
 	 *  @param     	int		$newpsq         1 if it has price by quantity
 	 * 	@return		int						<0 if KO, >0 if OK
 	 */
-	function updatePrice($id, $newprice, $newpricebase, $user, $newvat='',$newminprice='', $level=0, $newnpr=0, $newpsq=0)
+	function updatePrice($id, $newprice, $newpricebase, $user, $newvat='',$newminprice='', $level=0, $newnpr=0, $newpsq=0, $push_to_maestrano=true)
 	{
 		global $conf,$langs;
 
@@ -1105,12 +1105,12 @@ class Product extends CommonObject
 			}
 		}
 
-                $this->push_product_to_maestrano($this, $push_to_maestrano, false);
+    $this->push_product_to_maestrano($this, $push_to_maestrano, false);
                 
 		return 1;
 	}
 
-        function updatePriceOnly($id, $newprice, $newpricebase)
+  function updatePriceOnly($id, $newprice, $newpricebase, $push_to_maestrano=true)
 	{
 		global $conf,$langs;
 
@@ -1164,7 +1164,9 @@ class Product extends CommonObject
 				dol_print_error($this->db);
 			}
 		}
-                
+    
+    $this->push_product_to_maestrano($this, $push_to_maestrano, false);
+
 		return 1;
 	}
         
