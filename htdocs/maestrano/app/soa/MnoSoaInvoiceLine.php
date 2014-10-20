@@ -32,6 +32,7 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
         $invoice_line->tva_tx = $line->totalPrice->taxRate;
         $invoice_line->qty = $line->quantity;
         $invoice_line->subprice = $line->unitPrice->netAmount;
+        $invoice_line->remise_percent = $line->reductionPercent;
 
         // Map item
         if(!empty($line->item)) {
