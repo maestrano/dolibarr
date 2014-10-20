@@ -111,6 +111,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     MnoSoaLogger::debug("start pullInvoice for " . json_encode($this->_id));
 
     if (empty($this->_id)) { return constant('MnoSoaBaseEntity::STATUS_ERROR'); }
+    if (empty($this->_organization_id)) { return constant('MnoSoaBaseEntity::STATUS_ERROR'); }
 
     $local_id = $this->getLocalIdByMnoIdName($this->_id, $this->_mno_entity_name);
     if ($this->isDeletedIdentifier($local_id)) { return constant('MnoSoaBaseEntity::STATUS_DELETED_ID'); }
@@ -150,7 +151,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     // Map local organization
     $local_id = $this->getLocalIdByMnoIdName($this->_organization_id, "organizations");
     if ($this->isValidIdentifier($local_id)) {
-      MnoSoaLogger::debug(__FUNCTION__ . " local_id = " . json_encode($local_id));
+      MnoSoaLogger::debug(__FUNCTION__ . "organization local_id = " . json_encode($local_id));
       $this->_local_entity->socid = $local_id->_id;
     } else if ($this->isDeletedIdentifier($local_id)) {
       // do not update
@@ -158,7 +159,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     } else {
       // Fetch remote Organization if missing
       $notification->entity = "organizations";
-      $notification->id = $this->_role->organization->id;
+      $notification->id = $this->organization->id;
       $organization = new MnoSoaOrganization($this->_db);   
       $status = $organization->receiveNotification($notification);
       if ($status) {
@@ -179,6 +180,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     $user->id = "1";
     $user->rights->facture->valider = true;
 
+    $invoice_local_id = 0;
     if ($status == constant('MnoSoaBaseEntity::STATUS_NEW_ID')) {
       $invoice_local_id = $this->_local_entity->create($user, 0, 0, $push_to_maestrano);
       if ($invoice_local_id > 0) {

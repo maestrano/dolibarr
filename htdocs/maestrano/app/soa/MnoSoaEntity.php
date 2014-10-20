@@ -12,12 +12,12 @@ class MnoSoaEntity extends MnoSoaBaseEntity {
         $msg = $this->callMaestrano("GET", "updates" . '/' . $timestamp);
         if (empty($msg)) { return false; }
         
+        $this->updateEntity($msg, "MnoSoaCompany", "companys");
         $this->updateEntity($msg, "MnoSoaOrganization", "organizations");
         $this->updateEntity($msg, "MnoSoaPersonContact", "persons");
         $this->updateEntity($msg, "MnoSoaItem", "items");
         $this->updateEntity($msg, "MnoSoaAccount", "accounts");
         $this->updateEntity($msg, "MnoSoaInvoice", "invoices");
-        $this->updateEntity($msg, "MnoSoaCompany", "companys");
         
         MnoSoaLogger::info( "successfully completed (timestamp=$timestamp)");
     }
