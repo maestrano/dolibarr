@@ -22,6 +22,12 @@ if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {
   MnoSoaLogger::debug("Notification = ". json_encode($notification));
 
   switch ($notification_entity) {
+    case "COMPANY":
+      if (class_exists('MnoSoaCompany')) {
+        $mno_company = new MnoSoaCompany($opts['db_connection']);
+        $mno_company->receiveNotification($notification);
+      }
+      break;
     case "ORGANIZATIONS":
       if (class_exists('MnoSoaOrganization')) {
         $mno_org = new MnoSoaOrganization($opts['db_connection']);		
@@ -51,12 +57,6 @@ if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {
       if (class_exists('MnoSoaInvoice')) {
         $mno_invoice = new MnoSoaInvoice($opts['db_connection']);
         $mno_invoice->receiveNotification($notification);
-      }
-      break;
-      case "COMPANY":
-      if (class_exists('MnoSoaCompany')) {
-        $mno_company = new MnoSoaCompany($opts['db_connection']);
-        $mno_company->receiveNotification($notification);
       }
       break;
   }
