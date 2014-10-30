@@ -107,10 +107,15 @@ class MnoSoaItem extends MnoSoaBaseItem {
             $sale_currency = strtoupper($this->pull_set_or_delete_value($this->_sale->currency));
             MnoSoaLogger::debug("sale currency=".$sale_currency);
             if ($this->getMainCurrency() == $sale_currency) {
-                MnoSoaLogger::debug("main currency=sale currency");
-                $this->_local_entity->price = $this->pull_set_or_delete_value($this->_sale->price, "0");
-                $this->_local_entity->tva_tx = $this->pull_set_or_delete_value($this->_sale->taxRate, "0");
-                $this->_local_entity->price_base_type = 'TTC';
+                if(isset($this->_sale->price)) {
+                  $this->_local_entity->price = $this->pull_set_or_delete_value($this->_sale->price, "0");
+                  $this->_local_entity->tva_tx = $this->pull_set_or_delete_value($this->_sale->taxRate, "0");
+                  $this->_local_entity->price_base_type = 'TTC';
+                } else {
+                  $this->_local_entity->price = $this->pull_set_or_delete_value($this->_sale->netAmount, "0");
+                  $this->_local_entity->tva_tx = $this->pull_set_or_delete_value($this->_sale->taxRate, "0");
+                  $this->_local_entity->price_base_type = 'HT';
+                }
             }
         }
         
