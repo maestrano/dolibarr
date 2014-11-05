@@ -13,6 +13,7 @@ class MnoSoaEntity extends MnoSoaBaseEntity {
         if (empty($msg)) { return false; }
         
         $this->updateEntity($msg, "MnoSoaCompany", "companys");
+        $this->updateEntity($msg, "MnoSoaTax", "taxCodes");
         $this->updateEntity($msg, "MnoSoaOrganization", "organizations");
         $this->updateEntity($msg, "MnoSoaPersonContact", "persons");
         $this->updateEntity($msg, "MnoSoaItem", "items");

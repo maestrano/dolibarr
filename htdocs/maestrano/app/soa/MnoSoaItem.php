@@ -102,20 +102,23 @@ class MnoSoaItem extends MnoSoaBaseItem {
         }
         
         MnoSoaLogger::debug("main currency=".$this->getMainCurrency());
-        
         if (!empty($this->_sale->currency)) {
             $sale_currency = strtoupper($this->pull_set_or_delete_value($this->_sale->currency));
             MnoSoaLogger::debug("sale currency=".$sale_currency);
             if ($this->getMainCurrency() == $sale_currency) {
-                if(isset($this->_sale->price)) {
-                  $this->_local_entity->price = $this->pull_set_or_delete_value($this->_sale->price, "0");
-                  $this->_local_entity->tva_tx = $this->pull_set_or_delete_value($this->_sale->taxRate, "0");
-                  $this->_local_entity->price_base_type = 'TTC';
-                } else {
+                if(isset($this->_sale->netAmount)) {
+                  MnoSoaLogger::debug("saving product price excluding tax");
                   $this->_local_entity->price = $this->pull_set_or_delete_value($this->_sale->netAmount, "0");
                   $this->_local_entity->tva_tx = $this->pull_set_or_delete_value($this->_sale->taxRate, "0");
                   $this->_local_entity->price_base_type = 'HT';
+                } else {
+                  MnoSoaLogger::debug("saving product price including tax");
+                  $this->_local_entity->price = $this->pull_set_or_delete_value($this->_sale->price, "0");
+                  $this->_local_entity->tva_tx = $this->pull_set_or_delete_value($this->_sale->taxRate, "0");
+                  $this->_local_entity->price_base_type = 'TTC';
                 }
+            } else {
+              MnoSoaLogger::info("Product currency does not match main currency, product price will not be saved");
             }
         }
         
@@ -216,12 +219,10 @@ class MnoSoaItem extends MnoSoaBaseItem {
         $this->_taxes = array();
         foreach ($country_taxes as $country_tax) {
           if($country_tax['taux'] == $this->_local_entity->tva_tx) {
-            $tax_name = strtok($country_tax['note'], " ");
-            // Hack to map Australian GST tax name
-            if($tax_name == 'VAT' && $mysoc->country_code == 'AU') {
-              $tax_name = 'GST';
+            $mno_id = $this->getMnoIdByLocalIdName($country_tax['rowid'], 'TAX');
+            if(isset($mno_id)) {
+              $this->_sale_tax_code = $mno_id->_id;
             }
-            $this->_taxes[$tax_name] = array('name' => $tax_name, 'rate' => $country_tax['taux']);
           }
         }
       }
@@ -236,6 +237,7 @@ class MnoSoaItem extends MnoSoaBaseItem {
       $sql.= " WHERE t.fk_pays = p.rowid";
       $sql.= " AND t.active = 1";
       $sql.= " AND p.code = '".$mysoc->country_code."'";
+      $sql.= " ORDER BY t.rowid DESC";
 
       $taxes = null;
       $resql = $this->_db->query($sql);

@@ -83,6 +83,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
         // Push line price
         $invoice_line['id'] = $invoice_line_mno_id;
         $invoice_line['lineNumber'] = intval($line->rang);
+        $invoice_line['description'] = intval($line->description);
         $invoice_line['quantity'] = intval($line->qty);
 
         $invoice_line['unitPrice'] = array();
@@ -98,7 +99,8 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
         $invoice_line['reductionPercent'] = floatval($line->remise_percent);
         $invoice_line['status'] = $active ? 'ACTIVE' : 'INACTIVE';
 
-        $invoice_line['taxes'] = $this->addApplicableTaxes($line);
+        $invoice_line['taxCode'] = array();
+        $invoice_line['taxCode']['id'] = $this->mapTaxCode($line);
 
         $this->_invoice_lines[$invoice_line_mno_id] = $invoice_line;
       }
@@ -219,26 +221,23 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     return $conf->currency;
   }
 
-  protected function addApplicableTaxes($line) {
+  protected function mapTaxCode($line) {
     global $mysoc;
 
-    $taxes = array();
     $line_tax_rate = floatval($line->tva_tx);
     if($line_tax_rate > 0) {
       $country_taxes = $this->fetchTaxes();
 
       foreach ($country_taxes as $country_tax) {
         if($country_tax['taux'] == $line_tax_rate) {
-          $tax_name = strtok($country_tax['note'], " ");
-          // Hack to map Australian GST tax name
-          if($tax_name == 'VAT' && $mysoc->country_code == 'AU') {
-            $tax_name = 'GST';
+          $mno_id = $this->getMnoIdByLocalIdName($country_tax['rowid'], 'TAX');
+          if(isset($mno_id)) {
+            return $mno_id->_id;
           }
-          $taxes[$tax_name] = array('name' => $tax_name, 'rate' => $country_tax['taux']);
         }
       }
     }
-    return $taxes;
+    return null;
   }
 
   private function fetchTaxes() {
@@ -250,6 +249,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     $sql.= " WHERE t.fk_pays = p.rowid";
     $sql.= " AND t.active = 1";
     $sql.= " AND p.code = '".$mysoc->country_code."'";
+    $sql.= " ORDER BY t.rowid DESC";
 
     $taxes = null;
     $resql = $this->_db->query($sql);
