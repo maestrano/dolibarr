@@ -52,8 +52,8 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     }
 
     // Pull Organization ID
-    $mno_id = $this->getMnoIdByLocalIdName($this->_local_entity->socid, "SOCIETE");
-    $this->_organization_id = $mno_id->_id;
+    $mno_customer_id = $this->getMnoIdByLocalIdName($this->_local_entity->socid, "SOCIETE");
+    $this->_organization_id = $mno_customer_id->_id;
 
     // Pull Invoice lines
     $this->_invoice_lines = array();
@@ -63,26 +63,30 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
         
         // Find mno id if already exists
         $active = true;
-        $mno_entity = $this->getMnoIdByLocalIdName($line->rowid, "INVOICE_LINE");
-        if($this->isDeletedIdentifier($mno_entity)) {
-          $invoice_line_mno_id = $mno_entity->_id;
+        $mno_invoice_line_id = $this->getMnoIdByLocalIdName($line->rowid, "INVOICE_LINE");
+        if($this->isDeletedIdentifier($mno_invoice_line_id)) {
+          $invoice_line_mno_id = $mno_invoice_line_id->_id;
           $active = false;
-        } else if (!$this->isValidIdentifier($mno_entity)) {
+        } else if (!$this->isValidIdentifier($mno_invoice_line_id)) {
           // Generate and save ID
-          $invoice_line_mno_id = uniqid();
+          $invoice_line_mno_id = $this->_id . "#" . uniqid();
           $this->_mno_soa_db_interface->addIdMapEntry($line->rowid, "INVOICE_LINE", $invoice_line_mno_id, "INVOICE_LINE");
         } else {
-          $invoice_line_mno_id = $mno_entity->_id;
+          $invoice_line_mno_id = $mno_invoice_line_id->_id;
         }
+
+        $invoice_line_id_parts = explode("#", $invoice_line_mno_id);
+        $invoice_line_mno_id = $invoice_line_id_parts[1];
 
         // Map Product
         $local_product_id = $this->push_set_or_delete_value($line->fk_product);
-        $mno_id = $this->getMnoIdByLocalIdName($line->fk_product, "ITEMS");
-        $invoice_line['item']->id = $mno_id->_id;
+        $mno_item_id = $this->getMnoIdByLocalIdName($line->fk_product, "ITEMS");
+        $invoice_line['item']->id = $mno_item_id->_id;
 
         // Push line price
         $invoice_line['id'] = $invoice_line_mno_id;
         $invoice_line['lineNumber'] = intval($line->rang);
+        $invoice_line['description'] = intval($line->description);
         $invoice_line['quantity'] = intval($line->qty);
 
         $invoice_line['unitPrice'] = array();
@@ -98,7 +102,8 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
         $invoice_line['reductionPercent'] = floatval($line->remise_percent);
         $invoice_line['status'] = $active ? 'ACTIVE' : 'INACTIVE';
 
-        $invoice_line['taxes'] = $this->addApplicableTaxes($line);
+        $invoice_line['taxCode'] = array();
+        $invoice_line['taxCode']['id'] = $this->mapTaxCode($line);
 
         $this->_invoice_lines[$invoice_line_mno_id] = $invoice_line;
       }
@@ -110,8 +115,14 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
   protected function pullInvoice() {
     MnoSoaLogger::debug("start pullInvoice for " . json_encode($this->_id));
 
-    if (empty($this->_id)) { return constant('MnoSoaBaseEntity::STATUS_ERROR'); }
-    if (empty($this->_organization_id)) { return constant('MnoSoaBaseEntity::STATUS_ERROR'); }
+    if (empty($this->_id)) {
+      MnoSoaLogger::debug("Invoice does not have an ID, skipping");
+      return constant('MnoSoaBaseEntity::STATUS_ERROR');
+    }
+    if (empty($this->_organization_id)) {
+      MnoSoaLogger::debug("Invoice does not have an Organization ID, skipping");
+      return constant('MnoSoaBaseEntity::STATUS_ERROR');
+    }
 
     $local_id = $this->getLocalIdByMnoIdName($this->_id, $this->_mno_entity_name);
     if ($this->isDeletedIdentifier($local_id)) { return constant('MnoSoaBaseEntity::STATUS_DELETED_ID'); }
@@ -180,7 +191,6 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     $user->id = "1";
     $user->rights->facture->valider = true;
 
-    $invoice_local_id = 0;
     if ($status == constant('MnoSoaBaseEntity::STATUS_NEW_ID')) {
       $invoice_local_id = $this->_local_entity->create($user, 0, 0, $push_to_maestrano);
       if ($invoice_local_id > 0) {
@@ -192,7 +202,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     }
 
     $mno_invoice_line = new MnoSoaInvoiceLine($this->_db, $this->_log);
-    $mno_invoice_line->saveLocalEntity($invoice_local_id, $this->_invoice_lines, $push_to_maestrano);
+    $mno_invoice_line->saveLocalEntity($invoice_local_id, $this->_id, $this->_invoice_lines, $this->_discount_percent, $push_to_maestrano);
 
     // Calculate invoice amounts
     $this->_local_entity->update_price(1);
@@ -219,26 +229,21 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     return $conf->currency;
   }
 
-  protected function addApplicableTaxes($line) {
-    global $mysoc;
-
-    $taxes = array();
+  protected function mapTaxCode($line) {
     $line_tax_rate = floatval($line->tva_tx);
     if($line_tax_rate > 0) {
       $country_taxes = $this->fetchTaxes();
 
       foreach ($country_taxes as $country_tax) {
         if($country_tax['taux'] == $line_tax_rate) {
-          $tax_name = strtok($country_tax['note'], " ");
-          // Hack to map Australian GST tax name
-          if($tax_name == 'VAT' && $mysoc->country_code == 'AU') {
-            $tax_name = 'GST';
+          $mno_id = $this->getMnoIdByLocalIdName($country_tax['rowid'], 'TAX');
+          if(isset($mno_id)) {
+            return $mno_id->_id;
           }
-          $taxes[$tax_name] = array('name' => $tax_name, 'rate' => $country_tax['taux']);
         }
       }
     }
-    return $taxes;
+    return null;
   }
 
   private function fetchTaxes() {
@@ -250,6 +255,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     $sql.= " WHERE t.fk_pays = p.rowid";
     $sql.= " AND t.active = 1";
     $sql.= " AND p.code = '".$mysoc->country_code."'";
+    $sql.= " ORDER BY t.rowid DESC";
 
     $taxes = null;
     $resql = $this->_db->query($sql);

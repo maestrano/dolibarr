@@ -7,12 +7,12 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
 {
   protected $_local_entity_name = "INVOICE_LINE";
 
-  public function saveLocalEntity($invoice_local_id, $invoice_lines, $push_to_maestrano) {
-    MnoSoaLogger::debug("Saving invoice lines for invoice $invoice_local_id => " . json_encode($invoice_lines));
-    
+  public function saveLocalEntity($invoice_local_id, $invoice_mno_id, $invoice_lines, $invoice_discount_percent, $push_to_maestrano) {
+    MnoSoaLogger::debug("Saving invoice lines for invoice $invoice_mno_id => " . json_encode($invoice_lines));
     if(!empty($invoice_lines)) {
       foreach($invoice_lines as $line_id => $line) {
-        $local_line_id = $this->getLocalIdByMnoId($line_id);
+        $unique_line_id = $invoice_mno_id . "#" . $line_id;
+        $local_line_id = $this->getLocalIdByMnoId($unique_line_id);
         if($this->isDeletedIdentifier($local_line_id)) {
           continue;
         }
@@ -24,15 +24,30 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
           $invoice_line->fetch($local_line_id->_id);
         }
 
+        // Apply invoice level discount to lines
+        if(!isset($invoice_discount_percent)) {
+          $invoice_discount_percent = 0;
+        }
+
         $invoice_line->fk_facture = $invoice_local_id;
         $invoice_line->rang = $line->lineNumber;
-        $invoice_line->total_ht = $line->totalPrice->netAmount;
-        $invoice_line->total_tva = $line->totalPrice->taxAmount;
-        $invoice_line->total_ttc = $line->totalPrice->price;
+        $invoice_line->description = $line->description;
         $invoice_line->tva_tx = $line->totalPrice->taxRate;
         $invoice_line->qty = $line->quantity;
         $invoice_line->subprice = $line->unitPrice->netAmount;
-        $invoice_line->remise_percent = $line->reductionPercent;
+
+        if($invoice_discount_percent > 0) {
+          $invoice_line->total_ht = $line->totalPrice->netAmount * (1 - ($invoice_discount_percent / 100));
+          $invoice_line->total_tva = $line->totalPrice->taxAmount * (1 - ($invoice_discount_percent / 100));
+          $invoice_line->total_ttc = $line->totalPrice->price * (1 - ($invoice_discount_percent / 100));
+          $invoice_line->remise_percent = $invoice_discount_percent;
+        } else {
+          $invoice_line->total_ht = $line->totalPrice->netAmount;
+          $invoice_line->total_tva = $line->totalPrice->taxAmount;
+          $invoice_line->total_ttc = $line->totalPrice->price;
+          $invoice_line->remise_percent = $line->reductionPercent;
+        }
+        
 
         // Map item
         if(!empty($line->item)) {
@@ -43,7 +58,7 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
         if($new_record) {
           $local_id = $invoice_line->insert(0, $push_to_maestrano);
           if ($local_id > 0) {
-            $this->addIdMapEntry($local_id, $line_id);
+            $this->addIdMapEntry($local_id, $unique_line_id);
           }
         } else {
           $invoice_line->update('', 0, $push_to_maestrano);
