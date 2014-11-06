@@ -27,6 +27,7 @@ class MnoSoaBaseInvoice extends MnoSoaBaseEntity
   protected $_type;
   protected $_balance;
   protected $_deposit;
+  protected $_discount_percent;
   protected $_organization_id;
 
   protected $_invoice_lines;
@@ -59,6 +60,7 @@ class MnoSoaBaseInvoice extends MnoSoaBaseEntity
     if ($this->_type != null) { $msg['invoice']->type = $this->_type; }
     if ($this->_balance != null) { $msg['invoice']->balance = $this->_balance; }
     if ($this->_deposit != null) { $msg['invoice']->deposit = $this->_deposit; }
+    if ($this->_discount_percent != null) { $msg['invoice']->discountPercent = $this->_discount_percent; }
     if ($this->_organization_id != null) { $msg['invoice']->organization->id = $this->_organization_id; }
     if ($this->_invoice_lines != null) { $msg['invoice']->invoiceLines = $this->_invoice_lines; }
 
@@ -87,6 +89,7 @@ class MnoSoaBaseInvoice extends MnoSoaBaseEntity
       $this->set_if_array_key_has_value($this->_type, 'type', $mno_entity);
       $this->set_if_array_key_has_value($this->_balance, 'balance', $mno_entity);
       $this->set_if_array_key_has_value($this->_deposit, 'deposit', $mno_entity);
+      $this->set_if_array_key_has_value($this->_discount_percent, 'discountPercent', $mno_entity);
 
       if (!empty($mno_entity->organization)) {
         $this->set_if_array_key_has_value($this->_organization_id, 'id', $mno_entity->organization);

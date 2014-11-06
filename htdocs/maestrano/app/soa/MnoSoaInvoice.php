@@ -52,8 +52,8 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     }
 
     // Pull Organization ID
-    $mno_id = $this->getMnoIdByLocalIdName($this->_local_entity->socid, "SOCIETE");
-    $this->_organization_id = $mno_id->_id;
+    $mno_customer_id = $this->getMnoIdByLocalIdName($this->_local_entity->socid, "SOCIETE");
+    $this->_organization_id = $mno_customer_id->_id;
 
     // Pull Invoice lines
     $this->_invoice_lines = array();
@@ -63,22 +63,25 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
         
         // Find mno id if already exists
         $active = true;
-        $mno_entity = $this->getMnoIdByLocalIdName($line->rowid, "INVOICE_LINE");
-        if($this->isDeletedIdentifier($mno_entity)) {
-          $invoice_line_mno_id = $mno_entity->_id;
+        $mno_invoice_line_id = $this->getMnoIdByLocalIdName($line->rowid, "INVOICE_LINE");
+        if($this->isDeletedIdentifier($mno_invoice_line_id)) {
+          $invoice_line_mno_id = $mno_invoice_line_id->_id;
           $active = false;
-        } else if (!$this->isValidIdentifier($mno_entity)) {
+        } else if (!$this->isValidIdentifier($mno_invoice_line_id)) {
           // Generate and save ID
-          $invoice_line_mno_id = uniqid();
+          $invoice_line_mno_id = $this->_id . "#" . uniqid();
           $this->_mno_soa_db_interface->addIdMapEntry($line->rowid, "INVOICE_LINE", $invoice_line_mno_id, "INVOICE_LINE");
         } else {
-          $invoice_line_mno_id = $mno_entity->_id;
+          $invoice_line_mno_id = $mno_invoice_line_id->_id;
         }
+
+        $invoice_line_id_parts = explode("#", $invoice_line_mno_id);
+        $invoice_line_mno_id = $invoice_line_id_parts[1];
 
         // Map Product
         $local_product_id = $this->push_set_or_delete_value($line->fk_product);
-        $mno_id = $this->getMnoIdByLocalIdName($line->fk_product, "ITEMS");
-        $invoice_line['item']->id = $mno_id->_id;
+        $mno_item_id = $this->getMnoIdByLocalIdName($line->fk_product, "ITEMS");
+        $invoice_line['item']->id = $mno_item_id->_id;
 
         // Push line price
         $invoice_line['id'] = $invoice_line_mno_id;
@@ -112,8 +115,14 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
   protected function pullInvoice() {
     MnoSoaLogger::debug("start pullInvoice for " . json_encode($this->_id));
 
-    if (empty($this->_id)) { return constant('MnoSoaBaseEntity::STATUS_ERROR'); }
-    if (empty($this->_organization_id)) { return constant('MnoSoaBaseEntity::STATUS_ERROR'); }
+    if (empty($this->_id)) {
+      MnoSoaLogger::debug("Invoice does not have an ID, skipping");
+      return constant('MnoSoaBaseEntity::STATUS_ERROR');
+    }
+    if (empty($this->_organization_id)) {
+      MnoSoaLogger::debug("Invoice does not have an Organization ID, skipping");
+      return constant('MnoSoaBaseEntity::STATUS_ERROR');
+    }
 
     $local_id = $this->getLocalIdByMnoIdName($this->_id, $this->_mno_entity_name);
     if ($this->isDeletedIdentifier($local_id)) { return constant('MnoSoaBaseEntity::STATUS_DELETED_ID'); }
@@ -182,7 +191,6 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     $user->id = "1";
     $user->rights->facture->valider = true;
 
-    $invoice_local_id = 0;
     if ($status == constant('MnoSoaBaseEntity::STATUS_NEW_ID')) {
       $invoice_local_id = $this->_local_entity->create($user, 0, 0, $push_to_maestrano);
       if ($invoice_local_id > 0) {
@@ -194,7 +202,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     }
 
     $mno_invoice_line = new MnoSoaInvoiceLine($this->_db, $this->_log);
-    $mno_invoice_line->saveLocalEntity($invoice_local_id, $this->_invoice_lines, $push_to_maestrano);
+    $mno_invoice_line->saveLocalEntity($invoice_local_id, $this->_id, $this->_invoice_lines, $this->_discount_percent, $push_to_maestrano);
 
     // Calculate invoice amounts
     $this->_local_entity->update_price(1);
@@ -222,8 +230,6 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
   }
 
   protected function mapTaxCode($line) {
-    global $mysoc;
-
     $line_tax_rate = floatval($line->tva_tx);
     if($line_tax_rate > 0) {
       $country_taxes = $this->fetchTaxes();
