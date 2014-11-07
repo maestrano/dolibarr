@@ -19,9 +19,6 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
           continue;
         }
 
-        // Keep track of received line IDs to remove missing ones
-        array_push($processed_lines_local_ids, $local_line_id->_id);
-
         $invoice_line = new FactureLigne($this->_db);
         $new_record = true;
         if ($this->isValidIdentifier($local_line_id)) {
@@ -68,14 +65,17 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
         } else {
           $invoice_line->update('', 0, $push_to_maestrano);
         }
-      }
-    }
 
-    // Delete local invoice lines that have been removed
-    $local_invoice_lines = $mno_invoice->_local_entity->lines;
-    foreach ($local_invoice_lines as $local_invoice_line) {
-      if(!in_array($local_invoice_line->rowid, $processed_lines_local_ids)) {
-        $local_invoice_line->delete(false);
+        // Keep track of received line IDs to remove missing ones
+        array_push($processed_lines_local_ids, $local_id);
+      }
+
+      // Delete local invoice lines that have been removed
+      $local_invoice_lines = $mno_invoice->_local_entity->lines;
+      foreach ($local_invoice_lines as $local_invoice_line) {
+        if(!in_array($local_invoice_line->rowid, $processed_lines_local_ids)) {
+          $local_invoice_line->delete(false);
+        }
       }
     }
 
