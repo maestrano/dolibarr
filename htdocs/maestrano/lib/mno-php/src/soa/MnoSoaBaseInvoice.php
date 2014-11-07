@@ -17,20 +17,19 @@ class MnoSoaBaseInvoice extends MnoSoaBaseEntity
 
   protected $_enable_delete_notifications=true;
   
-  protected $_id;
-  protected $_transaction_number;
-  protected $_transaction_date;
-  protected $_amount;
-  protected $_currency;
-  protected $_due_date;
-  protected $_status;
-  protected $_type;
-  protected $_balance;
-  protected $_deposit;
-  protected $_discount_percent;
-  protected $_organization_id;
-
-  protected $_invoice_lines;
+  public $_id;
+  public $_transaction_number;
+  public $_transaction_date;
+  public $_amount;
+  public $_currency;
+  public $_due_date;
+  public $_status;
+  public $_type;
+  public $_balance;
+  public $_deposit;
+  public $_discount_percent;
+  public $_organization_id;
+  public $_invoice_lines;
 
   protected function pushInvoice() {
     throw new Exception('Function '. __FUNCTION__ . ' must be overriden in MnoInvoice class!');

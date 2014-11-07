@@ -106,8 +106,7 @@ class MnoSoaDB extends MnoSoaBaseDB {
 	      return $local_entity;
     }
     
-    public function deleteIdMapEntry($localId, $localEntityName) 
-    {
+    public function deleteIdMapEntry($localId, $localEntityName) {
         // Logically delete record
         $query = "UPDATE mno_id_map SET deleted_flag=1 WHERE app_entity_id='".$this->_db->escape($localId)."' and app_entity_name='".$this->_db->escape(strtoupper($localEntityName)) . "'";
         MnoSoaLogger::debug("deleteIdMapEntry query = ".$query);
@@ -119,5 +118,20 @@ class MnoSoaDB extends MnoSoaBaseDB {
         }
         
         return false;
+    }
+
+    public function hardDeleteIdMapEntry($localId, $localEntityName) {
+      MnoSoaLogger::debug(__CLASS__ . ' ' . __FUNCTION__ . " start");
+        // Hard delete record
+      $query = "DELETE FROM mno_id_map WHERE app_entity_id='" . $localId . "' and app_entity_name='" . strtoupper($localEntityName) . "'";
+      $result = $this->_db->query($query);
+
+      if ($result) {
+        MnoSoaLogger::debug(__CLASS__ . ' ' . __FUNCTION__ . " return true");
+        return true;
+      } else {
+        MnoSoaLogger::debug(__CLASS__ . ' ' . __FUNCTION__ . " return false");
+        return false;
+      }
     }
 }

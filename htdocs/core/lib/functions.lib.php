@@ -497,7 +497,7 @@ function dol_strtoupper($utf8_string)
 function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='')
 {
 	global $conf, $user;
-
+MnoSoaLogger::debug($message);
 	// If syslog module enabled
 	if (empty($conf->syslog->enabled)) return false;
 

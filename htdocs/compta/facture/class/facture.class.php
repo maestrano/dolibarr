@@ -129,17 +129,20 @@ class Facture extends CommonInvoice
 
 	// Push invoice to Maestrano
 	function push_invoice_to_maestrano($entity, $push_to_maestrano, $is_delete=false) {
-        if ($push_to_maestrano) {
-            ob_start();
-            var_dump($entity);
-            $result = ob_get_clean();
+    if ($push_to_maestrano) {
+      // Reload entity
+      $entity->fetch($entity->id);
 
-            MnoSoaLogger::debug("Sending entity to Maestrano: " . $result);
-            $mno_invoice = new MnoSoaInvoice($this->db, new MnoSoaLogger());
-            $mno_invoice->_is_delete = $is_delete;
-            $mno_invoice->send($entity);
-        }
+      ob_start();
+      var_dump($entity);
+      $result = ob_get_clean();
+
+      MnoSoaLogger::debug("Sending entity to Maestrano: " . $result);
+      $mno_invoice = new MnoSoaInvoice($this->db, new MnoSoaLogger());
+      $mno_invoice->_is_delete = $is_delete;
+      $mno_invoice->send($entity);
     }
+  }
 
 	/**
 	 *	Create invoice in database
@@ -2268,7 +2271,6 @@ class Facture extends CommonInvoice
 				// Mise a jour info denormalisees au niveau facture
 				$this->update_price(1);
 				$this->db->commit();
-				$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 				return $result;
 			}
 			else
@@ -3694,7 +3696,7 @@ class FactureLigne
 				// Appel des triggers
 				include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 				$interface=new Interfaces($this->db);
-				$result = $interface->run_triggers('LINEBILL_UPDATE',$this,$user,$langs,$conf);
+        $result = $interface->run_triggers('LINEBILL_UPDATE',$this,$user,$langs,$conf);
 				if ($result < 0) {
 					$error++; $this->errors=$interface->errors;
 				}
