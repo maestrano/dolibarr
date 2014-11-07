@@ -7,15 +7,20 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
 {
   protected $_local_entity_name = "INVOICE_LINE";
 
-  public function saveLocalEntity($invoice_local_id, $invoice_mno_id, $invoice_lines, $invoice_discount_percent, $push_to_maestrano) {
+  public function saveLocalEntity($mno_invoice, $invoice_local_id, $invoice_mno_id, $invoice_lines, $push_to_maestrano) {
     MnoSoaLogger::debug("Saving invoice lines for invoice $invoice_mno_id => " . json_encode($invoice_lines));
+
     if(!empty($invoice_lines)) {
+      $processed_lines_local_ids = array();
       foreach($invoice_lines as $line_id => $line) {
         $unique_line_id = $invoice_mno_id . "#" . $line_id;
         $local_line_id = $this->getLocalIdByMnoId($unique_line_id);
         if($this->isDeletedIdentifier($local_line_id)) {
           continue;
         }
+
+        // Keep track of received line IDs to remove missing ones
+        array_push($processed_lines_local_ids, $local_line_id->_id);
 
         $invoice_line = new FactureLigne($this->_db);
         $new_record = true;
@@ -25,6 +30,7 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
         }
 
         // Apply invoice level discount to lines
+        $invoice_discount_percent = $mno_invoice->_discount_percent;
         if(!isset($invoice_discount_percent)) {
           $invoice_discount_percent = 0;
         }
@@ -48,7 +54,6 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
           $invoice_line->remise_percent = $line->reductionPercent;
         }
         
-
         // Map item
         if(!empty($line->item)) {
           $local_item_id = $this->getLocalIdByMnoIdName($line->item->id, "ITEMS");
@@ -63,6 +68,14 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
         } else {
           $invoice_line->update('', 0, $push_to_maestrano);
         }
+      }
+    }
+
+    // Delete local invoice lines that have been removed
+    $local_invoice_lines = $mno_invoice->_local_entity->lines;
+    foreach ($local_invoice_lines as $local_invoice_line) {
+      if(!in_array($local_invoice_line->rowid, $processed_lines_local_ids)) {
+        $local_invoice_line->delete(false);
       }
     }
 

@@ -202,7 +202,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     }
 
     $mno_invoice_line = new MnoSoaInvoiceLine($this->_db, $this->_log);
-    $mno_invoice_line->saveLocalEntity($invoice_local_id, $this->_id, $this->_invoice_lines, $this->_discount_percent, $push_to_maestrano);
+    $mno_invoice_line->saveLocalEntity($this, $invoice_local_id, $this->_id, $this->_invoice_lines, $push_to_maestrano);
 
     // Calculate invoice amounts
     $this->_local_entity->update_price(1);
