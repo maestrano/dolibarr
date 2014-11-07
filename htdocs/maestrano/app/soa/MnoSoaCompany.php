@@ -78,10 +78,19 @@ class MnoSoaCompany extends MnoSoaBaseCompany
 
     // Map country
     if(isset($this->_local_entity->country)) {
+      // Map country name and code
       $country_code = $this->mapCountryToISO3166($this->_local_entity->country);
+      $country_name = $this->mapISO3166ToCountry($this->_local_entity->country);
+      if(!isset($country_code)) {
+        $country_code = $this->_local_entity->country;
+      }
+      if(!isset($country_name)) {
+        $country_name = $this->_local_entity->country;
+      }
+      
       $cpays = new Cpays($this->_db);
       $cpays->fetch(false, $country_code);
-      $s = $cpays->id.':'.$country_code.':'.$this->_local_entity->country;
+      $s = $cpays->id.':'.$country_code.':'.$country_name;
       dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_COUNTRY", $s);
 
       // Map state

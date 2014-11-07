@@ -2262,7 +2262,7 @@ class Facture extends CommonInvoice
 			//$this->line->price=$price;
 			//$this->line->remise=$remise;
 
-			$result=$this->line->update();
+			$result=$this->line->update(false);
 			if ($result > 0)
 			{
 				// Reorder if child line
@@ -2271,6 +2271,7 @@ class Facture extends CommonInvoice
 				// Mise a jour info denormalisees au niveau facture
 				$this->update_price(1);
 				$this->db->commit();
+				$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 				return $result;
 			}
 			else
@@ -3696,7 +3697,7 @@ class FactureLigne
 				// Appel des triggers
 				include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 				$interface=new Interfaces($this->db);
-        $result = $interface->run_triggers('LINEBILL_UPDATE',$this,$user,$langs,$conf);
+        		$result = $interface->run_triggers('LINEBILL_UPDATE',$this,$user,$langs,$conf);
 				if ($result < 0) {
 					$error++; $this->errors=$interface->errors;
 				}
@@ -3704,10 +3705,12 @@ class FactureLigne
 			}
 			$this->db->commit();
 
-			$this->fetch($this->rowid);
-			$invoice = new Facture($this->db);
-			$invoice->fetch($this->fk_facture);
-			$invoice->push_invoice_to_maestrano($invoice, $push_to_maestrano, false);
+			if($push_to_maestrano) {
+				$this->fetch($this->rowid);
+				$invoice = new Facture($this->db);
+				$invoice->fetch($this->fk_facture);
+				$invoice->push_invoice_to_maestrano($invoice, $push_to_maestrano, false);
+			}
 
 			return 1;
 		}
