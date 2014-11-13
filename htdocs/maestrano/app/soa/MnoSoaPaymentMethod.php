@@ -65,7 +65,7 @@ class MnoSoaPaymentMethod extends MnoSoaBasePaymentMethod {
   private function findPaymentMethodByCodeOrName($payment_method_code, $payment_method_name) {
     $payment_methods = $this->fetchPaymentMethods();
     foreach ($payment_methods as $payment_method) {
-      if($payment_method['code'] == $payment_method_code || $payment_method['libelle'] == $payment_method_name) {
+      if(($payment_method['code'] == $payment_method_code && $payment_method_code != '') || ($payment_method['libelle'] == $payment_method_name && $payment_method_name != '')) {
         return $payment_method;
       }
     }
@@ -74,15 +74,27 @@ class MnoSoaPaymentMethod extends MnoSoaBasePaymentMethod {
   }
 
   private function insertPaymentMethod($payment_method_code, $payment_method_name) {
-    $sql = "INSERT INTO ".MAIN_DB_PREFIX."c_paiement (code, libelle) ";
-    $sql.= "VALUES ('$payment_method_code', '$payment_method_name')";
-    $this->_db->query($sql);
+    $newid=0;
+    $sql = "SELECT max(id) + 1 as id FROM ".MAIN_DB_PREFIX."c_paiement";
+    $result = $this->_db->query($sql);
+    if ($result) {
+      $obj = $this->_db->fetch_object($result);
+      $newid = $obj->id;
+    }
+
+    if($newid > 0) {
+      $sql = "INSERT INTO ".MAIN_DB_PREFIX."c_paiement (id, code, libelle) ";
+      $sql.= "VALUES ($newid, '$payment_method_code', '$payment_method_name')";
+      MnoSoaLogger::debug("insert new payment method " . $sql);
+      $this->_db->query($sql);
+    }
   }
 
   private function updatePaymentMethod($payment_method_id, $payment_method_code, $payment_method_name) {
     $sql = "UPDATE ".MAIN_DB_PREFIX."c_paiement ";
     $sql.= " SET code='$payment_method_code', libelle='$payment_method_name' ";
     $sql.= " WHERE id=$payment_method_id";
+    MnoSoaLogger::debug("update payment method " . $sql);
     $this->_db->query($sql);
   }
 
@@ -114,7 +126,12 @@ class MnoSoaPaymentMethod extends MnoSoaBasePaymentMethod {
       'PRO' => 'PRO'
     );
 
-    return $mapping[$payment_method_code];
+    $code = $mapping[$payment_method_code];
+    if(isset($code)) {
+      return $code;
+    } else {
+      return $payment_method_code;
+    }
   }
 
   private function mapLocalPaymentMethodCode($payment_method_code) {
@@ -132,7 +149,12 @@ class MnoSoaPaymentMethod extends MnoSoaBasePaymentMethod {
       'PRO'   => 'PRO'
     );
 
-    return $mapping[$payment_method_code];
+    $code = $mapping[$payment_method_code];
+    if(isset($code)) {
+      return $code;
+    } else {
+      return $payment_method_code;
+    }
   }
 }
 
