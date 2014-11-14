@@ -17,6 +17,7 @@ class MnoSoaPayment extends MnoSoaBasePayment
       $this->_id = ($this->isValidIdentifier($mno_id)) ? $mno_id->_id : null;
       MnoSoaLogger::debug("mapped to mno payment " . json_encode($mno_id));
 
+      // Map payment attributes
       $this->_payment_reference = $this->push_set_or_delete_value($this->_local_entity->num_paiement);
       $this->_transaction_date = $this->push_set_or_delete_value($this->_local_entity->datepaye);
       $this->_total_amount = floatval($this->push_set_or_delete_value($this->_local_entity->amount));
@@ -51,8 +52,7 @@ class MnoSoaPayment extends MnoSoaBasePayment
         $payment_line['id'] = $payment_line_mno_id;
         $payment_line['amount'] = $local_payment_line->amount;
 
-        // Map signle Invoice to Payment line
-        $linked_transactions = array();
+        // Map single Invoice to Payment line
         $mno_invoice_id = $this->getMnoIdByLocalIdName($local_payment_line->fk_facture, "INVOICE");
         $payment_line['linkedTransactions'] = array($mno_invoice_id->_id => array('id' => $mno_invoice_id->_id));
 
@@ -92,6 +92,7 @@ class MnoSoaPayment extends MnoSoaBasePayment
         }
       }
 
+      // Note
       if(isset($this->_public_note)) {
         $paiement->note = $this->_public_note;
       } else if(isset($this->_private_note)) {
