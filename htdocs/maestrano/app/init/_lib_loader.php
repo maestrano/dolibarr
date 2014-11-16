@@ -30,8 +30,10 @@ require_once MNO_PHP_DIR . 'soa/MnoSoaBaseItem.php';
 require_once MNO_PHP_DIR . 'soa/MnoSoaBaseAccount.php';
 require_once MNO_PHP_DIR . 'soa/MnoSoaBaseInvoice.php';
 require_once MNO_PHP_DIR . 'soa/MnoSoaBaseInvoiceLine.php';
+require_once MNO_PHP_DIR . 'soa/MnoSoaBasePayment.php';
 require_once MNO_PHP_DIR . 'soa/MnoSoaBaseCompany.php';
 require_once MNO_PHP_DIR . 'soa/MnoSoaBaseTax.php';
+require_once MNO_PHP_DIR . 'soa/MnoSoaBasePaymentMethod.php';
 
 //-----------------------------------------------
 // Require Maestrano app files
@@ -46,5 +48,7 @@ require_once MNO_APP_DIR . 'soa/MnoSoaItem.php';
 require_once MNO_APP_DIR . 'soa/MnoSoaAccount.php';
 require_once MNO_APP_DIR . 'soa/MnoSoaInvoice.php';
 require_once MNO_APP_DIR . 'soa/MnoSoaInvoiceLine.php';
+require_once MNO_APP_DIR . 'soa/MnoSoaPayment.php';
 require_once MNO_APP_DIR . 'soa/MnoSoaCompany.php';
 require_once MNO_APP_DIR . 'soa/MnoSoaTax.php';
+require_once MNO_APP_DIR . 'soa/MnoSoaPaymentMethod.php';
