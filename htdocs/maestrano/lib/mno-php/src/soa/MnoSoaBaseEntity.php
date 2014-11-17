@@ -790,6 +790,9 @@ class MnoSoaBaseEntity
 	      case "YE": return "Yemen";
 	      case "ZM": return "Zambia";
 	      case "ZW": return "Zimbabwe";
+          # Extra mappings
+          case "AUS": return "Australia";
+          case "USA": return "United States";
 	}
 	return null;
     }
