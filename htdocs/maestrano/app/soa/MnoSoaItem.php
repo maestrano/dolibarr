@@ -210,6 +210,7 @@ class MnoSoaItem extends MnoSoaBaseItem {
         return "0";
     }
 
+    // Dolibarr stores only the tax rate against product, find first tax matching rate
     protected function pushTaxes() {
       global $mysoc;
 
@@ -218,6 +219,7 @@ class MnoSoaItem extends MnoSoaBaseItem {
 
         $this->_taxes = array();
         foreach ($country_taxes as $country_tax) {
+          // Find first tax matching rate
           if($country_tax['taux'] == $this->_local_entity->tva_tx) {
             $mno_id = $this->getMnoIdByLocalIdName($country_tax['rowid'], 'TAX');
             if(isset($mno_id)) {
