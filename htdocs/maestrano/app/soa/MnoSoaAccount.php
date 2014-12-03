@@ -29,6 +29,8 @@ class MnoSoaAccount extends MnoSoaBaseAccount
         }
         $this->_status = ($this->_is_delete) ? "INACTIVE" : "ACTIVE";
 
+        $this->_currency = $this->push_set_or_delete_value($this->_local_entity->currency_code);
+
         // Push account details
         $this->_bank_name = $this->push_set_or_delete_value($this->_local_entity->bank);
         $this->_bank_code = $this->push_set_or_delete_value($this->_local_entity->code_banque);
@@ -81,6 +83,8 @@ class MnoSoaAccount extends MnoSoaBaseAccount
         else { $local_courant = "0"; }
         // Default to SAVING account otherwise account sare ignored
         $this->_local_entity->courant = $local_courant;
+
+        $this->_local_entity->currency_code = $this->pull_set_or_delete_value($this->_currency);
 
         // Account details
         $this->_local_entity->bank = $this->pull_set_or_delete_value($this->_bank_name);
