@@ -25,7 +25,11 @@ class MnoSoaBaseAccount extends MnoSoaBaseEntity
     protected $_classification;
     
     protected $_currency;
+    protected $_bank_name;
+    protected $_bank_code;
     protected $_bank_account;
+    protected $_iban;
+    protected $_bic;
     
     protected $_parent;
     protected $_status;
@@ -64,7 +68,12 @@ class MnoSoaBaseAccount extends MnoSoaBaseEntity
         if ($this->_classification != null) { $msg['account']->classification = $this->_classification; }
         
         if ($this->_currency != null) { $msg['account']->currency = $this->_currency; }
-        if ($this->_bank_account != null) { $msg['account']->bankAccount = $this->_bank_account; }
+        
+        if ($this->_bank_account != null) { $msg['account']->bankAccount->accountNumber = $this->_bank_account; }
+        if ($this->_bank_code != null) { $msg['account']->bankAccount->bankCode = $this->_bank_code; }
+        if ($this->_bank_name != null) { $msg['account']->bankAccount->bankName = $this->_bank_name; }
+        if ($this->_iban != null) { $msg['account']->bankAccount->ibanNumber = $this->_iban; }
+        if ($this->_bic != null) { $msg['account']->bankAccount->bicCode = $this->_bic; }
         
         if ($this->_parent != null) { $msg['account']->parent = $this->_parent; }
         if ($this->_status != null) { $msg['account']->status = $this->_status; }
@@ -96,7 +105,11 @@ class MnoSoaBaseAccount extends MnoSoaBaseEntity
             $this->set_if_array_key_has_value($this->_currency, 'currency', $mno_entity);
             
             if (!empty($mno_entity->bankAccount)) {
-                $this->set_if_array_key_has_value($this->_bank_account, 'bankAccount', $mno_entity);
+              $this->set_if_array_key_has_value($this->_bank_name, 'bankName', $mno_entity->bankAccount);
+              $this->set_if_array_key_has_value($this->_bank_code, 'bankCode', $mno_entity->bankAccount);
+              $this->set_if_array_key_has_value($this->_bank_account, 'accountNumber', $mno_entity->bankAccount);
+              $this->set_if_array_key_has_value($this->_iban, 'ibanNumber', $mno_entity->bankAccount);
+              $this->set_if_array_key_has_value($this->_bic, 'bicCode', $mno_entity->bankAccount);
             }
             
             $this->set_if_array_key_has_value($this->_parent, 'parent', $mno_entity);

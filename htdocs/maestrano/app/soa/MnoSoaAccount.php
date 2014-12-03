@@ -28,6 +28,13 @@ class MnoSoaAccount extends MnoSoaBaseAccount
             default: break;
         }
         $this->_status = ($this->_is_delete) ? "INACTIVE" : "ACTIVE";
+
+        // Push account details
+        $this->_bank_name = $this->push_set_or_delete_value($this->_local_entity->bank);
+        $this->_bank_code = $this->push_set_or_delete_value($this->_local_entity->code_banque);
+        $this->_bank_account = $this->push_set_or_delete_value($this->_local_entity->number);
+        $this->_iban = $this->push_set_or_delete_value($this->_local_entity->iban_prefix);
+        $this->_bic = $this->push_set_or_delete_value($this->_local_entity->bic);
     }
     
     protected function pullAccount()
@@ -73,16 +80,18 @@ class MnoSoaAccount extends MnoSoaBaseAccount
         else if ($mno_classification == "ASSET_BANK_CASHONHAND") { $local_courant = "2"; }
         else { $local_courant = "0"; }
         // Default to SAVING account otherwise account sare ignored
-        // else { return constant('MnoSoaBaseEntity::STATUS_ERROR'); }
-        
         $this->_local_entity->courant = $local_courant;
-        
-        MnoSoaLogger::debug("courant=$local_courant");
-        
+
+        // Account details
+        $this->_local_entity->bank = $this->pull_set_or_delete_value($this->_bank_name);
+        $this->_local_entity->code_banque = $this->pull_set_or_delete_value($this->_bank_code);
+        $this->_local_entity->number = $this->pull_set_or_delete_value($this->_bank_account);
+        $this->_local_entity->iban = $this->pull_set_or_delete_value($this->_iban);
+        $this->_local_entity->bic = $this->pull_set_or_delete_value($this->_bic);
+
         return $return_status;
     }
     
-    // DONE
     protected function saveLocalEntity($push_to_maestrano, $status) {
         MnoSoaLogger::debug("start status=$status");
         
@@ -94,12 +103,13 @@ class MnoSoaAccount extends MnoSoaBaseAccount
             if ($local_id > 0) {
                 $this->addIdMapEntryName($local_id, $this->_local_entity_name, $this->_id, $this->_mno_entity_name);
             }
+            $this->_local_entity->update_bban($user, false);
         } else if ($status == constant('MnoSoaBaseEntity::STATUS_EXISTING_ID')) {
             $this->_local_entity->update($user, false);
+            $this->_local_entity->update_bban($user, false);
         }
     }
     
-    // DONE
     public function getLocalEntityIdentifier() {
         return $this->_local_entity->id;
     }
