@@ -25,7 +25,7 @@ class MnoSoaPayment extends MnoSoaBasePayment
       $this->_public_note = $this->push_set_or_delete_value($this->_local_entity->note);
 
       // Map Account ID
-      $mno_account_id = $this->getMnoIdByLocalIdName($this->_local_entity->bank_account, "ACCOUNT");
+      $mno_account_id = $this->getMnoIdByLocalIdName($this->_local_entity->fk_account, "ACCOUNT");
       $this->_deposit_account_id = $mno_account_id->_id;
 
       // Map Payment Method ID

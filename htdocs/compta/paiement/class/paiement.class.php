@@ -536,7 +536,6 @@ class Paiement extends CommonObject
             if (! $error)
             {
             	$this->db->commit();
-            	$this->push_payment_to_maestrano($this, $push_to_maestrano, false);
             }
             else
 			{
