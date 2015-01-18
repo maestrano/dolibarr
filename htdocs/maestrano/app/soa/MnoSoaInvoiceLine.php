@@ -36,7 +36,7 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
         $invoice_line->rang = $line->lineNumber;
         $invoice_line->description = $line->description;
         $invoice_line->tva_tx = $line->totalPrice->taxRate;
-        $invoice_line->qty = $line->quantity;
+        $invoice_line->qty = isset($line->quantity) ? $line->quantity : null;
         $invoice_line->subprice = $line->unitPrice->netAmount;
 
         if($invoice_discount_percent > 0) {
