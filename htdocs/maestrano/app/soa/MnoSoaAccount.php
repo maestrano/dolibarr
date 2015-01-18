@@ -27,6 +27,8 @@ class MnoSoaAccount extends MnoSoaBaseAccount
             case "2": $this->_classification="ASSET_BANK_CASHONHAND"; break;
             default: break;
         }
+
+        $this->_currency = $this->push_set_or_delete_value($this->_local_entity->currency_code);
         $this->_status = ($this->_is_delete) ? "INACTIVE" : "ACTIVE";
 
         $this->_currency = $this->push_set_or_delete_value($this->_local_entity->currency_code);
@@ -74,6 +76,8 @@ class MnoSoaAccount extends MnoSoaBaseAccount
 
         $this->_local_entity->label = $this->pull_set_or_delete_value($this->_name);
         $this->_local_entity->comment = $this->pull_set_or_delete_value($this->_description);
+        $this->_local_entity->solde = $this->pull_set_or_delete_value($this->_opening_balance);
+        $this->_local_entity->currency_code = $this->pull_set_or_delete_value($this->_currency);
         
         $mno_classification = strtoupper($this->pull_set_or_delete_value($this->_classification));
         
