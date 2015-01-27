@@ -59,7 +59,6 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     $this->_invoice_lines = array();
     if(!empty($this->_local_entity->lines)) {
       foreach($this->_local_entity->lines as $line) {
-MnoSoaLogger::debug("MAPPING INVOICE LINE " . json_encode($line));
         $invoice_line = array();
         
         // Find mno id if already exists
