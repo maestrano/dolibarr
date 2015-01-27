@@ -25,7 +25,7 @@ class MnoSoaPayment extends MnoSoaBasePayment
       $this->_public_note = $this->push_set_or_delete_value($this->_local_entity->note);
 
       // Map Account ID
-      $mno_account_id = $this->getMnoIdByLocalIdName($this->_local_entity->bank_account, "ACCOUNT");
+      $mno_account_id = $this->getMnoIdByLocalIdName($this->_local_entity->fk_account, "ACCOUNT");
       $this->_deposit_account_id = $mno_account_id->_id;
 
       // Map Payment Method ID
@@ -82,6 +82,12 @@ class MnoSoaPayment extends MnoSoaBasePayment
       $paiement->datepaye = date('Y-m-d H:i:s', $this->_transaction_date);
       $paiement->amounts = array();
       $paiement->num_paiement = $this->_payment_reference;
+
+      // Map Account
+      if(isset($this->_deposit_account_id)) {
+        $mno_account_id = $this->getLocalIdByMnoIdName($this->_deposit_account_id, "ACCOUNTS");
+        $paiement->bank_account = $mno_account_id->_id;
+      }
       
       // Payment type
       $paiement->paiementid =  6;
@@ -137,6 +143,13 @@ class MnoSoaPayment extends MnoSoaBasePayment
         $local_payment_id = $this->_local_entity->create($user, 0, false);
         if($local_payment_id > 0) {
           $this->_local_entity->id = $local_payment_id;
+
+          // Add payment to account
+          if(isset($this->_deposit_account_id)) {
+            $mno_account_id = $this->getLocalIdByMnoIdName($this->_deposit_account_id, "ACCOUNTS");
+            $label='(CustomerInvoicePayment)';
+            $this->_local_entity->addPaymentToBank($user, 'payment', $label, $mno_account_id->_id, null, null, 0, false);
+          }
         } else {
           $this->_local_entity->id = null;
         }

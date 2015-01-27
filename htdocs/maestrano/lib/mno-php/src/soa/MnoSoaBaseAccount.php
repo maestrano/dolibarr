@@ -25,6 +25,7 @@ class MnoSoaBaseAccount extends MnoSoaBaseEntity
     protected $_classification;
     
     protected $_currency;
+    protected $_opening_balance;
     protected $_bank_name;
     protected $_bank_code;
     protected $_bank_account;
@@ -68,8 +69,8 @@ class MnoSoaBaseAccount extends MnoSoaBaseEntity
         if ($this->_classification != null) { $msg['account']->classification = $this->_classification; }
         
         if ($this->_currency != null) { $msg['account']->currency = $this->_currency; }
-        
-        if ($this->_bank_account != null) { $msg['account']->bankAccount->accountNumber = $this->_bank_account; }
+        if ($this->_bank_account != null) { $msg['account']->bankAccount = $this->_bank_account; }
+        if ($this->_opening_balance != null) { $msg['account']->openingBalance = $this->_opening_balance; }
         if ($this->_bank_code != null) { $msg['account']->bankAccount->bankCode = $this->_bank_code; }
         if ($this->_bank_name != null) { $msg['account']->bankAccount->bankName = $this->_bank_name; }
         if ($this->_iban != null) { $msg['account']->bankAccount->ibanNumber = $this->_iban; }
@@ -111,6 +112,8 @@ class MnoSoaBaseAccount extends MnoSoaBaseEntity
               $this->set_if_array_key_has_value($this->_iban, 'ibanNumber', $mno_entity->bankAccount);
               $this->set_if_array_key_has_value($this->_bic, 'bicCode', $mno_entity->bankAccount);
             }
+
+            $this->set_if_array_key_has_value($this->_opening_balance, 'openingBalance', $mno_entity);
             
             $this->set_if_array_key_has_value($this->_parent, 'parent', $mno_entity);
             $this->set_if_array_key_has_value($this->_status, 'status', $mno_entity);
