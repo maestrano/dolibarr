@@ -59,6 +59,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     $this->_invoice_lines = array();
     if(!empty($this->_local_entity->lines)) {
       foreach($this->_local_entity->lines as $line) {
+MnoSoaLogger::debug("MAPPING INVOICE LINE " . json_encode($line));
         $invoice_line = array();
         
         // Find mno id if already exists
@@ -86,7 +87,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
         // Push line price
         $invoice_line['id'] = $invoice_line_mno_id;
         $invoice_line['lineNumber'] = intval($line->rang);
-        $invoice_line['description'] = intval($line->description);
+        $invoice_line['description'] = $line->desc;
         $invoice_line['quantity'] = intval($line->qty);
 
         $invoice_line['unitPrice'] = array();

@@ -154,6 +154,10 @@ class MnoSoaCompany extends MnoSoaBaseCompany
     }
   }
 
+  public function getLocalEntityIdentifier() {
+    return 0;
+  }
+
 }
 
 ?>
