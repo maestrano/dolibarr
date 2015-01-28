@@ -86,7 +86,7 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
         // Push line price
         $invoice_line['id'] = $invoice_line_mno_id;
         $invoice_line['lineNumber'] = intval($line->rang);
-        $invoice_line['description'] = intval($line->description);
+        $invoice_line['description'] = $line->desc;
         $invoice_line['quantity'] = intval($line->qty);
 
         $invoice_line['unitPrice'] = array();
