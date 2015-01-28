@@ -50,6 +50,14 @@ class MnoSoaOrganization extends MnoSoaBaseOrganization
     return constant('MnoSoaBaseEntity::STATUS_ERROR');
   }
 
+  protected function pushCode() {
+    $this->_code = $this->push_set_or_delete_value($this->_local_entity->code_client);
+  }
+
+  protected function pullCode() {
+    $this->_local_entity->code_client = $this->pull_set_or_delete_value($this->_code);        
+  }
+
   protected function pushName() {
     MnoSoaLogger::debug(__FUNCTION__ . " local_entity = " . json_encode($this->_local_entity));
     MnoSoaLogger::debug(__FUNCTION__ . " start " . $this->_local_entity->name);
