@@ -2124,7 +2124,6 @@ class Facture extends CommonInvoice
 				if ($result > 0)
 				{
 					$this->db->commit();
-					$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 					return $this->line->rowid;
 				}
 				else
@@ -2271,7 +2270,6 @@ class Facture extends CommonInvoice
 				// Mise a jour info denormalisees au niveau facture
 				$this->update_price(1);
 				$this->db->commit();
-				$this->push_invoice_to_maestrano($this, $push_to_maestrano, false);
 				return $result;
 			}
 			else
