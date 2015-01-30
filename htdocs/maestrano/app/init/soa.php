@@ -52,8 +52,8 @@ $conf->db->user							= $dolibarr_main_db_user;
 $conf->db->pass							= $dolibarr_main_db_pass;
 $conf->db->type							= $dolibarr_main_db_type;
 $conf->db->prefix						= $dolibarr_main_db_prefix;
-$conf->db->character_set                                        = $dolibarr_main_db_character_set;
-$conf->db->dolibarr_main_db_collation                           = $dolibarr_main_db_collation;
+$conf->db->character_set                = $dolibarr_main_db_character_set;
+$conf->db->dolibarr_main_db_collation   = $dolibarr_main_db_collation;
 
 // Configure Dolibarr Database
 $db=getDoliDBInstance($dolibarr_main_db_type,$dolibarr_main_db_host,$dolibarr_main_db_user,$dolibarr_main_db_pass,$dolibarr_main_db_name,$dolibarr_main_db_port);
@@ -73,3 +73,10 @@ $hookmanager=new HookManager($db);
 // If you define the $opts variable then it will
 // automatically be passed to the MnoSsoUser object
 // for construction
+
+// Activate default modules
+MnoSoaLogger::debug('ACTIVATE MODULES');
+activateModule('modSociete');
+activateModule('modProduct');
+activateModule('modFacture');
+activateModule('modBanque');
