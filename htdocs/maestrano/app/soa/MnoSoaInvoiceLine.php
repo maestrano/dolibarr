@@ -35,7 +35,7 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
 
         $invoice_line->fk_facture = $invoice_local_id;
         $invoice_line->rang = $line->lineNumber;
-        $invoice_line->description = $line->description;
+        $invoice_line->desc = $line->description;
         $invoice_line->tva_tx = $line->totalPrice->taxRate;
         $invoice_line->qty = isset($line->quantity) ? $line->quantity : null;
         $invoice_line->subprice = $line->unitPrice->netAmount;
