@@ -80,3 +80,4 @@ activateModule('modSociete');
 activateModule('modProduct');
 activateModule('modFacture');
 activateModule('modBanque');
+activateModule('modStock');
