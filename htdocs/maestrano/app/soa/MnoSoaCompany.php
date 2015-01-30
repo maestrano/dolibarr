@@ -70,8 +70,8 @@ class MnoSoaCompany extends MnoSoaBaseCompany
   protected function saveLocalEntity($push_to_maestrano) {
     MnoSoaLogger::debug(__FUNCTION__ . " start " . json_encode($this->_local_entity));
 
-    dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_NOM", $this->_local_entity->name);
-    dolibarr_set_const($this->_db, "MAIN_MONNAIE", $this->_local_entity->currency);
+    if(isset($this->_local_entity->name)) { dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_NOM", $this->_local_entity->name); }
+    if(isset($this->_local_entity->currency)) { dolibarr_set_const($this->_db, "MAIN_MONNAIE", $this->_local_entity->currency); }
 
     // Save logo
     $this->saveLogo();
@@ -110,12 +110,12 @@ class MnoSoaCompany extends MnoSoaBaseCompany
     }
     
     // Map address
-    dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_ADDRESS", $this->_local_entity->address);
-    dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_TOWN", $this->_local_entity->city);
-    dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_ZIP", $this->_local_entity->postcode);
-    dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_TEL", $this->_local_entity->phone);
-    dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_MAIL", $this->_local_entity->email);
-    dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_WEB", $this->_local_entity->website);
+    if(isset($this->_local_entity->address)) { dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_ADDRESS", $this->_local_entity->address); }
+    if(isset($this->_local_entity->city)) { dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_TOWN", $this->_local_entity->city); }
+    if(isset($this->_local_entity->postcode)) { dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_ZIP", $this->_local_entity->postcode); }
+    if(isset($this->_local_entity->phone)) { dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_TEL", $this->_local_entity->phone); }
+    if(isset($this->_local_entity->email)) { dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_MAIL", $this->_local_entity->email); }
+    if(isset($this->_local_entity->website)) { dolibarr_set_const($this->_db, "MAIN_INFO_SOCIETE_WEB", $this->_local_entity->website); }
 
     MnoSoaLogger::debug(__FUNCTION__ . " end ");
   }
