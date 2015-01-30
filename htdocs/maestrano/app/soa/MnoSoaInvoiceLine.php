@@ -15,6 +15,7 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
       foreach($invoice_lines as $line_id => $line) {
         $unique_line_id = $invoice_mno_id . "#" . $line_id;
         $local_line_id = $this->getLocalIdByMnoId($unique_line_id);
+
         if($this->isDeletedIdentifier($local_line_id)) {
           continue;
         }
@@ -34,7 +35,7 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
 
         $invoice_line->fk_facture = $invoice_local_id;
         $invoice_line->rang = $line->lineNumber;
-        $invoice_line->description = $line->description;
+        $invoice_line->desc = $line->description;
         $invoice_line->tva_tx = $line->totalPrice->taxRate;
         $invoice_line->qty = isset($line->quantity) ? $line->quantity : null;
         $invoice_line->subprice = $line->unitPrice->netAmount;
@@ -58,11 +59,14 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
         }
 
         if($new_record) {
+          MnoSoaLogger::debug("Creating new invoice line " . json_encode($unique_line_id));
           $local_id = $invoice_line->insert(0, $push_to_maestrano);
           if ($local_id > 0) {
             $this->addIdMapEntry($local_id, $unique_line_id);
           }
         } else {
+          MnoSoaLogger::debug("Updating invoice line " . json_encode($unique_line_id));
+          $local_id = $local_line_id->_id;
           $invoice_line->update('', 0, $push_to_maestrano);
         }
 
@@ -74,6 +78,7 @@ class MnoSoaInvoiceLine extends MnoSoaBaseInvoiceLine
       $local_invoice_lines = $mno_invoice->_local_entity->lines;
       foreach ($local_invoice_lines as $local_invoice_line) {
         if(!in_array($local_invoice_line->rowid, $processed_lines_local_ids)) {
+          MnoSoaLogger::debug("Deleting invoice line " . json_encode($unique_line_id));
           $local_invoice_line->delete(false);
         }
       }
