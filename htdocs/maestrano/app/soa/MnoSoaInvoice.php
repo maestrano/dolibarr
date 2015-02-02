@@ -19,6 +19,8 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     $this->_transaction_number = $this->push_set_or_delete_value($this->_local_entity->ref_client);
     $this->_transaction_date = $this->push_set_or_delete_value($this->_local_entity->date);
     $this->_due_date = $this->push_set_or_delete_value($this->_local_entity->date_lim_reglement);
+    $this->_public_note = $this->push_set_or_delete_value($this->_local_entity->note_public);
+    $this->_private_note = $this->push_set_or_delete_value($this->_local_entity->note_private);
 
     $this->_amount->price = floatval($this->push_set_or_delete_value($this->_local_entity->total_ttc));
     $this->_amount->netAmount = floatval($this->push_set_or_delete_value($this->_local_entity->total_ht));
@@ -144,6 +146,8 @@ class MnoSoaInvoice extends MnoSoaBaseInvoice {
     }
 
     $this->_local_entity->ref_client = $this->pull_set_or_delete_value($this->_transaction_number);
+    $this->_local_entity->note_public = $this->pull_set_or_delete_value($this->_public_note);
+    $this->_local_entity->note_private = $this->pull_set_or_delete_value($this->_private_note);
 
     $this->_local_entity->date = $this->pull_set_or_delete_value($this->_transaction_date);
     $this->_local_entity->date_lim_reglement = $this->pull_set_or_delete_value($this->_due_date);
