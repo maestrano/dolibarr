@@ -73,20 +73,3 @@ $hookmanager=new HookManager($db);
 // If you define the $opts variable then it will
 // automatically be passed to the MnoSsoUser object
 // for construction
-
-// Activate default modules
-MnoSoaLogger::debug('ACTIVATE MODULES');
-activateModule('modSociete');
-activateModule('modPropale');
-activateModule('modCommande');
-activateModule('modContrat');
-activateModule('modFicheinter');
-activateModule('modExpedition');
-activateModule('modProduct');
-activateModule('modFacture');
-activateModule('modBanque');
-activateModule('modStock');
-activateModule('modFournisseur');
-activateModule('modService');
-activateModule('modExport');
-activateModule('modImport');

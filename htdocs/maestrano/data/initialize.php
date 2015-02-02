@@ -9,8 +9,24 @@ if (!defined('MAESTRANO_ROOT')) {
 
 require_once(MAESTRANO_ROOT . '/app/init/soa.php');
 
-$maestrano = MaestranoService::getInstance();
+// Activate default modules
+MnoSoaLogger::debug('ACTIVATE MODULES');
+activateModule('modSociete');
+activateModule('modPropale');
+activateModule('modCommande');
+activateModule('modContrat');
+activateModule('modFicheinter');
+activateModule('modExpedition');
+activateModule('modProduct');
+activateModule('modFacture');
+activateModule('modBanque');
+activateModule('modStock');
+activateModule('modFournisseur');
+activateModule('modService');
+activateModule('modExport');
+activateModule('modImport');
 
+$maestrano = MaestranoService::getInstance();
 if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {
     $filepath = MAESTRANO_ROOT . '/var/_data_sequence';
     $status = false;
