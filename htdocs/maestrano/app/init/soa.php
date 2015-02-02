@@ -77,7 +77,16 @@ $hookmanager=new HookManager($db);
 // Activate default modules
 MnoSoaLogger::debug('ACTIVATE MODULES');
 activateModule('modSociete');
+activateModule('modPropale');
+activateModule('modCommande');
+activateModule('modContrat');
+activateModule('modFicheinter');
+activateModule('modExpedition');
 activateModule('modProduct');
 activateModule('modFacture');
 activateModule('modBanque');
 activateModule('modStock');
+activateModule('modFournisseur');
+activateModule('modService');
+activateModule('modExport');
+activateModule('modImport');
