@@ -11,20 +11,38 @@ require_once(MAESTRANO_ROOT . '/app/init/soa.php');
 
 // Activate default modules
 MnoSoaLogger::debug('ACTIVATE MODULES');
+
+// unActivateModule('modSociete');
+// unActivateModule('modPropale');
+// unActivateModule('modCommande');
+// unActivateModule('modContrat');
+// unActivateModule('modFicheinter');
+// unActivateModule('modExpedition');
+// unActivateModule('modProduct');
+// unActivateModule('modFacture');
+// unActivateModule('modBanque');
+// unActivateModule('modStock');
+// unActivateModule('modFournisseur');
+// unActivateModule('modService');
+// unActivateModule('modExport');
+// unActivateModule('modImport');
+// unActivateModule('modCashDesk');
+// unActivateModule('modTax');
+// unActivateModule('modPrelevement');
+// unActivateModule('modDon');
+// unActivateModule('modDeplacement');
+
 activateModule('modSociete');
 activateModule('modPropale');
 activateModule('modCommande');
 activateModule('modContrat');
 activateModule('modFicheinter');
 activateModule('modExpedition');
-activateModule('modProduct');
-activateModule('modFacture');
-activateModule('modBanque');
-activateModule('modStock');
+activateModule('modComptabilite');
+activateModule('modTax');
 activateModule('modFournisseur');
-activateModule('modService');
-activateModule('modExport');
-activateModule('modImport');
+activateModule('modProduct');
+activateModule('modStock');
 
 $maestrano = MaestranoService::getInstance();
 if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {
