@@ -9,6 +9,20 @@ if (!defined('MAESTRANO_ROOT')) {
 
 require_once(MAESTRANO_ROOT . '/app/init/soa.php');
 
+// Activate default modules
+MnoSoaLogger::debug('ACTIVATE MODULES');
+activateModule('modSociete');
+activateModule('modPropale');
+activateModule('modCommande');
+activateModule('modContrat');
+activateModule('modFicheinter');
+activateModule('modExpedition');
+activateModule('modComptabilite');
+activateModule('modTax');
+activateModule('modFournisseur');
+activateModule('modProduct');
+activateModule('modStock');
+
 $maestrano = MaestranoService::getInstance();
 if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {
     $filepath = MAESTRANO_ROOT . '/var/_data_sequence';
@@ -28,20 +42,5 @@ if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {
         file_put_contents($filepath, $current_timestamp);
     }
 }
-
-// Activate default modules
-MnoSoaLogger::debug('ACTIVATE MODULES');
-
-activateModule('modSociete');
-activateModule('modPropale');
-activateModule('modCommande');
-activateModule('modContrat');
-activateModule('modFicheinter');
-activateModule('modExpedition');
-activateModule('modComptabilite');
-activateModule('modTax');
-activateModule('modFournisseur');
-activateModule('modProduct');
-activateModule('modStock');
 
 ?>
