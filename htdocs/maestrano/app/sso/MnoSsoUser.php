@@ -106,7 +106,10 @@ class MnoSsoUser extends MnoSsoBaseUser
 			// Save the user and capture the id
 			$this->connection->begin();
       $lid = $this->_user->create(null);
-			if ($lid > 0) $this->_user->setPassword(null,$this->generatePassword());
+			if ($lid > 0) {
+        $this->_user->setPassword(null,$this->generatePassword());
+        if($this->_user->admin) { $this->assignAllRights(); }
+      }
 			$this->connection->commit();
     }
     
@@ -138,6 +141,28 @@ class MnoSsoUser extends MnoSsoBaseUser
 		 $this->_user = $u;
 		 
 		 return $this->_user;
+  }
+
+  protected function assignAllRights() {
+    // Delete all assigned rights
+    $sql = "DELETE FROM ".MAIN_DB_PREFIX."user_rights WHERE fk_user = " . $this->_user->id;
+    $result = $this->connection->query($sql);
+
+    // Assign all available rights
+    $sql = "SELECT id FROM ".MAIN_DB_PREFIX."rights_def";
+    $resql = $this->connection->query($sql);
+    if($resql) {
+      $num = $this->connection->num_rows($resql);
+      $i = 0;
+      while ($i < $num) {
+        $row = $this->connection->fetch_row($resql);
+        $sql = "INSERT INTO ".MAIN_DB_PREFIX."user_rights (fk_user, fk_id) VALUES (".$this->_user->id.", ".$row[0].")";
+        $result = $this->connection->query($sql);
+
+        $i++;
+      }
+      $this->connection->free($resql);
+    }
   }
   
   /**

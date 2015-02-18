@@ -17,14 +17,11 @@ activateModule('modCommande');
 activateModule('modContrat');
 activateModule('modFicheinter');
 activateModule('modExpedition');
-activateModule('modProduct');
-activateModule('modFacture');
-activateModule('modBanque');
-activateModule('modStock');
+activateModule('modComptabilite');
+activateModule('modTax');
 activateModule('modFournisseur');
-activateModule('modService');
-activateModule('modExport');
-activateModule('modImport');
+activateModule('modProduct');
+activateModule('modStock');
 
 $maestrano = MaestranoService::getInstance();
 if ($maestrano->isSoaEnabled() and $maestrano->getSoaUrl()) {
