@@ -27,7 +27,7 @@
  */
 require_once DOL_DOCUMENT_ROOT .'/core/class/commonobject.class.php';
 require_once DOL_DOCUMENT_ROOT .'/maestrano/app/init/base.php';
-
+require_once DOL_DOCUMENT_ROOT .'/fourn/class/fournisseur.product.class.php';
 
 /**
  * Class to manage products or services

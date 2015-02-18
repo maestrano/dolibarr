@@ -12,37 +12,42 @@ class MnoSoaItem extends MnoSoaBaseItem {
     public $_is_new;
     
     protected function pushItem() {
-        // PUSH ID
         $id = $this->getLocalEntityIdentifier();
         if (empty($id)) { return; }
+
         $mno_id = $this->getMnoIdByLocalIdName($id, $this->_local_entity_name);
         $this->_id = ($this->isValidIdentifier($mno_id)) ? $mno_id->_id : null;
         $this->_is_new = (empty($this->_id)) ? true : false;
-        // PUSH CODE
+
         $this->_code = $this->push_set_or_delete_value($this->_local_entity->ref);
-        // PUSH NAME
         $this->_name = $this->push_set_or_delete_value($this->_local_entity->libelle);
-        // PUSH DESCRIPTION
         $this->_description = $this->push_set_or_delete_value($this->_local_entity->description);
-        // PUSH STATUS
         $this->_status = ($this->_is_delete) ? "INACTIVE" : "ACTIVE";
         
         switch ($this->_local_element_type) {
-            case "PRODUCT":
-                // PUSH UNIT
-                $this->_type = $this->mapLocalProductNatureToMnoType($this->_local_entity->finished);
-                break;
-            case "SERVICE":
-                $this->_type = "SERVICE";
-                break;
+          case "PRODUCT":
+            $this->_type = $this->mapLocalProductNatureToMnoType($this->_local_entity->finished);
+            break;
+          case "SERVICE":
+            $this->_type = "SERVICE";
+            break;
         }
         
-        if (!empty($this->_local_entity->price)) {
-            $this->_sale->price = $this->push_set_or_delete_value($this->_local_entity->price_ttc);
-            $this->_sale->netAmount = $this->push_set_or_delete_value($this->_local_entity->price);
-            $this->_sale->taxRate = $this->push_set_or_delete_value($this->_local_entity->tva_tx);
-            $this->_sale->taxAmount = $this->_sale->price - $this->_sale->netAmount;
-            $this->_sale->currency = $this->push_set_or_delete_value($this->getMainCurrency());
+        // Sale price
+        if(!empty($this->_local_entity->price)) {
+          $this->_sale->price = $this->push_set_or_delete_value($this->_local_entity->price_ttc);
+          $this->_sale->netAmount = $this->push_set_or_delete_value($this->_local_entity->price);
+          $this->_sale->taxRate = $this->push_set_or_delete_value($this->_local_entity->tva_tx);
+          $this->_sale->taxAmount = $this->_sale->price - $this->_sale->netAmount;
+          $this->_sale->currency = $this->push_set_or_delete_value($this->getMainCurrency());
+        }
+
+        // Minimum purchase price
+        $product_fourn = new ProductFournisseur($this->_db);
+        $price_found = $product_fourn->find_min_price_product_fournisseur($id);
+        if($price_found == 1) {
+          $this->_purchase->netAmount = $product_fourn->fourn_unitprice;
+          $this->_purchase->taxRate = $product_fourn->fourn_tva_tx;
         }
 
         $this->pushTaxes();
