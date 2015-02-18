@@ -201,6 +201,7 @@ class ProductFournisseur extends Product
 			if ($resql)
 			{
 				$this->db->commit();
+        $this->push_product_to_maestrano($this);
 				return 0;
 			}
 			else
@@ -270,6 +271,7 @@ class ProductFournisseur extends Product
 		            if (! $error)
 		            {
 		                $this->db->commit();
+                    $this->push_product_to_maestrano($this);
 		                return 0;
 		            }
 		            else
@@ -504,6 +506,15 @@ class ProductFournisseur extends Product
         $langs->load("suppliers");
         $out=price($this->fourn_unitprice).' '.$langs->trans("HT").' &nbsp; ('.$langs->trans("Supplier").': '.$this->getSocNomUrl(1).' / '.$langs->trans("SupplierRef").': '.$this->fourn_ref.')';
         return $out;
+    }
+
+    function push_product_to_maestrano($entity, $push_to_maestrano=true, $is_delete=false) {
+      if ($push_to_maestrano) {
+        $mno_item = new MnoSoaItem($this->db);
+        $mno_item->_local_element_type = ($entity->type==0) ? "PRODUCT" : (($entity->type==1) ? "SERVICE" : null);
+        $mno_item->_is_delete = $is_delete;
+        $mno_item->send($entity);
+      }
     }
 
 }
