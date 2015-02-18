@@ -229,6 +229,7 @@ class MnoSoaItem extends MnoSoaBaseItem {
             $mno_id = $this->getMnoIdByLocalIdName($country_tax['rowid'], 'TAX');
             if(isset($mno_id)) {
               $this->_sale_tax_code = $mno_id->_id;
+              $this->_purchase_tax_code = $mno_id->_id;
             }
           }
         }
