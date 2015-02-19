@@ -45,7 +45,7 @@ class MnoSoaItem extends MnoSoaBaseItem {
         // Minimum purchase price
         $product_fourn = new ProductFournisseur($this->_db);
         $price_found = $product_fourn->find_min_price_product_fournisseur($id);
-        if($price_found == 1) {
+        if(isset($product_fourn->fourn_unitprice)) {
           $this->_purchase->netAmount = $product_fourn->fourn_unitprice;
           $this->_purchase->taxRate = $product_fourn->fourn_tva_tx;
         }
@@ -228,8 +228,8 @@ class MnoSoaItem extends MnoSoaBaseItem {
           if($country_tax['taux'] == $this->_local_entity->tva_tx) {
             $mno_id = $this->getMnoIdByLocalIdName($country_tax['rowid'], 'TAX');
             if(isset($mno_id)) {
-              $this->_sale_tax_code = $mno_id->_id;
-              $this->_purchase_tax_code = $mno_id->_id;
+              if(!empty($this->_sale)) { $this->_sale_tax_code = $mno_id->_id; }
+              if(!empty($this->_purchase)) { $this->_purchase_tax_code = $mno_id->_id; }
             }
           }
         }
