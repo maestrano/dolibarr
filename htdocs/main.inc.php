@@ -198,6 +198,18 @@ if (ini_get('register_globals'))    // To solve bug in using $_SESSION
     }
 }
 
+// Hook: Maestrano
+// Load Maestrano
+include_once 'maestrano/init.php';
+if(Maestrano::sso()->isSsoEnabled()) {
+  $mnoSession = new Maestrano_Sso_Session($_SESSION);
+  // Check session validity and trigger SSO if not
+  if (!$mnoSession->isValid()) {
+    header('Location: ' . Maestrano::sso()->getInitPath());
+    exit;
+  }
+}
+
 // Init the 5 global objects
 // This include will set: $conf, $db, $langs, $user, $mysoc objects
 require_once 'master.inc.php';
@@ -360,6 +372,13 @@ if (! defined('NOLOGIN'))
     $test=true;
     if (! isset($_SESSION["dol_login"]))
     {
+        // Hook: Maestrano
+        // Redirect to SSO login
+        if(Maestrano::sso()->isSsoEnabled()) {
+          header('Location: ' . Maestrano::sso()->getInitPath());
+          exit;
+        }
+
         // It is not already authenticated and it requests the login / password
         include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 
@@ -536,6 +555,15 @@ if (! defined('NOLOGIN'))
         // We are already into an authenticated session
         $login=$_SESSION["dol_login"];
         dol_syslog("This is an already logged session. _SESSION['dol_login']=".$login);
+
+        if(Maestrano::sso()->isSsoEnabled()) {
+          $mnoSession = new Maestrano_Sso_Session($_SESSION);
+          // Check session validity and trigger SSO if not
+          if (!$mnoSession->isValid()) {
+            header('Location: ' . Maestrano::sso()->getInitPath());
+            exit;
+          }
+        }
 
         $resultFetchUser=$user->fetch('',$login);
         if ($resultFetchUser <= 0)
@@ -1409,6 +1437,13 @@ function top_menu($head, $title='', $target='', $disablejs=0, $disablehead=0, $a
 	    }
 	    $logintext='<div class="login"><a href="'.DOL_URL_ROOT.'/user/card.php?id='.$user->id.'"';
 	    $logintext.=$target?(' target="'.$target.'"'):'';
+      // Hook:Maestrano
+      // Modify displayed name
+      if(Maestrano::sso()->isSsoEnabled()) {
+        $logintext.='>'. $user->getFullName($langs) .'</a>';
+      } else {
+        $logintext.='>'.$user->login.'</a>';
+      }
 	    $logintext.='>'.$user->login.'</a>';
 	    if ($user->societe_id) $logintext.=$companylink;
 	    $logintext.='</div>';
