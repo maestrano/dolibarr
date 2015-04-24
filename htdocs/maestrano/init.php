@@ -8,6 +8,7 @@ if (!defined('MAESTRANO_ROOT')) { define("MAESTRANO_ROOT", realpath(dirname(__FI
 // Require your app specific files here
 //-----------------------------------------------
 define('DOL_DOCUMENT_ROOT', realpath(MAESTRANO_ROOT . '/../'));
+require_once DOL_DOCUMENT_ROOT . '/filefunc.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/conf/conf.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/conf.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/security.lib.php';
@@ -16,6 +17,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/hookmanager.class.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/translate.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 
 require_once(DOL_DOCUMENT_ROOT . '/../vendor/maestrano/maestrano-php/lib/Maestrano.php');
 Maestrano::configure(DOL_DOCUMENT_ROOT . '/maestrano.json');
