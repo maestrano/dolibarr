@@ -17,3 +17,6 @@ doxygen_warnings.log
 Thumbs.db
 # Vagrant generated files
 .vagrant
+
+# Maestrano
+htdocs/maestrano/var/*

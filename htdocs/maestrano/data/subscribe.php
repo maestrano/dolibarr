@@ -4,6 +4,8 @@ require_once '../init.php';
 
 try {
   if(!Maestrano::param('connec.enabled')) { return false; }
+  
+  // require_once MAESTRANO_ROOT . '/connec/init.php';
 
   $client = new Maestrano_Connec_Client();
 
