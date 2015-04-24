@@ -10,7 +10,6 @@ if (!defined('MAESTRANO_ROOT')) { define("MAESTRANO_ROOT", realpath(dirname(__FI
 define('DOL_DOCUMENT_ROOT', realpath(MAESTRANO_ROOT . '/../'));
 require_once DOL_DOCUMENT_ROOT . '/filefunc.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/conf/conf.php';
-require_once DOL_DOCUMENT_ROOT . '/core/class/conf.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/security.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/includes/adodbtime/adodb-time.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
@@ -18,6 +17,8 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/hookmanager.class.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/translate.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/conf.class.php';
 
 require_once(DOL_DOCUMENT_ROOT . '/../vendor/maestrano/maestrano-php/lib/Maestrano.php');
 Maestrano::configure(DOL_DOCUMENT_ROOT . '/maestrano.json');
@@ -62,6 +63,7 @@ $opts['app_conf'] = $conf;
 // Configure Dolibarr Database
 $db=getDoliDBInstance($dolibarr_main_db_type,$dolibarr_main_db_host,$dolibarr_main_db_user,$dolibarr_main_db_pass,$dolibarr_main_db_name,$dolibarr_main_db_port);
 $opts['db_connection'] = $db;
+$conf->setValues($db);
 
 // Language configuration
 $langs = new Translate('', $conf);

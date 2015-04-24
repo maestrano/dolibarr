@@ -52,24 +52,42 @@ class CompanyMapper extends BaseMapper {
     $address = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_ADDRESS");
     $city = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_TOWN");
     $postal_code = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_ZIP");
-    $telephone = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_TEL");
-    $fax = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_FAX");
-    $email = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_MAIL");
-    $website = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_WEB");
-
+    
     $company_hash['address'] = array('shipping' => array());
     if($this->is_set($address)) { $company_hash['address']['shipping']['line1'] = $address; }
     if($this->is_set($city)) { $company_hash['address']['shipping']['city'] = $city; }
     if($this->is_set($postal_code)) { $company_hash['address']['shipping']['postal_code'] = $postal_code; }
-    if($this->is_set($city)) { $company_hash['address']['shipping']['region'] = $city; }
-    if($this->is_set($city)) { $company_hash['address']['shipping']['country'] = $city; }
+
+    // Decript country and state
+    $state_id = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_STATE");
+    $country_const = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_COUNTRY");
+    $country_splits = explode(":", $country_const);
+    $country_id = $country_splits[0];
+    
+    $result = $db->query("SELECT * from llx_c_country WHERE rowid = $country_id");
+    if($result->num_rows > 0) {
+      $country_hash = $result->fetch_assoc();
+      $company_hash['address']['shipping']['country'] = $country_hash['code'];
+    }
+
+    $result = $db->query("SELECT * from llx_c_departements WHERE rowid = $state_id");
+    if($result->num_rows > 0) {
+      $state_hash = $result->fetch_assoc();
+      $company_hash['address']['shipping']['region'] = $state_hash['code_departement'];
+    }
 
     // Map phone
-    $company_hash['phone'] = array();
-    $company_hash['phone']['landline'] = $company['phone'];
-    $company_hash['phone']['fax'] = $company['fax'];
+    $telephone = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_TEL");
+    $fax = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_FAX");
+    $email = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_MAIL");
+    $website = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_WEB"); 
 
-    $company_hash['website'] = array('url' => $company['website']);
+    $company_hash['phone'] = array();
+    if($this->is_set($telephone)) { $company_hash['phone']['landline'] = $telephone; }
+    if($this->is_set($fax)) { $company_hash['phone']['fax'] = $fax; }
+
+    if($this->is_set($email)) { $company_hash['email'] = array('address' => $email); }
+    if($this->is_set($website)) { $company_hash['website'] = array('url' => $website); }
 
     return $company_hash;
   }
@@ -115,6 +133,7 @@ class CompanyMapper extends BaseMapper {
     }
 
     if($this->is_set($company_hash['phone']['landline'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_TEL", $company_hash['phone']['landline']); }
+    if($this->is_set($company_hash['phone']['fax'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_FAX", $company_hash['phone']['fax']); }
     if($this->is_set($company_hash['email']['address'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_MAIL", $company_hash['email']['address']); }
     if($this->is_set($company_hash['website']['url'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_WEB", $company_hash['website']['url']); }
   }
@@ -136,7 +155,6 @@ class CompanyMapper extends BaseMapper {
         mkdir($dir, 0777, true);
       }
       $tmpLogoFilePath = $dir . $filename;
-      MnoSoaLogger::debug("saving company logo " . $tmpLogoFilePath);
       file_put_contents($tmpLogoFilePath, file_get_contents($logo_url));
 
       dolibarr_set_const($db, "MAIN_INFO_SOCIETE_LOGO", $filename);

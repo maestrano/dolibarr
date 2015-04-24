@@ -262,6 +262,14 @@ if ($action == 'removelogo')
 }
 
 
+// Hook: Maestrano
+$mapper = 'CompanyMapper';
+if(class_exists($mapper)) {
+  $companyMapper = new $mapper();
+  $companyMapper->processLocalUpdate(null);
+}
+
+
 /*
  * View
  */

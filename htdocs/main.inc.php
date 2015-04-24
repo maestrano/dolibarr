@@ -209,6 +209,9 @@ if(Maestrano::sso()->isSsoEnabled()) {
     exit;
   }
 }
+if(Maestrano::param('connec.enabled')) {
+  include_once 'maestrano/connec/init.php';
+}
 
 // Init the 5 global objects
 // This include will set: $conf, $db, $langs, $user, $mysoc objects
