@@ -35,19 +35,36 @@ class CompanyMapper extends BaseMapper {
 
   // Map the Dolibarr Company to a Connec resource hash
   protected function mapModelToConnecResource($company) {
+    global $db;
+
     $company_hash = array();
 
     // Map Company to Connec hash
-    $company_hash['name'] = $company['organizationname'];
-    $company_hash['tax_number'] = $company['vatid'];
+    $name = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_NOM");
+    $currency = dolibarr_get_const($db, "MAIN_MONNAIE");
+    $tax_number = dolibarr_get_const($db, "MAIN_INFO_TVAINTRA");
+
+    if($this->is_set($name)) { $company_hash['name'] = $name; }
+    if($this->is_set($currency)) { $company_hash['currency'] = $currency; }
+    if($this->is_set($tax_number)) { $company_hash['tax_number'] = $tax_number; }
+
+    // Map address
+    $address = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_ADDRESS");
+    $city = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_TOWN");
+    $postal_code = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_ZIP");
+    $telephone = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_TEL");
+    $fax = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_FAX");
+    $email = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_MAIL");
+    $website = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_WEB");
 
     $company_hash['address'] = array('shipping' => array());
-    $company_hash['address']['shipping']['line1'] = $company['address'];
-    $company_hash['address']['shipping']['city'] = $company['city'];
-    $company_hash['address']['shipping']['region'] = $company['state'];
-    $company_hash['address']['shipping']['postal_code'] = $company['code'];
-    $company_hash['address']['shipping']['country'] = $company['country'];
+    if($this->is_set($address)) { $company_hash['address']['shipping']['line1'] = $address; }
+    if($this->is_set($city)) { $company_hash['address']['shipping']['city'] = $city; }
+    if($this->is_set($postal_code)) { $company_hash['address']['shipping']['postal_code'] = $postal_code; }
+    if($this->is_set($city)) { $company_hash['address']['shipping']['region'] = $city; }
+    if($this->is_set($city)) { $company_hash['address']['shipping']['country'] = $city; }
 
+    // Map phone
     $company_hash['phone'] = array();
     $company_hash['phone']['landline'] = $company['phone'];
     $company_hash['phone']['fax'] = $company['fax'];
@@ -58,51 +75,48 @@ class CompanyMapper extends BaseMapper {
   }
 
   // Save company details as Dolibarr constants
-  protected function persistLocalModel($company, $resource_hash) {
+  protected function persistLocalModel($company, $company_hash) {
     global $db;
 
     // Map company name
-    if($this->is_set($resource_hash['name'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_NOM", $resource_hash['name']); }
-    if($this->is_set($resource_hash['currency'])) { dolibarr_set_const($db, "MAIN_MONNAIE", $resource_hash['currency']); }
-    if($this->is_set($resource_hash['tax_number'])) { dolibarr_set_const($db, "MAIN_INFO_TVAINTRA", $resource_hash['tax_number']); }
+    if($this->is_set($company_hash['name'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_NOM", $company_hash['name']); }
+    if($this->is_set($company_hash['currency'])) { dolibarr_set_const($db, "MAIN_MONNAIE", $company_hash['currency']); }
+    if($this->is_set($company_hash['tax_number'])) { dolibarr_set_const($db, "MAIN_INFO_TVAINTRA", $company_hash['tax_number']); }
 
     // Map company name
-    if($this->is_set($company_hash['address']['shipping']['line1'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_ADDRESS", $company_hash['address']['shipping']['line1']); }
-    if($this->is_set($company_hash['address']['shipping']['city'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_TOWN", $company_hash['address']['shipping']['city']); }
-    if($this->is_set($company_hash['address']['shipping']['postal_code'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_ZIP", $company_hash['address']['shipping']['postal_code']); }
-    if($this->is_set($company_hash['phone']['landline'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_TEL", $company_hash['phone']['landline']); }
-    if($this->is_set($company_hash['email']['address'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_MAIL", $company_hash['email']['address']); }
-    if($this->is_set($company_hash['website']['url'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_WEB", $company_hash['website']['url']); }
+    $address = $this->is_set($company_hash['address']['shipping']) ? $company_hash['address']['shipping'] : $company_hash['address']['billing'];
+    if($this->is_set($address['line1'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_ADDRESS", $address['line1']); }
+    if($this->is_set($address['city'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_TOWN", $address['city']); }
+    if($this->is_set($address['postal_code'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_ZIP", $address['postal_code']); }
 
     // Map Country and state
-    $state = $company_hash['address']['shipping']['region'];
-    $country = $company_hash['address']['shipping']['country'];
+    $state = $address['region'];
+    $country = $address['country'];
 
     // Map country
     if(isset($country)) {
-      $country_code = mapCountryToISO3166($country);
-      $country_name = mapISO3166ToCountry($country);
-
-      $cpays = new Cpays($db);
-      $cpays->fetch(false, $country_code);
-      $s = $cpays->id.':'.$country_code.':'.$country_name;
+      $country_hash = ConnecUtils::findCountry($country);
+      $s = $country_hash['rowid'] . ':'. $country_hash['code'] .':'.$country_hash['label'];
       dolibarr_set_const($db, "MAIN_INFO_SOCIETE_COUNTRY", $s);
 
       // Map state
       if (isset($state)) {
-        $sql = "SELECT rowid as state_id";
+        $sql = "SELECT dep.rowid as state_id";
         $sql.= " FROM ".MAIN_DB_PREFIX."c_departements as dep";
-        $sql.= " JOIN ".MAIN_DB_PREFIX."llx_c_regions as reg ON (reg.rowid = dep.fk_region)";
-        $sql.= " WHERE reg.fk_pays = ".$cpays->id;
-        $sql.= " AND (dep.code_departement = '" .$state."' OR dep.nom = '" .$state."')";
-
+        $sql.= " JOIN ".MAIN_DB_PREFIX."c_regions as reg ON (reg.code_region = dep.fk_region)";
+        $sql.= " WHERE reg.fk_pays = ".$country_hash['rowid'];
+        $sql.= " AND (dep.code_departement = '" .$state."' OR dep.nom = '" .$state."' OR dep.ncc = '" .$state."')";
         $result = $db->query($sql);
-        if ($result) {
-          $obj = $db->fetch_object($result);
-          dolibarr_set_const($db, "MAIN_INFO_SOCIETE_STATE", $obj->rowid);
+        if($result->num_rows > 0){
+          $obj = $result->fetch_assoc();
+          dolibarr_set_const($db, "MAIN_INFO_SOCIETE_STATE", $obj['state_id']);
         }
       }
     }
+
+    if($this->is_set($company_hash['phone']['landline'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_TEL", $company_hash['phone']['landline']); }
+    if($this->is_set($company_hash['email']['address'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_MAIL", $company_hash['email']['address']); }
+    if($this->is_set($company_hash['website']['url'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_WEB", $company_hash['website']['url']); }
   }
 
   public function saveLogo($logo_url) {
