@@ -35,41 +35,50 @@ class OrganizationMapper extends BaseMapper {
     if($organization_hash['is_lead']) { $organization->prospect = 1; }
 
     // Map Organization code as customer or supplier unique code
-    $code = $organization_hash['code'];
-    if($this->is_set($code)) {
-      if($organization_hash['is_customer']) { $organization->code_client = $code; } else
-      if($organization_hash['is_supplier']) { $organization->code_fournisseur = $code; }
+    if($this->is_set($organization_hash['code'])) {
+      if($organization_hash['is_customer']) { $organization->code_client = $organization_hash['code']; } else
+      if($organization_hash['is_supplier']) { $organization->code_fournisseur = $organization_hash['code']; }
     }
     
     if($this->is_set($organization_hash['name'])) { $organization->name = $organization_hash['name']; }
     
     if($this->is_set($organization_hash['description'])) { $organization->note_public = $organization_hash['description']; }
-    // if($this->is_set($organization_hash['industry'])) { $organization->column_fields['industry'] = $organization_hash['industry']; }
-    // if($this->is_set($organization_hash['annual_revenue'])) { $organization->column_fields['annualrevenue'] = $organization_hash['annual_revenue']; }
-    // if($this->is_set($organization_hash['reference'])) { $organization->column_fields['siccode'] = $organization_hash['reference']; }
-    // if($this->is_set($organization_hash['number_of_employees'])) { $organization->column_fields['employees'] = $organization_hash['number_of_employees']; }
+    if($this->is_set($organization_hash['capital'])) { $organization->capital = $organization_hash['capital']; }
+    if($this->is_set($organization_hash['reference'])) { $organization->tva_intra = $organization_hash['reference']; }
 
-    // if($this->is_set($organization_hash['address'])) {
-    //   if($this->is_set($organization_hash['address']['billing'])) {
-    //     $billing_address = $organization_hash['address']['billing'];
-    //     if($this->is_set($billing_address['line1'])) { $organization->column_fields['bill_street'] = $billing_address['line1']; }
-    //     if($this->is_set($billing_address['line2'])) { $organization->column_fields['bill_pobox'] = $billing_address['line2']; }
-    //     if($this->is_set($billing_address['city'])) { $organization->column_fields['bill_city'] = $billing_address['city']; }
-    //     if($this->is_set($billing_address['region'])) { $organization->column_fields['bill_state'] = $billing_address['region']; }
-    //     if($this->is_set($billing_address['postal_code'])) { $organization->column_fields['bill_code'] = $billing_address['postal_code']; }
-    //     if($this->is_set($billing_address['country'])) { $organization->column_fields['bill_country'] = $billing_address['country']; }
-    //   }
+    if($this->is_set($organization_hash['address'])) {
+      $address = $this->is_set($organization_hash['address']['billing']) ? $organization_hash['address']['billing'] : $organization_hash['address']['shipping'];
+      if($this->is_set($address)) {
+        if($this->is_set($address['line1'])) { $organization->address = $address['line1']; }
+        if($this->is_set($address['line2'])) { $organization->column_fields['bill_pobox'] = $address['line2']; }
+        if($this->is_set($address['city'])) { $organization->town = $address['city']; }
+        if($this->is_set($address['region'])) { $organization->column_fields['bill_state'] = $address['region']; }
+        if($this->is_set($address['postal_code'])) { $organization->zip = $address['postal_code']; }
+        if($this->is_set($address['country'])) { $organization->column_fields['bill_country'] = $address['country']; }
 
-    //   if($this->is_set($organization_hash['address']['shipping'])) {
-    //     $shipping_address = $organization_hash['address']['shipping'];
-    //     if($this->is_set($shipping_address['line1'])) { $organization->column_fields['ship_street'] = $shipping_address['line1']; }
-    //     if($this->is_set($shipping_address['line2'])) { $organization->column_fields['ship_pobox'] = $shipping_address['line2']; }
-    //     if($this->is_set($shipping_address['city'])) { $organization->column_fields['ship_city'] = $shipping_address['city']; }
-    //     if($this->is_set($shipping_address['region'])) { $organization->column_fields['ship_state'] = $shipping_address['region']; }
-    //     if($this->is_set($shipping_address['postal_code'])) { $organization->column_fields['ship_code'] = $shipping_address['postal_code']; }
-    //     if($this->is_set($shipping_address['country'])) { $organization->column_fields['ship_country'] = $shipping_address['country']; }
-    //   }
-    // }
+        // Map Country and state
+        $state = $address['region'];
+        $country = $address['country'];
+
+        // Map country
+        if(isset($country)) {
+          $country_hash = ConnecUtils::findCountry($country);
+          if($country_hash) {
+            $organization->country_id = $country_hash['rowid'];
+            $organization->country_code = $country_hash['code'];
+
+            // Map state
+            if (isset($state)) {
+              $state_hash = ConnecUtils::findState($country_hash['rowid'], $state);
+              if($state_hash) {
+                $organization->state_id = $state_hash['rowid'];
+                $organization->state_code = $state_hash['code_departement'];
+              }
+            }
+          }
+        }
+      }
+    }
 
     // if($this->is_set($organization_hash['phone'])) {
     //   if($this->is_set($organization_hash['phone']['landline'])) { $organization->column_fields['phone'] = $organization_hash['phone']['landline']; }

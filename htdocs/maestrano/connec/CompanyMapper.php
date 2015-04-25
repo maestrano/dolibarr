@@ -114,20 +114,14 @@ class CompanyMapper extends BaseMapper {
     // Map country
     if(isset($country)) {
       $country_hash = ConnecUtils::findCountry($country);
-      $s = $country_hash['rowid'] . ':'. $country_hash['code'] .':'.$country_hash['label'];
-      dolibarr_set_const($db, "MAIN_INFO_SOCIETE_COUNTRY", $s);
+      if($country_hash) {
+        $s = $country_hash['rowid'] . ':'. $country_hash['code'] .':'.$country_hash['label'];
+        dolibarr_set_const($db, "MAIN_INFO_SOCIETE_COUNTRY", $s);
 
-      // Map state
-      if (isset($state)) {
-        $sql = "SELECT dep.rowid as state_id";
-        $sql.= " FROM ".MAIN_DB_PREFIX."c_departements as dep";
-        $sql.= " JOIN ".MAIN_DB_PREFIX."c_regions as reg ON (reg.code_region = dep.fk_region)";
-        $sql.= " WHERE reg.fk_pays = ".$country_hash['rowid'];
-        $sql.= " AND (dep.code_departement = '" .$state."' OR dep.nom = '" .$state."' OR dep.ncc = '" .$state."')";
-        $result = $db->query($sql);
-        if($result->num_rows > 0){
-          $obj = $result->fetch_assoc();
-          dolibarr_set_const($db, "MAIN_INFO_SOCIETE_STATE", $obj['state_id']);
+        // Map state
+        if (isset($state)) {
+          $state_hash = ConnecUtils::findState($country_hash['rowid'], $state);
+          if($state_hash) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_STATE", $state_hash['rowid']); }
         }
       }
     }
