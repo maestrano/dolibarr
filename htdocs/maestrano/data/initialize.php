@@ -18,7 +18,8 @@ if (empty($timestamp)) { $timestamp = 0; }
 error_log('Fetch connec updates since ' . $timestamp);
 // Fetch updates
 $client = new Maestrano_Connec_Client();
-$msg = $client->get("updates/$timestamp?\$filter[entity]=Company,TaxCode,Account,Organization,Person,Item,Invoice,Quote,PurchaseOrder,Payment");
+// $msg = $client->get("updates/$timestamp?\$filter[entity]=Company,TaxCode,Account,Organization,Person,Item,Invoice,Quote,PurchaseOrder,Payment");
+$msg = $client->get("updates/$timestamp?\$filter[entity]=Company,Organization");
 $code = $msg['code'];
 $body = $msg['body'];
 

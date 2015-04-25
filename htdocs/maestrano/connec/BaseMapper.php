@@ -27,6 +27,10 @@ abstract class BaseMapper {
     return (!is_null($variable) && isset($variable) && !(is_string($variable) && trim($variable)===''));
   }
 
+  protected function is_new($model) {
+    return (!$this->is_set($model->id));
+  }
+
   // Overwrite me!
   // Return the Model local id
   abstract protected function getId($model);
@@ -183,6 +187,8 @@ abstract class BaseMapper {
 
   // Find an Dolibarr entity matching the Connec resource or initialize a new one
   protected function findOrInitializeModel($resource_hash) {
+    global $db;
+    
     $model = null;
 
     // Find local Model if exists
@@ -209,7 +215,7 @@ abstract class BaseMapper {
     if($model == null) {
       $entity_class = $this->local_entity_name;
       if(class_exists($entity_class)) {
-        $model = new $entity_class();
+        $model = new $entity_class($db);
       } else {
         error_log("Class $entity_class not loaded, model cannot be created");
       }

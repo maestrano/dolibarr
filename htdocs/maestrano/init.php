@@ -23,6 +23,9 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/conf.class.php';
 require_once(DOL_DOCUMENT_ROOT . '/../vendor/maestrano/maestrano-php/lib/Maestrano.php');
 Maestrano::configure(DOL_DOCUMENT_ROOT . '/maestrano.json');
 
+// Model classes
+require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
+
 //-----------------------------------------------
 // Perform your custom preparation code
 //-----------------------------------------------
