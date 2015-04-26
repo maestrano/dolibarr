@@ -385,7 +385,7 @@ class Societe extends CommonObject
      *    @param	User	$user       Object of user that ask creation
      *    @return   int         		>= 0 if OK, < 0 if KO
      */
-    function create($user='')
+    function create($user='', $pushToConnec=true)
     {
         global $langs,$conf;
 
@@ -466,6 +466,7 @@ class Societe extends CommonObject
                 {
                     dol_syslog(get_class($this)."::Create success id=".$this->id);
                     $this->db->commit();
+                    $this->pushToConnec($pushToConnec, false);
                     return $this->id;
                 }
                 else
@@ -622,7 +623,7 @@ class Societe extends CommonObject
      *		@param	int		$nosyncmember				Do not synchronize info of linked member
      *      @return int  			           			<0 if KO, >=0 if OK
      */
-    function update($id, $user='', $call_trigger=1, $allowmodcodeclient=0, $allowmodcodefournisseur=0, $action='update', $nosyncmember=1)
+    function update($id, $user='', $call_trigger=1, $allowmodcodeclient=0, $allowmodcodefournisseur=0, $action='update', $nosyncmember=1, $pushToConnec=true)
     {
         global $langs,$conf,$hookmanager;
         require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
@@ -910,6 +911,7 @@ class Societe extends CommonObject
                 {
                     dol_syslog(get_class($this)."::Update success");
                     $this->db->commit();
+                    $this->pushToConnec($pushToConnec, false);
                     return 1;
                 }
                 else
@@ -1260,7 +1262,7 @@ class Societe extends CommonObject
      *    @param	int		$id     Id of third party to delete
      *    @return	int				<0 if KO, 0 if nothing done, >0 if OK
      */
-    function delete($id)
+    function delete($id, $pushToConnec=true)
     {
         global $user, $langs, $conf;
 
@@ -1388,6 +1390,7 @@ class Societe extends CommonObject
             if (! $error)
             {
                 $this->db->commit();
+                $this->pushToConnec($pushToConnec, true);
 
                 // Delete directory
                 if (! empty($conf->societe->multidir_output[$entity]))
@@ -3212,4 +3215,16 @@ class Societe extends CommonObject
 
 	}
 
+  // Hook Maestrano
+  function pushToConnec($pushToConnec=true, $delete=false) {   
+    if(!$pushToConnec) { return $this; }
+
+    $mapper = 'OrganizationMapper';
+    if(class_exists($mapper)) {
+      $organizationMapper = new $mapper();
+      $organizationMapper->processLocalUpdate($this, $pushToConnec, $delete);
+    }
+
+    return $this;
+  }
 }

@@ -22,6 +22,15 @@ class ConnecUtils {
     return null;
   }
 
+  public static function findStateById($state_id) {
+    global $db;
+    
+    $sql = "SELECT * FROM ".MAIN_DB_PREFIX . "c_departements WHERE rowid = $state_id";
+    $result = $db->query($sql);
+    if($result->num_rows > 0) { return $result->fetch_assoc(); }
+    return null;
+  }
+
   public static function mapCountryToISO3166($country_name) {
     $country_hash = ConnecUtils::findCountry($country_name);
     if(is_null($country_hash)) { return null; }
