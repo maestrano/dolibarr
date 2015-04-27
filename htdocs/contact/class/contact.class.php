@@ -165,7 +165,7 @@ class Contact extends CommonObject
 
 			if (! $error)
 			{
-                $result=$this->update($this->id, $user, 1, 'add');
+                $result=$this->update($this->id, $user, 1, 'add', false);
                 if ($result < 0)
                 {
                     $error++;
@@ -1097,5 +1097,4 @@ class Contact extends CommonObject
 
     return $this;
   }
-
 }

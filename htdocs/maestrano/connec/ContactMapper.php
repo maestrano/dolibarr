@@ -156,9 +156,9 @@ class ContactMapper extends BaseMapper {
 
   // Persist the Dolibarr Contact
   protected function persistLocalModel($person, $resource_hash) {
-    $user = new User(null);
+    $user = ConnecUtils::defaultUser();
     if($this->is_new($person)) {
-      $person->create($user, false);
+      $person->id = $person->create($user, false);
     } else {
       $person->update($person->id, $user, 0, 'update', false);
     }

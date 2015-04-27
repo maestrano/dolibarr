@@ -27,6 +27,8 @@ Maestrano::configure(DOL_DOCUMENT_ROOT . '/maestrano.json');
 require_once DOL_DOCUMENT_ROOT . '/core/class/ccountry.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
+require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
 
 //-----------------------------------------------
 // Perform your custom preparation code
@@ -73,6 +75,7 @@ $conf->setValues($db);
 // Language configuration
 $langs = new Translate('', $conf);
 $langs->load("main");
+$langs->setDefaultLang();
 
 // Define the database prefix
 if (empty($dolibarr_main_db_prefix)) $dolibarr_main_db_prefix='llx_';

@@ -440,7 +440,7 @@ class Societe extends CommonObject
             {
                 $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX."societe");
 
-                $ret = $this->update($this->id,$user,0,1,1,'add');
+                $ret = $this->update($this->id,$user,0,1,1,'add',1,false);
 
                 // Ajout du commercial affecte
                 if ($this->commercial_id != '' && $this->commercial_id != -1)
@@ -466,7 +466,7 @@ class Societe extends CommonObject
                 {
                     dol_syslog(get_class($this)."::Create success id=".$this->id);
                     $this->db->commit();
-                    $this->pushToConnec($pushToConnec, false);
+                    $this->pushToConnec($pushToConnec);
                     return $this->id;
                 }
                 else

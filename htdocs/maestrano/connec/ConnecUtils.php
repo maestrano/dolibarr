@@ -1,10 +1,24 @@
 <?php
 
 class ConnecUtils {
+  // Select the first available User
+  public static function defaultUser() {
+    global $db;
+    
+    $result = $db->query("SELECT min(rowid) as user_id from ".MAIN_DB_PREFIX."user WHERE statut = 1 AND admin = 1");
+    if($result->num_rows > 0) {
+      $user_hash = $result->fetch_assoc();
+      $user = new User($db);
+      $user->fetch($user_hash['user_id']);
+      return $user;
+    }
+    return null;
+  }
+
   public static function findCountry($country_name) {
     global $db;
     
-    $result = $db->query("SELECT * from llx_c_country WHERE code = '$country_name' OR code_iso = '$country_name' OR label = '$country_name'");
+    $result = $db->query("SELECT * from ".MAIN_DB_PREFIX."c_country WHERE code = '$country_name' OR code_iso = '$country_name' OR label = '$country_name'");
     if($result->num_rows > 0) { return $result->fetch_assoc(); }
     return null;
   }

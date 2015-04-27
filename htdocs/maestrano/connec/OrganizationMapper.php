@@ -142,9 +142,9 @@ class OrganizationMapper extends BaseMapper {
 
   // Persist the Dolibarr Organization
   protected function persistLocalModel($organization, $resource_hash) {
-    $user = new User(null);
+    $user = ConnecUtils::defaultUser();
     if($this->is_new($organization)) {
-      $organization->create($user, false);
+      $organization->id = $organization->create($user, false);
     } else {
       $organization->update($organization->id, $user, 1, 0, 0, 'update', 1, false);
     }

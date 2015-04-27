@@ -219,7 +219,7 @@ class Product extends CommonObject
 	 *  @param	int		$notrigger		Disable triggers
 	 *	@return int			     		Id of product/service if OK, < 0 if KO
 	 */
-	function create($user,$notrigger=0)
+	function create($user,$notrigger=0, $pushToConnec=true)
 	{
 		global $conf, $langs;
 
@@ -396,7 +396,7 @@ class Product extends CommonObject
 							$result = $this->_log_price($user);
 							if ($result > 0)
 							{
-								if ($this->update($id, $user, true, 'add') <= 0)
+								if ($this->update($id, $user, true, 'add', false) <= 0)
 								{
 								    $error++;
 								}
@@ -444,6 +444,7 @@ class Product extends CommonObject
 			if (! $error)
 			{
 				$this->db->commit();
+        $this->pushToConnec($pushToConnec);
 				return $this->id;
 			}
 			else
@@ -547,7 +548,7 @@ class Product extends CommonObject
 	 *	@param	string	$action		Current action for hookmanager ('add' or 'update')
 	 *	@return int         		1 if OK, -1 if ref already exists, -2 if other error
 	 */
-	function update($id, $user, $notrigger=false, $action='update')
+	function update($id, $user, $notrigger=false, $action='update', $pushToConnec=true)
 	{
 		global $langs, $conf, $hookmanager;
 
@@ -735,6 +736,7 @@ class Product extends CommonObject
 				if (! $error)
 				{
 					$this->db->commit();
+          $this->pushToConnec($pushToConnec);
 					return 1;
 				}
 				else
@@ -773,7 +775,7 @@ class Product extends CommonObject
 	 *	@param      int		$id         Product id (usage of this is deprecated, delete should be called without parameters on a fetched object)
 	 * 	@return		int					< 0 if KO, 0 = Not possible, > 0 if OK
 	 */
-	function delete($id=0)
+	function delete($id=0, $pushToConnec=false)
 	{
 		global $conf,$user,$langs;
 		require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
@@ -877,6 +879,7 @@ class Product extends CommonObject
 			if (! $error)
 			{
 				$this->db->commit();
+        $this->pushToConnec($pushToConnec, true);
 				return 1;
 			}
 			else
@@ -3661,4 +3664,17 @@ class Product extends CommonObject
 
 		return $maxpricesupplier;
 	}
+
+  // Hook Maestrano
+  function pushToConnec($pushToConnec=true, $delete=false) {   
+    if(!$pushToConnec) { return $this; }
+
+    $mapper = 'ProductMapper';
+    if(class_exists($mapper)) {
+      $productMapper = new $mapper();
+      $productMapper->processLocalUpdate($this, $pushToConnec, $delete);
+    }
+
+    return $this;
+  }
 }

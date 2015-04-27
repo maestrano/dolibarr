@@ -137,7 +137,16 @@ abstract class BaseMapper {
       if($persist) {
         error_log("persistLocalModel entity=$this->connec_entity_name");
         $this->persistLocalModel($model, $resource_hash);
-        $this->findOrCreateIdMap($resource_hash, $model);
+
+        // If an error occured, log it
+        if($this->is_set($model->error)) {
+          error_log("Cannot save entity=$this->connec_entity_name due to error " . json_encode($model->error));
+          $transaction_log = array('entity_id' => $resource_hash['id'], 'entity_name' => $this->connec_entity_name, 'message' => $model->error, 'status' => 'ERROR');
+          $hash = array('transaction_logs' => $transaction_log);
+          $this->_connec_client->post('transaction_logs', $hash);
+        } else {
+          $this->findOrCreateIdMap($resource_hash, $model);
+        }
       }
 
       return $model;
