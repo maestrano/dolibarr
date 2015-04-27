@@ -19,13 +19,14 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/translate.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/conf.class.php';
-require_once DOL_DOCUMENT_ROOT . '/core/class/ccountry.class.php';
 
 require_once(DOL_DOCUMENT_ROOT . '/../vendor/maestrano/maestrano-php/lib/Maestrano.php');
 Maestrano::configure(DOL_DOCUMENT_ROOT . '/maestrano.json');
 
 // Model classes
+require_once DOL_DOCUMENT_ROOT . '/core/class/ccountry.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
+require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
 
 //-----------------------------------------------
 // Perform your custom preparation code

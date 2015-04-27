@@ -163,21 +163,18 @@ class MnoSsoUser extends Maestrano_Sso_User {
    */
   protected function isAdmin()
   {
-    $admin = false;
-    
-    if ($this->app_owner) {
-      $admin = true;
-    } else {
-      foreach ($this->organizations as $organization) {
-        if ($organization['role'] == 'Admin' || $organization['role'] == 'Super Admin') {
-          $admin = true;
-        } else {
-          $admin = false;
-        }
-      }
+    switch($this->getGroupRole()) {
+      case 'Member':
+        return false;
+      case 'Power User':
+        return false;
+      case 'Admin':
+        return true;
+      case 'Super Admin':
+        return true;
+      default:
+        return false;
     }
-    
-    return $admin;
   }
   
   /**

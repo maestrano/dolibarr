@@ -112,7 +112,7 @@ class Contact extends CommonObject
 	 *  @param      User	$user       Object user that create
 	 *  @return     int      			<0 if KO, >0 if OK
 	 */
-	function create($user)
+	function create($user, $pushToConnec=true)
 	{
 		global $conf, $langs;
 
@@ -194,6 +194,7 @@ class Contact extends CommonObject
             if (! $error)
             {
                 $this->db->commit();
+                $this->pushToConnec($pushToConnec, false);
                 return $this->id;
             }
             else
@@ -222,7 +223,7 @@ class Contact extends CommonObject
 	 *      @param		string	$action			Current action for hookmanager
 	 *      @return     int      			   	<0 if KO, >0 if OK
 	 */
-	function update($id, $user=null, $notrigger=0, $action='update')
+	function update($id, $user=null, $notrigger=0, $action='update', $pushToConnec=true)
 	{
 		global $conf, $langs, $hookmanager;
 
@@ -315,6 +316,7 @@ class Contact extends CommonObject
 			if (! $error)
 			{
 				$this->db->commit();
+        $this->pushToConnec($pushToConnec, false);
 				return 1;
 			}
 			else
@@ -693,7 +695,7 @@ class Contact extends CommonObject
 	 *   	@param		int		$notrigger		Disable all trigger
 	 *		@return		int						<0 if KO, >0 if OK
 	 */
-	function delete($notrigger=0)
+	function delete($notrigger=0, $pushToConnec=true)
 	{
 		global $conf, $langs, $user;
 
@@ -789,6 +791,7 @@ class Contact extends CommonObject
 		{
 
 			$this->db->commit();
+      $this->pushToConnec($pushToConnec, true);
 			return 1;
 		}
 		else
@@ -1081,5 +1084,18 @@ class Contact extends CommonObject
 			return 1;
 		}
 	}
+
+  // Hook Maestrano
+  function pushToConnec($pushToConnec=true, $delete=false) {   
+    if(!$pushToConnec) { return $this; }
+
+    $mapper = 'ContactMapper';
+    if(class_exists($mapper)) {
+      $contactMapper = new $mapper();
+      $contactMapper->processLocalUpdate($this, $pushToConnec, $delete);
+    }
+
+    return $this;
+  }
 
 }

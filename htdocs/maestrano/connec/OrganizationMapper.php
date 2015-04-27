@@ -1,7 +1,7 @@
 <?php
 
 /**
-* Map Connec Customer Organization representation to/from Dolibarr Societe
+* Map Connec Organization representation to/from Dolibarr Societe
 */
 class OrganizationMapper extends BaseMapper {
   public function __construct() {
@@ -135,6 +135,7 @@ class OrganizationMapper extends BaseMapper {
 
     if($this->is_set($organization->email)) { $organization_hash['email'] = array('address' => $organization->email); }
     if($this->is_set($organization->url)) { $organization_hash['website'] = array('url' => $organization->url); }
+    if($this->is_set($organization->skype)) { $organization_hash['contact_channel'] = array('skype' => $organization->skype); }
 
     return $organization_hash;
   }
