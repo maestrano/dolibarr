@@ -64,13 +64,13 @@ class CompanyMapper extends BaseMapper {
     $country_splits = explode(":", $country_const);
     $country_id = $country_splits[0];
     
-    $result = $db->query("SELECT * from llx_c_country WHERE rowid = $country_id");
+    $result = $db->query("SELECT * from ".MAIN_DB_PREFIX."c_country WHERE rowid = $country_id");
     if($result->num_rows > 0) {
       $country_hash = $result->fetch_assoc();
       $company_hash['address']['shipping']['country'] = $country_hash['code'];
     }
 
-    $result = $db->query("SELECT * from llx_c_departements WHERE rowid = $state_id");
+    $result = $db->query("SELECT * from ".MAIN_DB_PREFIX."c_departements WHERE rowid = $state_id");
     if($result->num_rows > 0) {
       $state_hash = $result->fetch_assoc();
       $company_hash['address']['shipping']['region'] = $state_hash['code_departement'];

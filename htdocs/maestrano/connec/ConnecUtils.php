@@ -56,4 +56,12 @@ class ConnecUtils {
     if(is_null($country_hash)) { return null; }
     return $country_hash['label'];
   }
+
+  public static function getCompanyCountryId() {
+    global $db;
+    // String format: 28:AU:Australia
+    $country_string = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_COUNTRY");
+    $str_bits = explode(":", $country_string);
+    return $str_bits[0];
+  }
 }

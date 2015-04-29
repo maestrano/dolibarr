@@ -346,7 +346,7 @@ class Account extends CommonObject
      *  @param	User	$user		Object user making creation
      *  @return int        			< 0 if KO, > 0 if OK
      */
-    function create($user='')
+    function create($user='', $pushToConnec=true)
     {
         global $langs,$conf;
 
@@ -417,7 +417,7 @@ class Account extends CommonObject
         {
             $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX."bank_account");
 
-            $result=$this->update();
+            $result=$this->update($user, $pushToConnec);
             if ($result > 0)
             {
                 $sql = "INSERT INTO ".MAIN_DB_PREFIX."bank (";
@@ -469,7 +469,7 @@ class Account extends CommonObject
      *    	@param	User	$user       Object user making action
      *		@return	int					<0 si ko, >0 si ok
      */
-    function update($user='')
+    function update($user='', $pushToConnec=true)
     {
         global $langs,$conf;
 
@@ -522,6 +522,7 @@ class Account extends CommonObject
         $result = $this->db->query($sql);
         if ($result)
         {
+            $this->pushToConnec($pushToConnec);
             return 1;
         }
         else
@@ -1021,6 +1022,18 @@ class Account extends CommonObject
         $this->country_id      = 1;
     }
 
+  // Hook Maestrano
+  function pushToConnec($pushToConnec=true, $delete=false) {   
+    if(!$pushToConnec) { return $this; }
+
+    $mapper = 'AccountMapper';
+    if(class_exists($mapper)) {
+      $accountMapper = new $mapper();
+      $accountMapper->processLocalUpdate($this, $pushToConnec, $delete);
+    }
+
+    return $this;
+  }
 }
 
 
@@ -1148,7 +1161,7 @@ class AccountLine extends CommonObject
      *		@param	User	$user	User object that delete
      *      @return	int 			<0 if KO, >0 if OK
      */
-    function delete($user=null)
+    function delete($user=null, $pushToConnec=true)
     {
         $nbko=0;
 
@@ -1181,6 +1194,7 @@ class AccountLine extends CommonObject
         if (! $nbko)
         {
             $this->db->commit();
+            $this->pushToConnec($pushToConnec, true);
             return 1;
         }
         else
@@ -1458,4 +1472,3 @@ class AccountLine extends CommonObject
     }
 
 }
-
