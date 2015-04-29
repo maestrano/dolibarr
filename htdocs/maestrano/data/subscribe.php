@@ -5,7 +5,7 @@ require_once '../init.php';
 try {
   if(!Maestrano::param('connec.enabled')) { return false; }
   
-  // require_once MAESTRANO_ROOT . '/connec/init.php';
+  require_once MAESTRANO_ROOT . '/connec/init.php';
 
   $client = new Maestrano_Connec_Client();
 
@@ -40,10 +40,10 @@ try {
       $productMapper = new ProductMapper();
       $productMapper->fetchConnecResource($entity_id);
       break;
-    // case "INVOICES":
-    //   $invoiceMapper = new InvoiceMapper();
-    //   $invoiceMapper->fetchConnecResource($entity_id);
-    //   break;
+    case "INVOICES":
+      $invoiceMapper = new InvoiceMapper();
+      $invoiceMapper->fetchConnecResource($entity_id);
+      break;
   }
 } catch (Exception $e) {
   error_log("Caught exception in subscribe " . json_encode($e->getMessage()));

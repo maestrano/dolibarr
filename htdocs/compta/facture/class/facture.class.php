@@ -177,7 +177,7 @@ class Facture extends CommonInvoice
 	 * 	@param	int		$forceduedate	1=Do not recalculate due date from payment condition but force it with value
 	 *	@return	int						<0 if KO, >0 if OK
 	 */
-	function create($user,$notrigger=0,$forceduedate=0)
+	function create($user,$notrigger=0,$forceduedate=0, $pushToConnec=true)
 	{
 		global $langs,$conf,$mysoc,$hookmanager;
 		$error=0;
