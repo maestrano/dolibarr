@@ -356,7 +356,7 @@ class Facture extends CommonInvoice
 						}
 
 						$newinvoiceline->fk_parent_line=$fk_parent_line;
-						$result=$newinvoiceline->insert();
+						$result=$newinvoiceline->insert($notrigger, $pushToConnec);
 
 						// Defined the new fk_parent_line
 						if ($result > 0 && $newinvoiceline->product_type == 9) {
@@ -1071,7 +1071,7 @@ class Facture extends CommonInvoice
 	 *      @param      int		$notrigger	    0=launch triggers after, 1=disable triggers
 	 *      @return     int      			   	<0 if KO, >0 if OK
 	 */
-	function update($user=null, $notrigger=0)
+	function update($user=null, $notrigger=0, $pushToConnec=true)
 	{
 		global $conf, $langs;
 		$error=0;
@@ -3509,7 +3509,7 @@ class FactureLigne extends CommonInvoiceLine
 	 *	@param      int		$notrigger		1 no triggers
 	 *	@return		int						<0 if KO, >0 if OK
 	 */
-	function insert($notrigger=0)
+	function insert($notrigger=0, $pushToConnec=true)
 	{
 		global $langs,$user,$conf;
 
@@ -3701,7 +3701,7 @@ class FactureLigne extends CommonInvoiceLine
 	 *	@param		int		$notrigger	Disable triggers
 	 *	@return		int					<0 if KO, >0 if OK
 	 */
-	function update($user='',$notrigger=0)
+	function update($user='',$notrigger=0, $pushToConnec=true)
 	{
 		global $user,$langs,$conf;
 
