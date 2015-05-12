@@ -33,9 +33,6 @@ class InvoiceLineMapper extends BaseMapper {
 
   // Map the Connec resource attributes onto the Dolibarr FactureLigne
   protected function mapConnecResourceToModel($invoice_line_hash, $invoice_line) {
-    // TODO: Map Invoice lines
-    // Map each invoice_line to a FactureLigne
-
     // Line attributes
     $invoice_line->fk_facture = $this->invoice->id;
     $invoice_line->rang = $invoice_line_hash['line_number'];

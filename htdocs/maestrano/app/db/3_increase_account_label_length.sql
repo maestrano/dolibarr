@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bank_account` MODIFY `label` VARCHAR(255);
