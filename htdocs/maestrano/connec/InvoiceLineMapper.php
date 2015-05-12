@@ -60,9 +60,6 @@ class InvoiceLineMapper extends BaseMapper {
 
     $invoice_line_hash = array();
 
-    // Missing transaction lines are considered as deleted by Connec!
-    $invoice_line_hash['opts'] = array('sparse' => false);
-
     // TODO!!
     
     // // Map attributes

@@ -3,7 +3,7 @@
 /**
 * Map Connec Customer Invoice representation to/from Dolibarr Facture
 */
-class InvoiceMapper extends TransactionMapper {
+class CustomerInvoiceMapper extends TransactionMapper {
   public function __construct() {
     parent::__construct();
 
@@ -65,12 +65,12 @@ class InvoiceMapper extends TransactionMapper {
 
     // Map invoice status
     $this->mapInvoiceStatusToDolibarr($invoice_hash, $invoice);
-    
+
     // // Map attributes
     if($this->is_set($invoice->ref)) { $invoice_hash['code'] = $invoice->ref; }
     if($this->is_set($invoice->ref_ext)) { $invoice_hash['transaction_number'] = $invoice->ref_ext; }
-    if($this->is_set($invoice->date)) { $invoice_hash['transaction_date'] = $invoice->date; }
-    if($this->is_set($invoice->date_lim_reglement)) { $invoice_hash['due_date'] = $invoice->date_lim_reglement; }
+    if($this->is_set($invoice->date)) { $invoice_hash['transaction_date'] = date('c', $invoice->date); }
+    if($this->is_set($invoice->date_lim_reglement)) { $invoice_hash['due_date'] = date('c', $invoice->date_lim_reglement); }
     if($this->is_set($invoice->note_public)) { $invoice_hash['public_note'] = $invoice->note_public; }
     if($this->is_set($invoice->note_private)) { $invoice_hash['private_note'] = $invoice->note_private; }
     if($this->is_set($invoice->remise_percent)) { $invoice_hash['discount_percent'] = $invoice->remise_percent; }
@@ -89,6 +89,16 @@ class InvoiceMapper extends TransactionMapper {
       $contact_id = $contact['id'];
       $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($contact_id, 'CONTACTS');
       if($mno_id_map) { $invoice_hash['person_id'] = $mno_id_map['mno_entity_guid']; }
+    }
+
+    // Map Invoice lines
+    if(!empty($invoice->lines)) {
+      $invoice_lines_hashes = array();
+      $invoice_line_mapper = new InvoiceLineMapper($invoice);
+      foreach($invoice->lines as $invoice_line) {
+        array_push($invoice_lines_hashes, $invoice_line_mapper->mapModelToConnecResource($invoice_line));
+      }
+      $invoice_hash['lines'] = $invoice_lines_hashes;
     }
 
     return $invoice_hash;

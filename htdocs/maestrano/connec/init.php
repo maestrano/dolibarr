@@ -11,7 +11,7 @@ require_once MAESTRANO_ROOT . '/connec/OrganizationMapper.php';
 require_once MAESTRANO_ROOT . '/connec/ContactMapper.php';
 require_once MAESTRANO_ROOT . '/connec/ProductMapper.php';
 require_once MAESTRANO_ROOT . '/connec/TransactionMapper.php';
-require_once MAESTRANO_ROOT . '/connec/InvoiceMapper.php';
+require_once MAESTRANO_ROOT . '/connec/CustomerInvoiceMapper.php';
 require_once MAESTRANO_ROOT . '/connec/InvoiceLineMapper.php';
 
 // Set default user as a global variable

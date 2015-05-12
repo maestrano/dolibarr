@@ -508,6 +508,7 @@ class Facture extends CommonInvoice
 					if (! $error)
 					{
 						$this->db->commit();
+            $this->pushToConnec($pushToConnec);
 						return $this->id;
 					}
 					else
@@ -701,6 +702,7 @@ class Facture extends CommonInvoice
 		if (! $error)
 		{
 			$this->db->commit();
+      $this->pushToConnec($pushToConnec);
 			return $this->id;
 		}
 		else
@@ -1162,6 +1164,7 @@ class Facture extends CommonInvoice
 		else
 		{
 			$this->db->commit();
+      $this->pushToConnec($pushToConnec);
 			return 1;
 		}
 	}
@@ -1173,7 +1176,7 @@ class Facture extends CommonInvoice
 	 *    @param     int	$idremise	Id of absolute discount
 	 *    @return    int          		>0 if OK, <0 if KO
 	 */
-	function insert_discount($idremise)
+	function insert_discount($idremise, $pushToConnec=true)
 	{
 		global $langs;
 
@@ -1226,6 +1229,7 @@ class Facture extends CommonInvoice
 					}
 
 					$this->db->commit();
+          $this->pushToConnec($pushToConnec);
 					return 1;
 				}
 				else
@@ -1283,7 +1287,7 @@ class Facture extends CommonInvoice
 	 *	@param		int		$idwarehouse	Id warehouse to use for stock change.
 	 *	@return		int						<0 if KO, >0 if OK
 	 */
-	function delete($rowid=0, $notrigger=0, $idwarehouse=-1)
+	function delete($rowid=0, $notrigger=0, $idwarehouse=-1, $pushToConnec=true)
 	{
 		global $user,$langs,$conf;
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
@@ -1418,6 +1422,7 @@ class Facture extends CommonInvoice
 					}
 
 					$this->db->commit();
+          $this->pushToConnec($pushToConnec, true);
 					return 1;
 				}
 				else
@@ -1450,7 +1455,7 @@ class Facture extends CommonInvoice
 	 *	@param  string	$close_note	Commentaire renseigne si on classe a payee alors que paiement incomplet (cas escompte par exemple)
 	 *  @return int         		<0 if KO, >0 if OK
 	 */
-	function set_paid($user,$close_code='',$close_note='')
+	function set_paid($user,$close_code='',$close_note='', $pushToConnec=true)
 	{
 		global $conf,$langs;
 		$error=0;
@@ -1485,6 +1490,7 @@ class Facture extends CommonInvoice
 			if (! $error)
 			{
 				$this->db->commit();
+        $this->pushToConnec($pushToConnec);
 				return 1;
 			}
 			else
@@ -1508,7 +1514,7 @@ class Facture extends CommonInvoice
 	 *  @param	User	$user       Object user that change status
 	 *  @return int         		<0 if KO, >0 if OK
 	 */
-	function set_unpaid($user)
+	function set_unpaid($user, $pushToConnec=true)
 	{
 		global $conf,$langs;
 		$error=0;
@@ -1538,6 +1544,7 @@ class Facture extends CommonInvoice
 		if (! $error)
 		{
 			$this->db->commit();
+      $this->pushToConnec($pushToConnec);
 			return 1;
 		}
 		else
@@ -1558,7 +1565,7 @@ class Facture extends CommonInvoice
 	 *	@param	string	$close_note		Comment
 	 *	@return int         			<0 if KO, >0 if OK
 	 */
-	function set_canceled($user,$close_code='',$close_note='')
+	function set_canceled($user,$close_code='',$close_note='', $pushToConnec=true)
 	{
 		global $conf,$langs;
 
@@ -1596,6 +1603,7 @@ class Facture extends CommonInvoice
 	            // End call triggers
 
 				$this->db->commit();
+        $this->pushToConnec($pushToConnec);
 				return 1;
 			}
 			else
@@ -1623,7 +1631,7 @@ class Facture extends CommonInvoice
 	 * @param	int		$notrigger		1=Does not execute triggers, 0= execuete triggers
      * @return	int						<0 if KO, >0 if OK
 	 */
-	function validate($user, $force_number='', $idwarehouse=0, $notrigger=0)
+	function validate($user, $force_number='', $idwarehouse=0, $notrigger=0, $pushToConnec=true)
 	{
 		global $conf,$langs;
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
@@ -1833,6 +1841,7 @@ class Facture extends CommonInvoice
 		if (! $error)
 		{
 			$this->db->commit();
+      $this->pushToConnec($pushToConnec);
 			return 1;
 		}
 		else
@@ -1849,7 +1858,7 @@ class Facture extends CommonInvoice
 	 *	@param	int		$idwarehouse	Id warehouse to use for stock change.
 	 *	@return	int						<0 if KO, >0 if OK
 	 */
-	function set_draft($user,$idwarehouse=-1)
+	function set_draft($user,$idwarehouse=-1, $pushToConnec=true)
 	{
 		global $conf,$langs;
 
@@ -1913,6 +1922,7 @@ class Facture extends CommonInvoice
 			if ($error == 0)
 			{
 				$this->db->commit();
+        $this->pushToConnec($pushToConnec);
 				return 1;
 			}
 			else
@@ -1964,7 +1974,7 @@ class Facture extends CommonInvoice
 	 *		@param		array		$array_option		extrafields array
 	 *    	@return    	int             				<0 if KO, Id of line if OK
 	 */
-	function addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits=0, $fk_remise_except='', $price_base_type='HT', $pu_ttc=0, $type=self::TYPE_STANDARD, $rang=-1, $special_code=0, $origin='', $origin_id=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='', $array_option=0)
+	function addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits=0, $fk_remise_except='', $price_base_type='HT', $pu_ttc=0, $type=self::TYPE_STANDARD, $rang=-1, $special_code=0, $origin='', $origin_id=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='', $array_option=0, $pushToConnec=true)
 	{
 		global $mysoc, $conf, $langs;
 
@@ -2098,6 +2108,7 @@ class Facture extends CommonInvoice
 				if ($result > 0)
 				{
 					$this->db->commit();
+          $this->pushToConnec($pushToConnec);
 					return $this->line->rowid;
 				}
 				else
@@ -2141,7 +2152,7 @@ class Facture extends CommonInvoice
      *  @param		array		$array_option		extrafields array
 	 *  @return    	int             				< 0 if KO, > 0 if OK
 	 */
-	function updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $txlocaltax1=0, $txlocaltax2=0, $price_base_type='HT', $info_bits=0, $type= self::TYPE_STANDARD, $fk_parent_line=0, $skip_update_total=0, $fk_fournprice=null, $pa_ht=0, $label='', $special_code=0, $array_option=0)
+	function updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $txtva, $txlocaltax1=0, $txlocaltax2=0, $price_base_type='HT', $info_bits=0, $type= self::TYPE_STANDARD, $fk_parent_line=0, $skip_update_total=0, $fk_fournprice=null, $pa_ht=0, $label='', $special_code=0, $array_option=0, $pushToConnec=true)
 	{
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
 
@@ -2251,6 +2262,7 @@ class Facture extends CommonInvoice
 				// Mise a jour info denormalisees au niveau facture
 				$this->update_price(1);
 				$this->db->commit();
+        $this->pushToConnec($pushToConnec);
 				return $result;
 			}
 			else
@@ -2273,7 +2285,7 @@ class Facture extends CommonInvoice
 	 *	@param		int		$rowid		Id of line to delete
 	 *	@return		int					<0 if KO, >0 if OK
 	 */
-	function deleteline($rowid)
+	function deleteline($rowid, $pushToConnec=true)
 	{
 		global $langs, $conf;
 
@@ -2315,6 +2327,7 @@ class Facture extends CommonInvoice
 			if ($result > 0)
 			{
 				$this->db->commit();
+        $this->pushToConnec($pushToConnec);
 				return 1;
 			}
 			else
@@ -3339,7 +3352,18 @@ class Facture extends CommonInvoice
 	}
 
 
+  // Hook Maestrano
+  function pushToConnec($pushToConnec=true, $delete=false) {   
+    if(!$pushToConnec) { return $this; }
 
+    $mapper = 'CustomerInvoiceMapper';
+    if(class_exists($mapper)) {
+      $customerInvoiceMapper = new $mapper();
+      $customerInvoiceMapper->processLocalUpdate($this, $pushToConnec, $delete);
+    }
+
+    return $this;
+  }
 }
 
 
@@ -3683,6 +3707,7 @@ class FactureLigne extends CommonInvoiceLine
 			}
 
 			$this->db->commit();
+      $this->pushToConnec($pushToConnec);
 			return $this->rowid;
 
 		}
@@ -3794,6 +3819,7 @@ class FactureLigne extends CommonInvoiceLine
                 // End call triggers
 			}
 			$this->db->commit();
+      $this->pushToConnec($pushToConnec);
 			return 1;
 		}
 		else
@@ -3809,7 +3835,7 @@ class FactureLigne extends CommonInvoiceLine
 	 *
 	 *	@return		int		<0 if KO, >0 if OK
 	 */
-	function delete()
+	function delete($pushToConnec=true)
 	{
 		global $conf,$langs,$user;
 
@@ -3832,6 +3858,7 @@ class FactureLigne extends CommonInvoiceLine
 		if ($this->db->query($sql) )
 		{
 			$this->db->commit();
+      $this->pushToConnec($pushToConnec);
 			return 1;
 		}
 		else
@@ -3880,5 +3907,23 @@ class FactureLigne extends CommonInvoiceLine
 			return -2;
 		}
 	}
+
+  // Hook Maestrano
+  function pushToConnec($pushToConnec=true, $delete=false) {   
+    if(!$pushToConnec) { return $this; }
+
+    $mapper = 'CustomerInvoiceMapper';
+    if(class_exists($mapper)) {
+      // Fetch parent invoice
+      $this->fetch($this->rowid);
+      $invoice = new Facture($this->db);
+      $invoice->fetch($this->fk_facture);
+
+      $customerInvoiceMapper = new $mapper();
+      $customerInvoiceMapper->processLocalUpdate($invoice, $pushToConnec, $delete);
+    }
+
+    return $this;
+  }
 }
 
