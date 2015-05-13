@@ -129,7 +129,7 @@ class Paiement extends CommonObject
 	 *    @param    int		$closepaidinvoices   	1=Also close payed invoices to paid, 0=Do nothing more
 	 *    @return   int                 			id of created payment, < 0 if error
 	 */
-	function create($user,$closepaidinvoices=0)
+	function create($user,$closepaidinvoices=0, $pushToConnec=true)
 	{
 		global $conf, $langs;
 
@@ -263,6 +263,7 @@ class Paiement extends CommonObject
 		    $this->amount=$totalamount;
 		    $this->total=$totalamount;    // deprecated
 			$this->db->commit();
+      $this->pushToConnec($pushToConnec);
 			return $this->id;
 		}
 		else
@@ -810,5 +811,18 @@ class Paiement extends CommonObject
 		}
 		return $langs->trans('Unknown');
 	}
+
+  // Hook Maestrano
+  function pushToConnec($pushToConnec=true, $delete=false) {   
+    if(!$pushToConnec) { return $this; }
+
+    $mapper = 'PaymentMapper';
+    if(class_exists($mapper)) {
+      $paymentMapper = new $mapper();
+      $paymentMapper->processLocalUpdate($this, $pushToConnec, $delete);
+    }
+
+    return $this;
+  }
 
 }

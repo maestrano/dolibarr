@@ -20,7 +20,7 @@ class CustomerInvoiceMapper extends TransactionMapper {
 
   // Map the Connec resource attributes onto the Dolibarr Invoice
   protected function mapConnecResourceToModel($invoice_hash, $invoice) {
-    return parent::mapConnecResourceToModel($invoice_hash, $invoice);
+    parent::mapConnecResourceToModel($invoice_hash, $invoice);
 
     // Map invoice type
     $this->mapInvoiceTypeToDolibarr($invoice_hash, $invoice);
