@@ -149,7 +149,7 @@ class FactureFournisseur extends CommonInvoice
      *    @param      User		$user       object utilisateur qui cree
      *    @return     int    	     		id facture si ok, < 0 si erreur
      */
-    function create($user)
+    function create($user, $pushToConnec=true)
     {
         global $langs,$conf,$hookmanager;
 
@@ -287,6 +287,7 @@ class FactureFournisseur extends CommonInvoice
                 if (! $error)
                 {
                     $this->db->commit();
+                    $this->pushToConnec($pushToConnec);
                     return $this->id;
                 }
                 else
@@ -486,7 +487,7 @@ class FactureFournisseur extends CommonInvoice
         $sql.= ', p.rowid as product_id, p.ref as product_ref, p.label as label, p.description as product_desc';
         $sql.= ' FROM '.MAIN_DB_PREFIX.'facture_fourn_det as f';
         $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'product as p ON f.fk_product = p.rowid';
-        $sql.= ' WHERE fk_facture_fourn='.$this->id;
+        $sql.= ' WHERE fk_facture_fourn='.$this->id.' ORDER BY f.rowid ASC';
 
         dol_syslog(get_class($this)."::fetch_lines", LOG_DEBUG);
         $resql_rows = $this->db->query($sql);
@@ -546,7 +547,7 @@ class FactureFournisseur extends CommonInvoice
      *  @param  int		$notrigger       0=launch triggers after, 1=disable triggers
      *  @return int 			         <0 if KO, >0 if OK
      */
-    function update($user=null, $notrigger=0)
+    function update($user=null, $notrigger=0, $pushToConnec=true)
     {
         global $conf, $langs;
         $error=0;
@@ -654,6 +655,7 @@ class FactureFournisseur extends CommonInvoice
         else
         {
             $this->db->commit();
+            $this->pushToConnec($pushToConnec);
             return 1;
         }
     }
@@ -783,7 +785,7 @@ class FactureFournisseur extends CommonInvoice
      *	@param      User	$user       Object user
      *	@return     int         		<0 si ko, >0 si ok
      */
-    function set_paid($user)
+    function set_paid($user, $pushToConnec=true)
     {
         global $conf,$langs;
         $error=0;
@@ -813,6 +815,7 @@ class FactureFournisseur extends CommonInvoice
         if (! $error)
         {
             $this->db->commit();
+            $this->pushToConnec($pushToConnec);
             return 1;
         }
         else
@@ -831,7 +834,7 @@ class FactureFournisseur extends CommonInvoice
      *	@param      User	$user       Object user that change status
      *	@return     int         		<0 si ok, >0 si ok
      */
-    function set_unpaid($user)
+    function set_unpaid($user, $pushToConnec=true)
     {
         global $conf,$langs;
         $error=0;
@@ -861,6 +864,7 @@ class FactureFournisseur extends CommonInvoice
         if (! $error)
         {
             $this->db->commit();
+            $this->pushToConnec($pushToConnec);
             return 1;
         }
         else
@@ -879,7 +883,7 @@ class FactureFournisseur extends CommonInvoice
      *  @param	int		$notrigger		1=Does not execute triggers, 0= execuete triggers
      *	@return int 			        <0 if KO, =0 if nothing to do, >0 if OK
      */
-    function validate($user, $force_number='', $idwarehouse=0, $notrigger=0)
+    function validate($user, $force_number='', $idwarehouse=0, $notrigger=0, $pushToConnec=true)
     {
         global $conf,$langs;
 
@@ -1002,6 +1006,7 @@ class FactureFournisseur extends CommonInvoice
             if (! $error)
             {
                 $this->db->commit();
+                $this->pushToConnec($pushToConnec);
                 return 1;
             }
             else
@@ -1026,7 +1031,7 @@ class FactureFournisseur extends CommonInvoice
      *	@param	int		$idwarehouse	Id warehouse to use for stock change.
      *	@return	int						<0 if KO, >0 if OK
      */
-    function set_draft($user, $idwarehouse=-1)
+    function set_draft($user, $idwarehouse=-1, $pushToConnec=true)
     {
         global $conf,$langs;
 
@@ -1069,6 +1074,7 @@ class FactureFournisseur extends CommonInvoice
             if ($error == 0)
             {
                 $this->db->commit();
+                $this->pushToConnec($pushToConnec);
                 return 1;
             }
             else
@@ -1113,7 +1119,7 @@ class FactureFournisseur extends CommonInvoice
      *
      *  FIXME Add field ref (that should be named ref_supplier) and label into update. For example can be filled when product line created from order.
      */
-    function addline($desc, $pu, $txtva, $txlocaltax1, $txlocaltax2, $qty, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits='', $price_base_type='HT', $type=0, $rang=-1, $notrigger=false)
+    function addline($desc, $pu, $txtva, $txlocaltax1, $txlocaltax2, $qty, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits='', $price_base_type='HT', $type=0, $rang=-1, $notrigger=false, $pushToConnec=true)
     {
         dol_syslog(get_class($this)."::addline $desc,$pu,$qty,$txtva,$fk_product,$remise_percent,$date_start,$date_end,$ventil,$info_bits,$price_base_type,$type", LOG_DEBUG);
         include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
@@ -1150,7 +1156,7 @@ class FactureFournisseur extends CommonInvoice
         {
             $idligne = $this->db->last_insert_id(MAIN_DB_PREFIX.'facture_fourn_det');
 
-            $result=$this->updateline($idligne, $desc, $pu, $txtva, $txlocaltax1, $txlocaltax2, $qty, $fk_product, $price_base_type, $info_bits, $type, $remise_percent, true);
+            $result=$this->updateline($idligne, $desc, $pu, $txtva, $txlocaltax1, $txlocaltax2, $qty, $fk_product, $price_base_type, $info_bits, $type, $remise_percent, true, false);
             if ($result > 0)
             {
                 $this->rowid = $idligne;
@@ -1169,6 +1175,7 @@ class FactureFournisseur extends CommonInvoice
                 }
 
                 $this->db->commit();
+                $this->pushToConnec($pushToConnec);
                 return 1;
             }
             else
@@ -1204,7 +1211,7 @@ class FactureFournisseur extends CommonInvoice
      *  @param		int		$notrigger			Disable triggers
      * @return    	int           				<0 if KO, >0 if OK
      */
-    function updateline($id, $desc, $pu, $vatrate, $txlocaltax1=0, $txlocaltax2=0, $qty=1, $idproduct=0, $price_base_type='HT', $info_bits=0, $type=0, $remise_percent=0, $notrigger=false)
+    function updateline($id, $desc, $pu, $vatrate, $txlocaltax1=0, $txlocaltax2=0, $qty=1, $idproduct=0, $price_base_type='HT', $info_bits=0, $type=0, $remise_percent=0, $notrigger=false, $pushToConnec=true)
     {
     	global $mysoc;
         dol_syslog(get_class($this)."::updateline $id,$desc,$pu,$vatrate,$qty,$idproduct,$price_base_type,$info_bits,$type,$remise_percent", LOG_DEBUG);
@@ -1302,6 +1309,7 @@ class FactureFournisseur extends CommonInvoice
             $result=$this->update_price('','auto');
 
             $this->db->commit();
+            $this->pushToConnec($pushToConnec);
 
             return $result;
         }
@@ -1320,7 +1328,7 @@ class FactureFournisseur extends CommonInvoice
      *	@param	int		$notrigger		1=Does not execute triggers, 0= execute triggers
      * 	@return	void
      */
-    function deleteline($rowid, $notrigger=0)
+    function deleteline($rowid, $notrigger=0, $pushToConnec=true)
     {
     	global $user, $langs, $conf;
 
@@ -1362,6 +1370,7 @@ class FactureFournisseur extends CommonInvoice
     	if (! $error)
     	{
     		$this->db->commit();
+        $this->pushToConnec($pushToConnec);
         	return 1;
     	}
     	else
@@ -1691,7 +1700,7 @@ class FactureFournisseur extends CommonInvoice
      *	@param		int		$invertdetail	Reverse sign of amounts for lines
      * 	@return		int						New id of clone
      */
-    function createFromClone($fromid,$invertdetail=0)
+    function createFromClone($fromid,$invertdetail=0, $pushToConnec=true)
     {
         global $user,$langs;
 
@@ -1753,6 +1762,7 @@ class FactureFournisseur extends CommonInvoice
         if (! $error)
         {
             $this->db->commit();
+            $this->pushToConnec($pushToConnec);
             return $object->id;
         }
         else
@@ -1795,5 +1805,21 @@ class FactureFournisseur extends CommonInvoice
 
 		return $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref);
 	}
+
+  // Hook Maestrano
+  function pushToConnec($pushToConnec=true, $delete=false) {   
+    if(!$pushToConnec) { return $this; }
+
+    $mapper = 'SupplierInvoiceMapper';
+    if(class_exists($mapper)) {
+      // Reload invoice to committed modifications
+      $this->fetch($this->id);
+
+      $supplierInvoiceMapper = new $mapper();
+      $supplierInvoiceMapper->processLocalUpdate($this, $pushToConnec, $delete);
+    }
+
+    return $this;
+  }
 
 }

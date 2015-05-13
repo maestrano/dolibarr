@@ -3,7 +3,7 @@
 /**
 * Map Connec Customer Invoice Line representation to/from Dolibarr FactureLigne
 */
-class InvoiceLineMapper extends BaseMapper {
+class CustomerInvoiceLineMapper extends BaseMapper {
   private $invoice = null;
   private $invoice_hash = null;
 
@@ -73,7 +73,6 @@ class InvoiceLineMapper extends BaseMapper {
   protected function mapModelToConnecResource($invoice_line) {
     $invoice_line_hash = array();
 
-    $invoice_line_hash = array();
     $productid = intval($invoice_line->fk_product);
     $line_number = intval($invoice_line->rang);
     $quantity = floatval($invoice_line->qty);

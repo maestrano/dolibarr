@@ -1,26 +1,26 @@
 <?php
 
 /**
-* Map Connec Customer Invoice representation to/from Dolibarr Facture
+* Map Connec Supplier Invoice representation to/from Dolibarr FactureFournisseur
 */
-class CustomerInvoiceMapper extends TransactionMapper {
+class SupplierInvoiceMapper extends TransactionMapper {
   public function __construct() {
     parent::__construct();
 
     $this->connec_entity_name = 'Invoice';
-    $this->local_entity_name = 'Facture';
+    $this->local_entity_name = 'FactureFournisseur';
     $this->connec_resource_name = 'invoices';
     $this->connec_resource_endpoint = 'invoices';
   }
 
   protected function validate($invoice_hash) {
-    // Process only Customer Invoices
-    return $invoice_hash['type'] == 'CUSTOMER';
+    // Process only Supplier Invoices
+    return $invoice_hash['type'] == 'SUPPLIER';
   }
 
   // Map the Connec resource attributes onto the Dolibarr Invoice
   protected function mapConnecResourceToModel($invoice_hash, $invoice) {
-    return parent::mapConnecResourceToModel($invoice_hash, $invoice);
+    parent::mapConnecResourceToModel($invoice_hash, $invoice);
 
     // Map invoice type
     $this->mapInvoiceTypeToDolibarr($invoice_hash, $invoice);
@@ -28,7 +28,10 @@ class CustomerInvoiceMapper extends TransactionMapper {
     // Map invoice status
     $this->mapInvoiceStatusToConnec($invoice_hash, $invoice);
 
-    if($this->is_set($transaction_hash['transaction_number'])) { $transaction->ref_ext = $transaction_hash['transaction_number']; }
+    // Find of generate a supplier reference
+    if($this->is_set($transaction_hash['transaction_number'])) { $invoice->ref_supplier = $transaction_hash['transaction_number']; }
+    else if($this->is_set($transaction_hash['code'])) { $invoice->ref_supplier = $transaction_hash['code']; }
+    else { $invoice->ref_supplier = mt_rand(); }
   }
 
   // Map the Dolibarr Invoice to a Connec resource hash
@@ -37,8 +40,8 @@ class CustomerInvoiceMapper extends TransactionMapper {
 
     $invoice_hash = parent::mapModelToConnecResource($invoice);
 
-    // Default invoice type to CUSTOMER
-    $invoice_hash['type'] = 'CUSTOMER';
+    // Default invoice type to SUPPLIER
+    $invoice_hash['type'] = 'SUPPLIER';
 
     // Map invoice status
     $this->mapInvoiceStatusToDolibarr($invoice_hash, $invoice);
@@ -55,9 +58,11 @@ class CustomerInvoiceMapper extends TransactionMapper {
     // Map Invoice lines
     if(!empty($invoice->lines)) {
       $invoice_lines_hashes = array();
-      $invoice_line_mapper = new CustomerInvoiceLineMapper($invoice, $invoice_hash);
+      $invoice_line_mapper = new SupplierInvoiceLineMapper($invoice, $invoice_hash);
       foreach($invoice->lines as $invoice_line) {
-        array_push($invoice_lines_hashes, $invoice_line_mapper->mapModelToConnecResource($invoice_line));
+        $invoice_line_hash = $invoice_line_mapper->mapModelToConnecResource($invoice_line);
+        $invoice_line_hash['line_number'] = count($invoice_lines_hashes) + 1;
+        array_push($invoice_lines_hashes, $invoice_line_hash);
       }
       $invoice_hash['lines'] = $invoice_lines_hashes;
     }
@@ -69,9 +74,10 @@ class CustomerInvoiceMapper extends TransactionMapper {
   protected function persistLocalModel($invoice, $invoice_hash) {
     $user = ConnecUtils::defaultUser();
     if($this->is_new($invoice)) {
-      $invoice->id = $invoice->create($user, 0, 0, false);
+      $invoice->create($user, false);
     } else {
       $invoice->update($user, 0, false);
+      $invoice->fetch($invoice->id);
     }
 
     // Persist invoice lines
@@ -79,7 +85,7 @@ class CustomerInvoiceMapper extends TransactionMapper {
       $processed_lines_local_ids = array();
 
       foreach($invoice_hash['lines'] as $invoice_line_hash) {
-        $invoice_line_mapper = new CustomerInvoiceLineMapper($invoice, $invoice_hash);
+        $invoice_line_mapper = new SupplierInvoiceLineMapper($invoice, $invoice_hash);
         $invoice_line = $invoice_line_mapper->saveConnecResource($invoice_line_hash);
         array_push($processed_lines_local_ids, $invoice_line->rowid);
       }
@@ -88,7 +94,7 @@ class CustomerInvoiceMapper extends TransactionMapper {
       $local_invoice_lines = $invoice->lines;
       foreach ($local_invoice_lines as $local_invoice_line) {
         if(!in_array($local_invoice_line->rowid, $processed_lines_local_ids)) {
-          $local_invoice_line->delete(false);
+          $invoice->deleteline($local_invoice_line->rowid, 0, false);
           MnoIdMap::hardDeleteMnoIdMap($local_invoice_line->rowid, 'FACTURELIGNE');
         }
       }
@@ -100,7 +106,7 @@ class CustomerInvoiceMapper extends TransactionMapper {
 
   // Set default invoice type to TYPE_STANDARD
   private function mapInvoiceTypeToDolibarr(&$invoice_hash, $invoice) {
-    if($this->is_new($invoice)) { $invoice->type = Facture::TYPE_STANDARD; }
+    if($this->is_new($invoice)) { $invoice->type = FactureFournisseur::TYPE_STANDARD; }
   }
 
   // Map invoice status from Connec to Dolibarr

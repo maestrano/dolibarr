@@ -43,6 +43,8 @@ try {
     case "INVOICES":
       $customerInvoiceMapper = new CustomerInvoiceMapper();
       $customerInvoiceMapper->fetchConnecResource($entity_id);
+      $supplierInvoiceMapper = new SupplierInvoiceMapper();
+      $supplierInvoiceMapper->fetchConnecResource($entity_id);
       break;
   }
 } catch (Exception $e) {

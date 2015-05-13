@@ -3355,7 +3355,7 @@ class Facture extends CommonInvoice
   // Hook Maestrano
   function pushToConnec($pushToConnec=true, $delete=false) {   
     if(!$pushToConnec) { return $this; }
-error_log("PUSHING MODIFICATION ON INVOICE " . $this->id);
+
     $mapper = 'CustomerInvoiceMapper';
     if(class_exists($mapper)) {
       // Reload invoice to committed modifications

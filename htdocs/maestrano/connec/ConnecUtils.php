@@ -75,7 +75,6 @@ class ConnecUtils {
     $sql.= " WHERE t.active = 1";
     $sql.= " AND c.code = '".$mysoc->country_code."'";
     $sql.= " ORDER BY t.rowid DESC";
-error_log("QUERY TAXES " . $sql);
     $result = $db->query($sql);
     return $result;
   }
