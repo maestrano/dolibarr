@@ -26,7 +26,7 @@ class CustomerInvoiceMapper extends TransactionMapper {
     $this->mapInvoiceTypeToDolibarr($invoice_hash, $invoice);
 
     // Map invoice status
-    $this->mapInvoiceStatusToConnec($invoice_hash, $invoice);
+    $this->mapInvoiceStatusToDolibarr($invoice_hash, $invoice);
 
     if($this->is_set($transaction_hash['transaction_number'])) { $transaction->ref_ext = $transaction_hash['transaction_number']; }
   }
@@ -41,7 +41,7 @@ class CustomerInvoiceMapper extends TransactionMapper {
     $invoice_hash['type'] = 'CUSTOMER';
 
     // Map invoice status
-    $this->mapInvoiceStatusToDolibarr($invoice_hash, $invoice);
+    $this->mapInvoiceStatusToConnec($invoice_hash, $invoice);
 
     // Map first Contact
     $contacts = $invoice->liste_contact();

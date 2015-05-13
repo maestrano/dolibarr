@@ -26,7 +26,9 @@ class SupplierInvoiceMapper extends TransactionMapper {
     $this->mapInvoiceTypeToDolibarr($invoice_hash, $invoice);
 
     // Map invoice status
-    $this->mapInvoiceStatusToConnec($invoice_hash, $invoice);
+    $this->mapInvoiceStatusToDolibarr($invoice_hash, $invoice);
+
+    if($this->is_set($transaction_hash['title'])) { $invoice->libelle = $transaction_hash['title']; }
 
     // Find of generate a supplier reference
     if($this->is_set($transaction_hash['transaction_number'])) { $invoice->ref_supplier = $transaction_hash['transaction_number']; }
@@ -43,8 +45,10 @@ class SupplierInvoiceMapper extends TransactionMapper {
     // Default invoice type to SUPPLIER
     $invoice_hash['type'] = 'SUPPLIER';
 
+    if($this->is_set($transaction->libelle)) { $transaction_hash['title'] = $transaction->libelle; }
+
     // Map invoice status
-    $this->mapInvoiceStatusToDolibarr($invoice_hash, $invoice);
+    $this->mapInvoiceStatusToConnec($invoice_hash, $invoice);
 
     // Map first Contact
     $contacts = $invoice->liste_contact();
