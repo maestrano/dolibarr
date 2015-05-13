@@ -41,8 +41,8 @@ try {
       $productMapper->fetchConnecResource($entity_id);
       break;
     case "INVOICES":
-      $invoiceMapper = new InvoiceMapper();
-      $invoiceMapper->fetchConnecResource($entity_id);
+      $customerInvoiceMapper = new CustomerInvoiceMapper();
+      $customerInvoiceMapper->fetchConnecResource($entity_id);
       break;
   }
 } catch (Exception $e) {

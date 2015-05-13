@@ -64,4 +64,19 @@ class ConnecUtils {
     $str_bits = explode(":", $country_string);
     return $str_bits[0];
   }
+
+  public static function fetchTaxes() {
+    global $mysoc;
+    global $db;
+
+    $sql = "SELECT t.rowid, t.taux, t.note";
+    $sql.= " FROM ".MAIN_DB_PREFIX."c_tva as t";
+    $sql.= " JOIN ".MAIN_DB_PREFIX."c_country c ON (t.fk_pays = c.rowid)";
+    $sql.= " WHERE t.active = 1";
+    $sql.= " AND c.code = '".$mysoc->country_code."'";
+    $sql.= " ORDER BY t.rowid DESC";
+error_log("QUERY TAXES " . $sql);
+    $result = $db->query($sql);
+    return $result;
+  }
 }

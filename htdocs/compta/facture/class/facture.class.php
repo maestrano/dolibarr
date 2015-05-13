@@ -3355,9 +3355,12 @@ class Facture extends CommonInvoice
   // Hook Maestrano
   function pushToConnec($pushToConnec=true, $delete=false) {   
     if(!$pushToConnec) { return $this; }
-
+error_log("PUSHING MODIFICATION ON INVOICE " . $this->id);
     $mapper = 'CustomerInvoiceMapper';
     if(class_exists($mapper)) {
+      // Reload invoice to committed modifications
+      $this->fetch($this->id);
+
       $customerInvoiceMapper = new $mapper();
       $customerInvoiceMapper->processLocalUpdate($this, $pushToConnec, $delete);
     }
@@ -3707,7 +3710,6 @@ class FactureLigne extends CommonInvoiceLine
 			}
 
 			$this->db->commit();
-      $this->pushToConnec($pushToConnec);
 			return $this->rowid;
 
 		}
@@ -3819,7 +3821,6 @@ class FactureLigne extends CommonInvoiceLine
                 // End call triggers
 			}
 			$this->db->commit();
-      $this->pushToConnec($pushToConnec);
 			return 1;
 		}
 		else
@@ -3858,7 +3859,6 @@ class FactureLigne extends CommonInvoiceLine
 		if ($this->db->query($sql) )
 		{
 			$this->db->commit();
-      $this->pushToConnec($pushToConnec);
 			return 1;
 		}
 		else
@@ -3907,23 +3907,4 @@ class FactureLigne extends CommonInvoiceLine
 			return -2;
 		}
 	}
-
-  // Hook Maestrano
-  function pushToConnec($pushToConnec=true, $delete=false) {   
-    if(!$pushToConnec) { return $this; }
-
-    $mapper = 'CustomerInvoiceMapper';
-    if(class_exists($mapper)) {
-      // Fetch parent invoice
-      $this->fetch($this->rowid);
-      $invoice = new Facture($this->db);
-      $invoice->fetch($this->fk_facture);
-
-      $customerInvoiceMapper = new $mapper();
-      $customerInvoiceMapper->processLocalUpdate($invoice, $pushToConnec, $delete);
-    }
-
-    return $this;
-  }
 }
-

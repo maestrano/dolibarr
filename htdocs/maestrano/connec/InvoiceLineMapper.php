@@ -5,8 +5,9 @@
 */
 class InvoiceLineMapper extends BaseMapper {
   private $invoice = null;
+  private $invoice_hash = null;
 
-  public function __construct($invoice) {
+  public function __construct($invoice=null, $invoice_hash=null) {
     parent::__construct();
 
     $this->connec_entity_name = 'InvoiceLine';
@@ -15,11 +16,17 @@ class InvoiceLineMapper extends BaseMapper {
     $this->connec_resource_endpoint = 'invoices/lines';
 
     $this->invoice = $invoice;
+    $this->invoice_hash = $invoice_hash;
   }
 
-  // Invoice Line ID includes Invoice ID for unicity
+  // Invoice Line ID
   protected function getId($invoice_line) {
-    return $invoice->id . "#" . $invoice_line->id;
+    return $invoice_line->rowid;
+  }
+
+  // Prefix the Invoice Line ID with the Invoice ID to ensure unicity
+  protected function getConnecResourceId($invoice_line_hash) {
+    return $this->invoice_hash['id'] . "#" . $invoice_line_hash['id'];
   }
 
   // Return a local FactureLigne by id
@@ -29,6 +36,14 @@ class InvoiceLineMapper extends BaseMapper {
     $invoice_line = new $this->local_entity_name($db);
     $invoice_line->fetch($local_id);
     return $invoice_line;
+  }
+
+  // Load by Invoice and Line number
+  protected function matchLocalModel($invoice_line_hash) {
+    foreach($this->invoice->lines as $invoice_line) {
+      if(intval($invoice_line->rang) == intval($invoice_line_hash['line_number'])) { return $invoice_line; }
+    }
+    return null;
   }
 
   // Map the Connec resource attributes onto the Dolibarr FactureLigne
@@ -49,115 +64,68 @@ class InvoiceLineMapper extends BaseMapper {
 
     // Map item
     if(!empty($invoice_line_hash['item_id'])) {
-      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($invoice_line_hash['item_id'], 'PRODUCT');
+      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($invoice_line_hash['item_id'], 'ITEM');
       $invoice_line->fk_product = $mno_id_map['app_entity_id'];
     }
   }
 
   // Map the Dolibarr Invoice to a Connec resource hash
   protected function mapModelToConnecResource($invoice_line) {
-    global $adb;
-
     $invoice_line_hash = array();
 
-    // TODO!!
-    
-    // // Map attributes
-    // if($this->is_set($invoice_line->column_fields['subject'])) { $invoice_line_hash['title'] = $invoice_line->column_fields['subject']; }
-    // if($this->is_set($invoice_line->column_fields['notes'])) { $invoice_line_hash['public_note'] = $invoice_line->column_fields['notes']; }
+    $invoice_line_hash = array();
+    $productid = intval($invoice_line->fk_product);
+    $line_number = intval($invoice_line->rang);
+    $quantity = floatval($invoice_line->qty);
+    $unit_price = floatval($invoice_line->subprice);
+    $tax_rate = floatval($invoice_line->tva_tx);
+    $total_amount = floatval($invoice_line->total_ht);
+    $total_tax_amount = floatval($invoice_line->total_tva);
+    $total_net_amount = floatval($invoice_line->total_ttc);
+    $reduction_percent = floatval($invoice_line->remise_percent);
+    $description = $invoice_line->desc;
 
-    // // Map Organization
-    // if($this->is_set($invoice_line->column_fields['account_id'])) {
-    //   $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($invoice_line->column_fields['account_id'], 'ACCOUNTS');
-    //   if($mno_id_map) { $invoice_line_hash['organization_id'] = $mno_id_map['mno_entity_guid']; }
-    // }
+    // Map Invoice Line ID
+    $invoice_line_local_id = $invoice_line->rowid;
+    $invoice_line_mno_id = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($invoice_line_local_id, $this->local_entity_name);
+    if($invoice_line_mno_id) {
+      $invoice_line_id_parts = explode("#", $invoice_line_mno_id['mno_entity_guid']);
+      $invoice_line_hash['id'] = $invoice_line_id_parts[1];
+    }
 
-    // // Map Vendor
-    // if($this->is_set($invoice_line->column_fields['vendor_id'])) {
-    //   $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($invoice_line->column_fields['vendor_id'], 'VENDORS');
-    //   if($mno_id_map) { $invoice_line_hash['organization_id'] = $mno_id_map['mno_entity_guid']; }
-    // }
+    $invoice_line_hash['status'] = 'ACTIVE';
+    $invoice_line_hash['line_number'] = $line_number;
+    $invoice_line_hash['description'] = $description;
+    $invoice_line_hash['quantity'] = $quantity;
+    $invoice_line_hash['reduction_percent'] = $reduction_percent;
+    $invoice_line_hash['unit_price'] = array('net_amount' => $unit_price, 'tax_rate' => $tax_rate);
+    $invoice_line_hash['total_price'] = array('total_amount' => $total_amount, 'tax_amount' => $total_tax_amount, 'net_amount' => $total_net_amount, 'tax_rate' => $tax_rate);
 
-    // // Map Contact
-    // if($this->is_set($invoice_line->column_fields['contact_id'])) {
-    //   $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($invoice_line->column_fields['contact_id'], 'CONTACTS');
-    //   if($mno_id_map) { $invoice_line_hash['person_id'] = $mno_id_map['mno_entity_guid']; }
-    // }
+    // Map tax code by tax rate (best match)
+    if($tax_rate > 0) {
+      $country_taxes = ConnecUtils::fetchTaxes();
+      if($country_taxes) {
+        foreach ($country_taxes as $country_tax) {
+          if($country_tax['taux'] == $tax_rate) {
+            $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($country_tax['rowid'], 'TAXCODE');
+            if($mno_id_map) { $invoice_line_hash['tax_code_id'] = $mno_id_map['mno_entity_guid']; }
+            break;
+          }
+        }
+      }
+    }
 
-    // // Map transaction lines
-    // $invoice_line_hash['lines'] = array();
-    // $result = $adb->pquery("SELECT * FROM vtiger_inventoryproductrel WHERE id = ?", array($invoice_line->id));
-    // while($invoice_line_detail = $adb->fetch_array($result)) {
-    //   $invoice_line = array();
-    //   $productid = intval($invoice_line_detail['productid']);
-    //   $line_number = intval($invoice_line_detail['sequence_no']);
-    //   $quantity = intval($invoice_line_detail['quantity']);
-    //   $listprice = floatval($invoice_line_detail['listprice']);
-    //   $discount_percent = floatval($invoice_line_detail['discount_percent']);
-    //   $discount_amount = floatval($invoice_line_detail['discount_amount']);
-    //   $comment = $invoice_line_detail['comment'];
-    //   $description = $invoice_line_detail['description'];
-
-    //   // Dolibarr recreates the transaction lines on every save, so local IDs are not mappable
-    //   // Use InvoiceID#LineNumber instead
-    //   $invoice_line_id = $invoice_line->id . "#" . $line_number;
-    //   $mno_transaction_line_id = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($invoice_line_id, "TRANSACTION_LINE");
-    //   if($mno_transaction_line_id) {
-    //     // Reuse Connec Invoice Line ID
-    //     $invoice_line_id_parts = explode("#", $mno_transaction_line_id['mno_entity_guid']);
-    //     $invoice_line['id'] = $invoice_line_id_parts[1];
-    //   }
-
-    //   $invoice_line['status'] = 'ACTIVE';
-    //   $invoice_line['line_number'] = $line_number;
-    //   $invoice_line['description'] = $comment;
-    //   $invoice_line['quantity'] = $quantity;
-    //   $invoice_line['reduction_percent'] = $discount_percent;
-    //   $invoice_line['unit_price'] = array('net_amount' => $listprice);
-
-    //   // Line applicable tax (limit to one)
-    //   if($_REQUEST['taxtype'] == 'individual') {
-    //     foreach ($invoice_line_detail as $key => $value) {
-    //       if(preg_match('/^tax\d+/', $key) && !is_null($value) && $value > 0) {
-    //         $tax = TaxMapper::getTaxByName($key);
-    //         $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($tax['taxid'], 'TAXRECORD');
-    //         if($mno_id_map) {
-    //           $invoice_line['tax_code_id'] = $mno_id_map['mno_entity_guid'];
-    //           $individual_tax = true;
-    //           break;
-    //         }
-    //       }
-    //     }
-    //   }
-
-    //   if($_REQUEST['taxtype'] == 'group') {
-    //     foreach ($invoice_line_detail as $key => $value) {
-    //       if(preg_match('/^tax\d+/', $key) && !is_null($value) && $value > 0) {
-    //         $tax = TaxMapper::getTaxByName($key);
-    //         $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($tax['taxid'], 'TAXRECORD');
-    //         if($mno_id_map) {
-    //           $invoice_line['tax_code_id'] = $mno_id_map['mno_entity_guid'];
-    //           $individual_tax = true;
-    //           break;
-    //         }
-    //       }
-    //     }
-    //   }
-
-    //   // Map item id
-    //   $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($productid, 'PRODUCTS');
-    //   if($mno_id_map) { $invoice_line['item_id'] = $mno_id_map['mno_entity_guid']; }
-
-    //   $invoice_line_hash['lines'][] = $invoice_line;
-    // }
+    // Map item id
+    $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($productid, 'PRODUCT');
+    if($mno_id_map) { $invoice_line_hash['item_id'] = $mno_id_map['mno_entity_guid']; }
 
     return $invoice_line_hash;
   }
 
   // Persist the Dolibarr InvoiceLine
   protected function persistLocalModel($invoice_line, $invoice_line_hash) {
-    if($this->is_new($invoice_line)) {
-      $invoice_line->id = $invoice_line->insert(0, false);
+    if(!$this->is_set($invoice_line->rowid)) {
+      $invoice_line->rowid = $invoice_line->insert(0, false);
     } else {
       $user = ConnecUtils::defaultUser();
       $invoice_line->update($user, 0, false);

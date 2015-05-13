@@ -63,6 +63,13 @@ abstract class BaseMapper {
     return true;
   }
 
+  // Overwrite me!
+  // Optional: Returns the Connec! Resource ID. When dealing with embedded documents, ID is unique only within the embedded collection.
+  // In this case it is advised to prefix the Embedded Document ID with the Parent Document ID (eg: PARENT_ID#EMBEDDED_DOCUMENT_ID)
+  protected function getConnecResourceId($resource_hash) {
+    return $resource_hash['id'];
+  }
+
   public function getConnecResourceName() {
     return $this->connec_resource_name;
   }
@@ -107,7 +114,7 @@ abstract class BaseMapper {
         try {
           $this->saveConnecResource($resource_hash);
         } catch (Exception $e) {
-          error_log("Error when processing entity=".$this->connec_entity_name.", id=".$resource_hash['id'].", message=" . $e->getMessage());
+          error_log("Error when processing entity=".$this->connec_entity_name.", id=".$this->getConnecResourceId($resource_hash).", message=" . $e->getMessage());
         }
       }
     }
@@ -141,7 +148,7 @@ abstract class BaseMapper {
         // If an error occured, log it
         if($this->is_set($model->error)) {
           error_log("Cannot save entity=$this->connec_entity_name due to error " . json_encode($model->error));
-          $transaction_log = array('entity_id' => $resource_hash['id'], 'entity_name' => $this->connec_entity_name, 'message' => $model->error, 'status' => 'ERROR');
+          $transaction_log = array('entity_id' => $this->getConnecResourceId($resource_hash), 'entity_name' => $this->connec_entity_name, 'message' => $model->error, 'status' => 'ERROR');
           $hash = array('transaction_logs' => $transaction_log);
           $this->_connec_client->post('transaction_logs', $hash);
         } else {
@@ -164,14 +171,15 @@ abstract class BaseMapper {
   // Map a Connec Resource to an Dolibarr Model
   public function findOrCreateIdMap($resource_hash, $model) {
     $local_id = $this->getId($model);
-    error_log("findOrCreateIdMap entity=$this->connec_entity_name, local_id=$local_id, entity_id=" .$resource_hash['id']);
+    $mno_id = $this->getConnecResourceId($resource_hash);
+    error_log("findOrCreateIdMap entity=$this->connec_entity_name, local_id=$local_id, entity_id=" .$mno_id);
     
-    if($local_id == 0 || is_null($resource_hash['id'])) { return null; }
+    if($local_id == 0 || is_null($mno_id)) { return null; }
 
     $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($local_id, $this->local_entity_name);
     if(!$mno_id_map) {
-      error_log("map connec resource entity=$this->connec_entity_name, id=" . $resource_hash['id'] . ", local_id=$local_id");
-      return MnoIdMap::addMnoIdMap($local_id, $this->local_entity_name, $resource_hash['id'], $this->connec_entity_name);
+      error_log("map connec resource entity=$this->connec_entity_name, id=" . $mno_id . ", local_id=$local_id");
+      return MnoIdMap::addMnoIdMap($local_id, $this->local_entity_name, $mno_id, $this->connec_entity_name);
     }
 
     return $mno_id_map;
@@ -201,7 +209,7 @@ abstract class BaseMapper {
     $model = null;
 
     // Find local Model if exists
-    $mno_id = $resource_hash['id'];
+    $mno_id = $this->getConnecResourceId($resource_hash);
     $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($mno_id, $this->connec_entity_name, $this->local_entity_name);
     
     error_log("find or initialize entity=$this->connec_entity_name, mno_id=$mno_id, mno_id_map=" . json_encode($mno_id_map));

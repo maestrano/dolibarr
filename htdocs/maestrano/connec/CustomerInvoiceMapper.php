@@ -94,7 +94,7 @@ class CustomerInvoiceMapper extends TransactionMapper {
     // Map Invoice lines
     if(!empty($invoice->lines)) {
       $invoice_lines_hashes = array();
-      $invoice_line_mapper = new InvoiceLineMapper($invoice);
+      $invoice_line_mapper = new InvoiceLineMapper($invoice, $invoice_hash);
       foreach($invoice->lines as $invoice_line) {
         array_push($invoice_lines_hashes, $invoice_line_mapper->mapModelToConnecResource($invoice_line));
       }
@@ -113,11 +113,23 @@ class CustomerInvoiceMapper extends TransactionMapper {
       $invoice->update($user, 0, false);
     }
 
-    // Persist Invoice Lines
+    // Persist invoice lines
     if(!empty($invoice_hash['lines'])) {
+      $processed_lines_local_ids = array();
+
       foreach($invoice_hash['lines'] as $invoice_line_hash) {
-        $invoice_line_mapper = new InvoiceLineMapper($invoice);
-        $invoice_line_mapper->saveConnecResource($invoice_line_hash);
+        $invoice_line_mapper = new InvoiceLineMapper($invoice, $invoice_hash);
+        $invoice_line = $invoice_line_mapper->saveConnecResource($invoice_line_hash);
+        array_push($processed_lines_local_ids, $invoice_line->rowid);
+      }
+
+      // Delete local invoice lines that have been removed
+      $local_invoice_lines = $invoice->lines;
+      foreach ($local_invoice_lines as $local_invoice_line) {
+        if(!in_array($local_invoice_line->rowid, $processed_lines_local_ids)) {
+          $local_invoice_line->delete(false);
+          MnoIdMap::hardDeleteMnoIdMap($local_invoice_line->rowid, 'FACTURELIGNE');
+        }
       }
     }
 
