@@ -1,0 +1,84 @@
+- name: Dolibarr Installation
+  hosts: localhost
+  vars_files:
+    - ../var/settings.yml
+
+  tasks:
+  - name: General | Install Application packages
+    apt: "name={{ item }} state=present"
+    with_items:
+      - git
+      - curl
+
+  - name: Dolibarr | Ensure MySQL is running
+    service: 
+      name: mysql 
+      state: started
+
+  - name: Dolibarr | Create Dolibarr database
+    mysql_db:
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      db: "{{ dolibarr_db_name }}"
+      state: present
+
+  - name: Dolibarr | Create Dolibarr database user
+    mysql_user:
+      name: "{{ dolibarr_db_user }}"
+      password: "{{ dolibarr_db_password }}"
+      priv: "{{ dolibarr_db_name }}.*:ALL,GRANT"
+      state: present
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+
+  - name: Dolibarr | Download application from Github
+    sudo: false
+    git: >
+      repo=https://github.com/maestrano/dolibarr.git
+      dest={{ dolibarr_root_path }}
+      version=3.7.0-1
+      accept_hostkey=yes
+      ssh_opts="-o StrictHostKeyChecking=no"
+      update=yes
+      force=yes
+
+  - name: Dolibarr | Configure Apache virtual host
+    template: 
+      src: ../templates/etc-apache22-confd-dolibarr-conf
+      dest: /etc/apache2/sites-available/dolibarr.conf
+      owner: root
+      mode: 755
+
+  - name: Dolibarr | Enable Apache virtual host 
+    file: src=/etc/apache2/sites-available/dolibarr.conf dest=/etc/apache2/sites-enabled/dolibarr.conf state=link
+
+  - name: Apache | Restart the Apache service
+    service: 
+      name: apache2 
+      state: restarted
+
+  - name: Dolibarr | Configuration file config.php
+    template: 
+      src: ../templates/dolibarr-conf.php
+      dest: "{{ dolibarr_root_path }}/conf/conf.php"
+      owner: root
+      mode: 755
+
+  - name: Dolibarr | Configuration file maestrano.json
+    template: 
+      src: ../templates/maestrano.json
+      dest: "{{ dolibarr_root_path }}/maestrano.json"
+      owner: root
+      mode: 755
+
+  - name: Dolibarr | Apply Maestrano patch
+    shell: "mysql {{ dolibarr_db_name }} -u{{dolibarr_db_user}} -p{{dolibarr_db_password}} < maestrano/app/db/{{ item }}"
+    args:
+      chdir: "{{ dolibarr_root_path }}"
+    with_items:
+      - 1_add_mno_uid_field.sql
+      - 2_add_mno_id_map.sql
+      - 3_increase_account_label_length.sql
+
+  - name: Dolibarr | Set file permissions
+    file: "path={{ dolibarr_root_path }} mode=755 owner=www-data group=www-data state=directory recurse=yes"
