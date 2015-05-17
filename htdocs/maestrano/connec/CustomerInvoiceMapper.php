@@ -25,9 +25,6 @@ class CustomerInvoiceMapper extends TransactionMapper {
     // Map invoice type
     $this->mapInvoiceTypeToDolibarr($invoice_hash, $invoice);
 
-    // Map invoice status
-    $this->mapInvoiceStatusToDolibarr($invoice_hash, $invoice);
-
     if($this->is_set($transaction_hash['transaction_number'])) { $transaction->ref_ext = $transaction_hash['transaction_number']; }
   }
 
@@ -69,7 +66,7 @@ class CustomerInvoiceMapper extends TransactionMapper {
   protected function persistLocalModel($invoice, $invoice_hash) {
     $user = ConnecUtils::defaultUser();
     if($this->is_new($invoice)) {
-      $invoice->id = $invoice->create($user, 0, 0, false);
+      $invoice->id = $invoice->create($user, 0, $invoice->date_lim_reglement, false);
     } else {
       $invoice->update($user, 0, false);
     }
@@ -96,6 +93,9 @@ class CustomerInvoiceMapper extends TransactionMapper {
 
     // Calculate invoice amount
     $invoice->update_price(1);
+
+    // Apply invoice status
+    $this->mapInvoiceStatusToDolibarr($invoice_hash, $invoice);
   }
 
   // Set default invoice type to TYPE_STANDARD
@@ -106,19 +106,23 @@ class CustomerInvoiceMapper extends TransactionMapper {
   // Map invoice status from Connec to Dolibarr
   // Connec status: DRAFT, AUTHORISED, PAID, VOIDED
   private function mapInvoiceStatusToDolibarr($invoice_hash, $invoice) {
+    $user = ConnecUtils::defaultUser();
+    $user->rights->facture->valider = true;
     switch($invoice_hash['status']) {
       case "PAID":
-        $invoice->paye = 1;
-        $invoice->statut = 2;
+        $invoice->set_paid($user, '', '', false);
         break;
       case "AUTHORISED":
-        $invoice->statut = 1;
+        $invoice->validate($user, '', 0, 0, false);
+        break;
+      case "SUBMITTED":
+        $invoice->validate($user, '', 0, 0, false);
         break;
       case "DRAFT":
-        $invoice->statut = 0;
+        $invoice->set_draft($user, -1, false);
         break;
       case "VOIDED":
-        $invoice->statut = 3;
+        $invoice->set_canceled($user, '', '', false);
         break;
     }
   }

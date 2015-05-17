@@ -30,7 +30,7 @@ abstract class TransactionMapper extends BaseMapper {
   // Map the Connec resource attributes onto the Dolibarr transaction
   protected function mapConnecResourceToModel($transaction_hash, $transaction) {
     // TODO Map/Create Currency
-
+error_log("INVOICE DUE DATE: " . json_encode($transaction_hash['due_date']));
     // Map invoice attributes
     if($this->is_set($transaction_hash['code'])) { $transaction->ref = $transaction_hash['code']; }
     if($this->is_set($transaction_hash['transaction_date'])) { $transaction->date = $transaction_hash['transaction_date']; }

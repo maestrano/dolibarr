@@ -28,11 +28,13 @@ class SupplierInvoiceMapper extends TransactionMapper {
     // Map invoice status
     $this->mapInvoiceStatusToDolibarr($invoice_hash, $invoice);
 
-    if($this->is_set($transaction_hash['title'])) { $invoice->libelle = $transaction_hash['title']; }
+    // Map attributes
+    if($this->is_set($invoice_hash['title'])) { $invoice->libelle = $invoice_hash['title']; }
+    if($this->is_set($invoice_hash['due_date'])) { $invoice->date_echeance = $invoice_hash['due_date']; }
 
     // Find of generate a supplier reference
-    if($this->is_set($transaction_hash['transaction_number'])) { $invoice->ref_supplier = $transaction_hash['transaction_number']; }
-    else if($this->is_set($transaction_hash['code'])) { $invoice->ref_supplier = $transaction_hash['code']; }
+    if($this->is_set($invoice_hash['transaction_number'])) { $invoice->ref_supplier = $invoice_hash['transaction_number']; }
+    else if($this->is_set($invoice_hash['code'])) { $invoice->ref_supplier = $invoice_hash['code']; }
     else { $invoice->ref_supplier = mt_rand(); }
   }
 
@@ -45,7 +47,8 @@ class SupplierInvoiceMapper extends TransactionMapper {
     // Default invoice type to SUPPLIER
     $invoice_hash['type'] = 'SUPPLIER';
 
-    if($this->is_set($transaction->libelle)) { $transaction_hash['title'] = $transaction->libelle; }
+    if($this->is_set($invoice->libelle)) { $invoice_hash['title'] = $invoice->libelle; }
+    if($this->is_set($invoice->date_echeance)) { $invoice_hash['due_date'] = date('c', $invoice->date_echeance); }
 
     // Map invoice status
     $this->mapInvoiceStatusToConnec($invoice_hash, $invoice);
