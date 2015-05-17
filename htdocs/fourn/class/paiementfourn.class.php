@@ -133,7 +133,7 @@ class PaiementFourn extends Paiement
 	 *	@param		int		$closepaidinvoices   	1=Also close payed invoices to paid, 0=Do nothing more
 	 *	@return     int         					id of created payment, < 0 if error
 	 */
-	function create($user,$closepaidinvoices=0)
+	function create($user,$closepaidinvoices=0, $pushToConnec=true)
 	{
 		global $langs,$conf;
 
@@ -237,6 +237,7 @@ class PaiementFourn extends Paiement
 		{
 			$this->db->commit();
 			dol_syslog('PaiementFourn::Create Ok Total = '.$this->total);
+			$this->pushToConnec($pushToConnec);
 			return $this->id;
 		}
 		else
@@ -504,4 +505,17 @@ class PaiementFourn extends Paiement
 		if ($withpicto != 2) $result.=$lien.$text.$lienfin;
 		return $result;
 	}
+
+  // Hook Maestrano
+  function pushToConnec($pushToConnec=true, $delete=false) {   
+    if(!$pushToConnec) { return $this; }
+
+    $mapper = 'SupplierPaymentMapper';
+    if(class_exists($mapper)) {
+      $supplierPaymentMapper = new $mapper();
+      $supplierPaymentMapper->processLocalUpdate($this, $pushToConnec, $delete);
+    }
+
+    return $this;
+  }
 }

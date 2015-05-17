@@ -16,6 +16,8 @@ require_once MAESTRANO_ROOT . '/connec/CustomerInvoiceLineMapper.php';
 require_once MAESTRANO_ROOT . '/connec/SupplierInvoiceMapper.php';
 require_once MAESTRANO_ROOT . '/connec/SupplierInvoiceLineMapper.php';
 require_once MAESTRANO_ROOT . '/connec/PaymentMapper.php';
+require_once MAESTRANO_ROOT . '/connec/CustomerPaymentMapper.php';
+require_once MAESTRANO_ROOT . '/connec/SupplierPaymentMapper.php';
 
 // Set default user as a global variable
 $user = ConnecUtils::defaultUser();

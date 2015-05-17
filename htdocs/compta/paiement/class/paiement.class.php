@@ -816,10 +816,10 @@ class Paiement extends CommonObject
   function pushToConnec($pushToConnec=true, $delete=false) {   
     if(!$pushToConnec) { return $this; }
 
-    $mapper = 'PaymentMapper';
+    $mapper = 'CustomerPaymentMapper';
     if(class_exists($mapper)) {
-      $paymentMapper = new $mapper();
-      $paymentMapper->processLocalUpdate($this, $pushToConnec, $delete);
+      $customerPaymentMapper = new $mapper();
+      $customerPaymentMapper->processLocalUpdate($this, $pushToConnec, $delete);
     }
 
     return $this;
