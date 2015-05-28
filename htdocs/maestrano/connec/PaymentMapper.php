@@ -34,7 +34,7 @@ abstract class PaymentMapper extends BaseMapper {
     // Map payment attributes
     if($this->is_set($payment_hash['code'])) { $payment->ref = $payment_hash['code']; }
     if($this->is_set($payment_hash['payment_reference'])) { $payment->num_paiement = $payment_hash['payment_reference']; }
-    if($this->is_set($payment_hash['Payment_date'])) { $payment->datepaye = $payment_hash['Payment_date']; }
+    if($this->is_set($payment_hash['transaction_date'])) { $payment->datepaye = $payment_hash['transaction_date']; }
     if($this->is_set($payment_hash['public_note'])) { $payment->note = $payment_hash['public_note']; }
 
     // Map Account
@@ -50,10 +50,11 @@ abstract class PaymentMapper extends BaseMapper {
     $payment->amounts = array();
     // Map each linked payment of each payment line to a local invoice
     foreach($payment_hash['payment_lines'] as $payment_line_hash) {
+      // Payment amount
       $payment_line_amount = floatval($payment_line_hash['amount']);
-      foreach($payment_line_hash['linked_payments'] as $payment_hash) {
+      foreach($payment_line_hash['linked_transactions'] as $payment_hash) {
         // Map payment and amount paid
-        $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($payment_hash['id'], 'INVOICE', $this->local_entity_name);
+        $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($payment_hash['id'], 'INVOICE');
         if($mno_id_map) { $payment->amounts[$mno_id_map['app_entity_id']] = $payment_line_amount; }
       }
     }

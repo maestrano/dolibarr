@@ -31,13 +31,18 @@ class SupplierPaymentMapper extends PaymentMapper {
     $payment_hash['payment_lines'] = array();
     $local_payment_lines = $this->getLocalPaymentLines($payment);
     foreach ($local_payment_lines as $local_payment_line) {
-      // TODO: Map Payment Line ID
       $payment_line = array();
+
+      // Map Payment Line ID
+      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($local_payment_line['rowid'], 'PAIEMENTFOURNISSEURLIGNE');
+      if($mno_id_map) { $payment_line['id'] = array(array('id' => $mno_id_map['mno_entity_guid'])); }
+
+      // Payment line attributes
       $payment_line['amount'] = $local_payment_line['amount'];
 
       // Map single payment to Payment line
       $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($local_payment_line['fk_facture'], 'FACTUREFOURNISSEUR');
-      if($mno_id_map) { $payment_line['linked_payments'] = array(array('id' => $mno_id_map['mno_entity_guid'])); }
+      if($mno_id_map) { $payment_line['linked_transactions'] = array(array('id' => $mno_id_map['mno_entity_guid'])); }
       
       $payment_hash['payment_lines'][] = $payment_line;
     }
@@ -45,11 +50,21 @@ class SupplierPaymentMapper extends PaymentMapper {
     return $payment_hash;
   }
 
-  // Persist the Dolibarr Payment. Process only new Payments.
+    // Persist the Dolibarr Payment. Process only new Payments.
   protected function persistLocalModel($payment, $payment_hash) {
     $user = ConnecUtils::defaultUser();
     if($this->is_new($payment)) {
       $payment->id = $payment->create($user, 1, false);
+    }
+
+    // Map payment lines IDs
+    $local_payment_lines = $this->getLocalPaymentLines($payment);
+    if(!empty($payment_hash['payment_lines'])) {
+      foreach($payment_hash['payment_lines'] as $payment_line_hash) {
+        $local_payment_line = $local_payment_lines->fetch_assoc();
+        $payment_line_id = $payment_line_hash['id'];
+        MnoIdMap::addMnoIdMap($local_payment_line['rowid'], 'PAIEMENTFOURNISSEURLIGNE', $payment_line_id, 'PAYMENTLINE');
+      }
     }
   }
 
@@ -59,6 +74,7 @@ class SupplierPaymentMapper extends PaymentMapper {
     $sql = 'SELECT *';
     $sql.= ' FROM '.MAIN_DB_PREFIX.'paiementfourn_facturefourn ';
     $sql.= ' WHERE fk_paiementfourn = '.$payment->id;
+    $sql.= ' ORDER BY rowid';
     return $db->query($sql);
   }
 }

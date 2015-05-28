@@ -107,7 +107,10 @@ class CustomerInvoiceMapper extends TransactionMapper {
   // Connec status: DRAFT, AUTHORISED, PAID, VOIDED
   private function mapInvoiceStatusToDolibarr($invoice_hash, $invoice) {
     $user = ConnecUtils::defaultUser();
+    if(is_null($user->rights)) { $user->rights = (object) array(); }
+    if(is_null($user->rights->facture)) { $user->rights->facture = (object) array(); }
     $user->rights->facture->valider = true;
+    
     switch($invoice_hash['status']) {
       case "PAID":
         $invoice->set_paid($user, '', '', false);

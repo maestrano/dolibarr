@@ -56,9 +56,9 @@ class CustomerInvoiceLineMapper extends BaseMapper {
     if($this->is_set($invoice_line_hash['quantity'])) { $invoice_line->qty = $invoice_line_hash['quantity']; }
     
     // Line amounts
-    $invoice_line->total_ht = $invoice_line_hash['total_price']['net_amount'];
-    $invoice_line->total_tva = $invoice_line_hash['total_price']['tax_amount'];
-    $invoice_line->total_ttc = $invoice_line_hash['total_price']['total_amount'];
+    $invoice_line->total_ht = $invoice_line_hash['total_price']['net_amount'] ? $invoice_line_hash['total_price']['net_amount'] : 0;
+    $invoice_line->total_tva = $invoice_line_hash['total_price']['tax_amount'] ? $invoice_line_hash['total_price']['tax_amount'] : 0;
+    $invoice_line->total_ttc = $invoice_line_hash['total_price']['total_amount'] ? $invoice_line_hash['total_price']['total_amount'] : 0;
     $invoice_line->remise_percent = $invoice_line_hash['reduction_percent'];
     $invoice_line->subprice = $invoice_line_hash['unit_price']['net_amount'];
 
