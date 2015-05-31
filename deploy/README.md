@@ -8,7 +8,7 @@
 
 You can add extra hosts entry to your cotnainers with the option `--add-host hostname:IP`:
 
-`sudo docker run -t -i --add-host application.maestrano.io:172.17.42.1 --name=dolibarr_container maestrano:dolibarr-3.7.0`
+`sudo docker run -t -i --add-host application.maestrano.io:172.17.42.1 --add-host connec.maestrano.io:172.17.42.1 --name=dolibarr_container maestrano:dolibarr-3.7.0`
 
 ## Retrieve container details (IP address...)
 `sudo docker inspect dolibarr_container`
@@ -16,7 +16,7 @@ You can add extra hosts entry to your cotnainers with the option `--add-host hos
 And then access the container with http://[IP_ADDRESS] to check vTiger is running
 
 ## Apply the maestrano patch (SSO and Connec! data sharing)
-ansible-playbook /etc/ansible/playbooks/configure_dolibarr.yml -c local --extra-vars='{"sso_enabled": "true", "connec_enabled": "true", "maestrano_environment": "local", "server_hostname": "dolibarr.app.dev.maestrano.io", "api_key": "94cd736d57484d5e42ed1a194de0af7508b1163a35909ab7fe3b713a90816661", "api_secret": "baa59b5b-cb6b-4e4b-8682-b3966877840e"}'
+ansible-playbook /etc/ansible/playbooks/configure_dolibarr.yml -c local --extra-vars='{"sso_enabled": "true", "connec_enabled": "true", "maestrano_environment": "local", "server_hostname": "dolibarr.app.dev.maestrano.io", "api_key": "7a25167c7a960d48e10ada7721a9820f599925e790c3e94a1d82e04fb645c292", "api_secret": "d657da53-9f32-4efd-8cfe-0b0f4ac12214"}'
 
 ### Maestrano configuration variables:
  - sso_enabled

@@ -11,14 +11,8 @@ ADD ansible/hosts /etc/ansible/hosts
 WORKDIR /etc/ansible
 
 # Install Ansible
-# RUN apt-get -y update &&  \
-#     apt-get -y upgrade &&  \
-#     ansible-playbook /etc/ansible/playbooks/install_dolibarr.yml -c local &&  \
-#     apt-get clean purge -y python2.6 python2.6-minimal &&  \
-#     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-RUN apt-get -y update
-RUN apt-get -y upgrade
-RUN ansible-playbook /etc/ansible/playbooks/install_dolibarr.yml -c local
-RUN apt-get clean purge -y python2.6 python2.6-minimal
-RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get -y update &&  \
+    apt-get -y upgrade &&  \
+    ansible-playbook /etc/ansible/playbooks/install_dolibarr.yml -c local &&  \
+    apt-get clean purge -y python2.6 python2.6-minimal &&  \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

@@ -44,7 +44,7 @@
 
   - name: Dolibarr | Configure Apache virtual host
     template: 
-      src: ../templates/etc-apache22-confd-dolibarr-conf
+      src: ../templates/etc-apache24-confd-dolibarr-conf
       dest: /etc/apache2/sites-available/dolibarr.conf
       owner: root
       mode: 755
