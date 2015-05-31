@@ -60,22 +60,30 @@
   - name: Dolibarr | Configuration file config.php
     template: 
       src: ../templates/dolibarr-conf.php
-      dest: "{{ dolibarr_root_path }}/conf/conf.php"
+      dest: "{{ dolibarr_root_path }}/htdocs/conf/conf.php"
       owner: root
       mode: 755
 
   - name: Dolibarr | Configuration file maestrano.json
     template: 
-      src: ../templates/maestrano.json
-      dest: "{{ dolibarr_root_path }}/maestrano.json"
+      src: ../templates/dolibarr-maestrano.json
+      dest: "{{ dolibarr_root_path }}/htdocs/maestrano.json"
+      owner: root
+      mode: 755
+
+  - name: Dolibarr | Base schema base_schema.sql
+    template: 
+      src: ../templates/dolibarr-base-schema.sql
+      dest: "{{ dolibarr_root_path }}/htdocs/maestrano/app/db/base_schema.sql"
       owner: root
       mode: 755
 
   - name: Dolibarr | Apply Maestrano patch
     shell: "mysql {{ dolibarr_db_name }} -u{{dolibarr_db_user}} -p{{dolibarr_db_password}} < maestrano/app/db/{{ item }}"
     args:
-      chdir: "{{ dolibarr_root_path }}"
+      chdir: "{{ dolibarr_root_path }}/htdocs"
     with_items:
+      - base_schema.sql
       - 1_add_mno_uid_field.sql
       - 2_add_mno_id_map.sql
       - 3_increase_account_label_length.sql

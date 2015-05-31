@@ -31,7 +31,7 @@
   - name: Dolibarr | Configuration file maestrano.json
     template: 
       src: ../templates/dolibarr-maestrano.json
-      dest: "{{ dolibarr_root_path }}/maestrano.json"
+      dest: "{{ dolibarr_root_path }}/htdocs/maestrano.json"
       owner: www-data
       group: www-data
       mode: 777
