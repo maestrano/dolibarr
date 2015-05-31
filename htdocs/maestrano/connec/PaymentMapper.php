@@ -4,6 +4,11 @@
 * Base mapper for payments
 */
 abstract class PaymentMapper extends BaseMapper {
+  protected $connec_entity_line_name = 'PAYMENTLINE';
+  protected $local_entity_line_name = 'PAYMENTLINE';
+  protected $default_label = '(CustomerInvoicePayment)';
+  protected $default_operation = 'payment';
+
   public function __construct() {
     parent::__construct();
 
@@ -70,7 +75,7 @@ abstract class PaymentMapper extends BaseMapper {
     // // Map attributes
     if($this->is_set($payment->ref)) { $payment_hash['code'] = $payment->ref; }
     if($this->is_set($payment->num_paiement)) { $payment_hash['payment_reference'] = $payment->num_paiement; }
-    if($this->is_set($payment->datepaye)) { $payment_hash['payment_date'] = date('c', $payment->datepaye); }
+    if($this->is_set($payment->datepaye)) { $payment_hash['transaction_date'] = date('c', $payment->datepaye); }
     if($this->is_set($payment->note)) { $payment_hash['public_note'] = $payment->note; }
     if($this->is_set($payment->amount)) { $payment_hash['total_amount'] = $payment->amount; }
 
@@ -82,4 +87,37 @@ abstract class PaymentMapper extends BaseMapper {
 
     return $payment_hash;
   }
+
+  // Persist the Dolibarr Payment. Process only new Payments.
+  protected function persistLocalModel($payment, $payment_hash) {
+    $user = ConnecUtils::defaultUser();
+    if($this->is_new($payment)) {
+      $payment->id = $payment->create($user, 1, false);
+    }
+
+    // Map payment lines IDs
+    $local_payment_lines = $this->getLocalPaymentLines($payment);
+    if(!empty($payment_hash['payment_lines'])) {
+      foreach($payment_hash['payment_lines'] as $payment_line_hash) {
+        $local_payment_line = $local_payment_lines->fetch_assoc();
+        $payment_line_id = $payment_line_hash['id'];
+        MnoIdMap::addMnoIdMap($local_payment_line['rowid'], $this->local_entity_line_name, $payment_line_id, $this->connec_entity_line_name);
+      }
+    }
+
+    // Add payment entry to general ledger
+    if($this->is_set($payment_hash['deposit_account_id'])) {
+      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($payment_hash['deposit_account_id'], 'ACCOUNT');
+      if($mno_id_map) {
+        $accountMapper = new AccountMapper();
+        $account = $accountMapper->loadModelById(intval($mno_id_map['app_entity_id']));
+        // Accounts of type Cash accepts only payment method 'LIQ'
+        if($account->courant == 2) { $payment->paiementid = 'LIQ'; }
+
+        $payment->addPaymentToBank($user, $this->default_operation, $this->default_label, $account->rowid, '', '');
+      }
+    }
+  }
+
+  protected function getLocalPaymentLines($payment) {}
 }

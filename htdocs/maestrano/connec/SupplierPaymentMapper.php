@@ -8,6 +8,9 @@ class SupplierPaymentMapper extends PaymentMapper {
     parent::__construct();
 
     $this->local_entity_name = 'PaiementFourn';
+    $this->local_entity_line_name = 'PAIEMENTFOURNISSEURLIGNE';
+    $this->default_label = '(SupplierInvoicePayment)';
+    $this->default_operation = 'payment_supplier';
   }
 
   protected function validate($payment_hash) {
@@ -41,7 +44,7 @@ class SupplierPaymentMapper extends PaymentMapper {
       $payment_line['amount'] = $local_payment_line['amount'];
 
       // Map single payment to Payment line
-      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($local_payment_line['fk_facture'], 'FACTUREFOURNISSEUR');
+      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($local_payment_line['fk_facturefourn'], 'FACTUREFOURNISSEUR');
       if($mno_id_map) { $payment_line['linked_transactions'] = array(array('id' => $mno_id_map['mno_entity_guid'])); }
       
       $payment_hash['payment_lines'][] = $payment_line;
@@ -50,25 +53,7 @@ class SupplierPaymentMapper extends PaymentMapper {
     return $payment_hash;
   }
 
-    // Persist the Dolibarr Payment. Process only new Payments.
-  protected function persistLocalModel($payment, $payment_hash) {
-    $user = ConnecUtils::defaultUser();
-    if($this->is_new($payment)) {
-      $payment->id = $payment->create($user, 1, false);
-    }
-
-    // Map payment lines IDs
-    $local_payment_lines = $this->getLocalPaymentLines($payment);
-    if(!empty($payment_hash['payment_lines'])) {
-      foreach($payment_hash['payment_lines'] as $payment_line_hash) {
-        $local_payment_line = $local_payment_lines->fetch_assoc();
-        $payment_line_id = $payment_line_hash['id'];
-        MnoIdMap::addMnoIdMap($local_payment_line['rowid'], 'PAIEMENTFOURNISSEURLIGNE', $payment_line_id, 'PAYMENTLINE');
-      }
-    }
-  }
-
-  private function getLocalPaymentLines($payment) {
+  protected function getLocalPaymentLines($payment) {
     global $db;
 
     $sql = 'SELECT *';

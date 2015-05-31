@@ -818,6 +818,9 @@ class Paiement extends CommonObject
 
     $mapper = 'CustomerPaymentMapper';
     if(class_exists($mapper)) {
+      // Extract account id
+      $this->fk_account = GETPOST('accountid');
+
       $customerPaymentMapper = new $mapper();
       $customerPaymentMapper->processLocalUpdate($this, $pushToConnec, $delete);
     }

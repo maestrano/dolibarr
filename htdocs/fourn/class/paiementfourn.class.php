@@ -512,6 +512,9 @@ class PaiementFourn extends Paiement
 
     $mapper = 'SupplierPaymentMapper';
     if(class_exists($mapper)) {
+      // Extract account id
+      $this->fk_account = GETPOST('accountid');
+      
       $supplierPaymentMapper = new $mapper();
       $supplierPaymentMapper->processLocalUpdate($this, $pushToConnec, $delete);
     }

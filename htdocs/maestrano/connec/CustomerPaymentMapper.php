@@ -8,6 +8,9 @@ class CustomerPaymentMapper extends PaymentMapper {
     parent::__construct();
 
     $this->local_entity_name = 'Paiement';
+    $this->local_entity_line_name = 'PAIEMENTLIGNE';
+    $this->default_label = '(CustomerInvoicePayment)';
+    $this->default_operation = 'payment';
   }
 
   protected function validate($payment_hash) {
@@ -50,25 +53,7 @@ class CustomerPaymentMapper extends PaymentMapper {
     return $payment_hash;
   }
 
-  // Persist the Dolibarr Payment. Process only new Payments.
-  protected function persistLocalModel($payment, $payment_hash) {
-    $user = ConnecUtils::defaultUser();
-    if($this->is_new($payment)) {
-      $payment->id = $payment->create($user, 1, false);
-    }
-
-    // Map payment lines IDs
-    $local_payment_lines = $this->getLocalPaymentLines($payment);
-    if(!empty($payment_hash['payment_lines'])) {
-      foreach($payment_hash['payment_lines'] as $payment_line_hash) {
-        $local_payment_line = $local_payment_lines->fetch_assoc();
-        $payment_line_id = $payment_line_hash['id'];
-        MnoIdMap::addMnoIdMap($local_payment_line['rowid'], 'PAIEMENTLIGNE', $payment_line_id, 'PAYMENTLINE');
-      }
-    }
-  }
-
-  private function getLocalPaymentLines($payment) {
+  protected function getLocalPaymentLines($payment) {
     global $db;
 
     $sql = 'SELECT *';
