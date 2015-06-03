@@ -357,6 +357,7 @@ class Entrepot extends CommonObject
 		$sql.= " FROM ".MAIN_DB_PREFIX."entrepot";
 		$sql.= " WHERE entity IN (".getEntity('warehouse', 1).")";
 		$sql.= " AND statut = ".$status;
+		$sql.= " ORDER BY label";
 
 		$result = $this->db->query($sql);
 		$i = 0;

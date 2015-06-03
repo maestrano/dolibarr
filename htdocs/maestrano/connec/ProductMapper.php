@@ -49,11 +49,6 @@ class ProductMapper extends BaseMapper {
     }
 
     if($this->is_set($item_hash['purchase_price'])) { $product->status_buy = 1; }
-    
-    // Track product inventory from another application
-    if($this->is_set($product_hash['is_inventoried']) && $product_hash['is_inventoried']) {
-      $product->stock = $product_hash['quantity_on_hand'];
-    }
   }
 
   // Map the Dolibarr Product to a Connec resource hash
@@ -105,10 +100,17 @@ class ProductMapper extends BaseMapper {
   }
 
   // Persist the Dolibarr Product
-  protected function persistLocalModel($product, $resource_hash) {
+  protected function persistLocalModel($product, $product_hash) {
     $user = ConnecUtils::defaultUser();
     if($this->is_new($product)) {
       $product->id = $product->create($user, 0, false);
+
+      // Set initial stock into default Warehouse
+      if($this->is_set($product_hash['is_inventoried']) && $product_hash['is_inventoried']) {
+        $quantity = is_null($product_hash['initial_quantity']) ? $product_hash['quantity_on_hand'] : $product_hash['initial_quantity'];
+        $warehouse = WarehouseMapper::getDefault();
+        $product->correct_stock($user, $warehouse->id, $quantity, 0);
+      }
     } else {
       $product->update($product->id, $user, false, 'update', false);
     }
