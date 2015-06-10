@@ -41,7 +41,7 @@ Map container mysql data and dolibarr directory as volumes and do backups:
 
 ## Stop and remove all containers
 sudo docker stop $(docker ps -a -q)
-sudo docker rm $(docker ps -a -q)
+sudo docker rm -v $(docker ps -a -q)
 
 ## Remove untagged images
 sudo docker images -q --filter "dangling=true" | xargs docker rmi
