@@ -23,3 +23,7 @@ $mno_settings->soa_init_url = $full_host . '/maestrano/data/initialize.php';
 
 // Enable Maestrano SSO for this app
 $mno_settings->soa_enabled = true;
+
+// API Keys
+$api_key = 'changeme';
+$api_secret = 'changeme';
