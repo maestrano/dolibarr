@@ -71,7 +71,7 @@ class Entrepot extends CommonObject
 	 *	@param		User	$user       Object user that create the warehouse
 	 *	@return		int					>0 if OK, =<0 if KO
 	 */
-	function create($user)
+	function create($user, $pushToConnec=true)
 	{
 		global $conf;
 
@@ -98,9 +98,10 @@ class Entrepot extends CommonObject
 			{
 				$this->id = $id;
 
-				if ($this->update($id, $user) > 0)
+				if ($this->update($id, $user, $pushToConnec) > 0)
 				{
 					$this->db->commit();
+          $this->pushToConnec($pushToConnec);
 					return $id;
 				}
 				else
@@ -133,7 +134,7 @@ class Entrepot extends CommonObject
 	 *	@param      User	$user	User object
 	 *	@return		int				>0 if OK, <0 if KO
 	 */
-	function update($id, $user)
+	function update($id, $user, $pushToConnec=true)
 	{
 		$this->libelle=$this->db->escape(trim($this->libelle));
 		$this->description=$this->db->escape(trim($this->description));
@@ -163,6 +164,7 @@ class Entrepot extends CommonObject
 		if ($resql)
 		{
 			$this->db->commit();
+      $this->pushToConnec($pushToConnec);
 			return 1;
 		}
 		else
@@ -549,4 +551,17 @@ class Entrepot extends CommonObject
         $this->country_id=1;
         $this->country_code='FR';
     }
+
+  // Hook Maestrano
+  function pushToConnec($pushToConnec=true, $delete=false) {   
+    if(!$pushToConnec) { return $this; }
+
+    $mapper = 'WarehouseMapper';
+    if(class_exists($mapper)) {
+      $warehouseMapper = new $mapper();
+      $warehouseMapper->processLocalUpdate($this, $pushToConnec, $delete);
+    }
+
+    return $this;
+  }
 }

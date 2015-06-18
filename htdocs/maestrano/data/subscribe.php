@@ -46,6 +46,10 @@ try {
       $supplierInvoiceMapper = new SupplierInvoiceMapper();
       $supplierInvoiceMapper->fetchConnecResource($entity_id);
       break;
+    case "WAREHOUSES":
+      $warehouseMapper = new WarehouseMapper();
+      $warehouseMapper->fetchConnecResource($entity_id);
+      break;
   }
 } catch (Exception $e) {
   error_log("Caught exception in subscribe " . json_encode($e->getMessage()));
