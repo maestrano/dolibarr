@@ -71,6 +71,13 @@
       owner: root
       mode: 755
 
+  - name: Dolibarr | Configuration script
+    template: 
+      src: ../templates/configure-container.sh
+      dest: "/root/configure.sh"
+      owner: root
+      mode: 755
+
   - name: Dolibarr | Base schema base_schema.sql
     template: 
       src: ../templates/dolibarr-base-schema.sql
