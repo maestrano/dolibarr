@@ -38,11 +38,9 @@ if($code != 200) {
       $mapper->persistAll($result[$mapper->getConnecResourceName()]);
     }
   }
+
+  $status = true;
 }
 
-error_log('Finished processing updates');
-$status = true;
-
-if ($status) {
-  file_put_contents($filepath, $current_timestamp);
-}
+// Set update timestamp
+if ($status) { file_put_contents($filepath, $current_timestamp); }
