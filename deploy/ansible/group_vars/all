@@ -1,7 +1,5 @@
----
-
 # php.ini
-php_max_execution_time: '90'
+php_max_execution_time: '180'
 php_memory_limit: '64M'
 php_display_errors: 'On'
 php_display_startup_errors: 'On'
@@ -20,13 +18,20 @@ innodb_file_per_table: 'innodb_file_per_table'
 # mysql
 mysql_root_password: 'password'
 
+# ssmtp
+notification_mail: admin@maestrano.com
+ssmtp_mailhub: smtp.mandrillapp.com:587
+ssmtp_hostname: fqdn_of_your_mail_server
+ssmtp_auth_user: the_mandrill_account_username
+ssmtp_auth_pass: the_mandrill_api_key
+
 # Dolibarr installation
 dolibarr_db_user: dolibarr
 dolibarr_db_password: dolibarr
 dolibarr_db_name: dolibarr
 dolibarr_root_path: /var/lib/dolibarr/webapp
 
-# Dolibarr default configuration
+# vTiger default configuration
 sso_enabled: "false"
 connec_enabled: "false"
 maestrano_environment: "production"
