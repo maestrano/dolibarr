@@ -1,13 +1,14 @@
 ServerName {{ server_hostname }}
 
 <VirtualHost *:80>
-  DocumentRoot {{ dolibarr_root_path }}
-  <Directory {{ dolibarr_root_path }}>
+  DocumentRoot {{ dolibarr_root_path }}/htdocs
+  <Directory {{ dolibarr_root_path }}/htdocs>
     DirectoryIndex index.php index.html
     Options Indexes FollowSymLinks Includes ExecCGI MultiViews
     AllowOverride All
     Order allow,deny
     Allow from all
+    Require all granted
   </Directory>
   
   ErrorLog /var/log/apache2/dolibarr_error.log

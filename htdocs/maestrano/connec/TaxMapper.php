@@ -37,7 +37,11 @@ class TaxMapper extends BaseMapper {
 
     // Map tax rate and name
     if($this->is_set($tax_hash['name'])) { $tax->note = $tax_hash['name']; }
-    if($this->is_set($tax_hash['sale_tax_rate'])) { $tax->taux = $tax_hash['sale_tax_rate']; }
+    if($this->is_set($tax_hash['sale_tax_rate'])) {
+      $tax->taux = $tax_hash['sale_tax_rate'];
+    } else {
+      $tax->taux = 0;
+    }
   }
 
   // Map the Dolibarr Tax to a Connec resource hash
@@ -69,7 +73,7 @@ class TaxMapper extends BaseMapper {
   public static function getTaxByName($tax_name) {
     global $db;
 
-    $result = $db->query("SELECT * from ".MAIN_DB_PREFIX."c_tva WHERE note = $tax_name AND active = 1 ORDER BY rowid DESC LIMIT 1");
+    $result = $db->query("SELECT * from ".MAIN_DB_PREFIX."c_tva WHERE note = '$tax_name' AND active = 1 ORDER BY rowid DESC LIMIT 1");
     if($result->num_rows > 0) { return (object) $result->fetch_assoc(); }
     return null;
   }

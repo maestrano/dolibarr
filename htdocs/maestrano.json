@@ -4,19 +4,19 @@
         "host": "http://dolibarr.app.dev.maestrano.io"
     },
     "api": {
-        "id": "2cfc929923e0243b4a7b9119326ea05ed17981c3f4d558c8e8cee824a61ed5c6",
-        "key": "e637a8ff-fdc1-46b2-bcd1-7579c4ed0ed2",
+        "id": "e876260b50146136ec393b662edc6d91e453a0dbae1facad335b33fb763ead99",
+        "key": "9309cffc-2cb2-4423-92ea-e1ff64894241",
         "group_id": "dolibarr.app.dev.maestrano.io"
     },
     "sso": {
-        "enabled": false,
+        "enabled": true,
         "slo_enabled": true,
         "init_path": "/maestrano/auth/saml/init.php",
         "consume_path": "/maestrano/auth/saml/consume.php",
         "creation_mode": "virtual"
     },
     "connec": {
-      "enabled": false
+      "enabled": true
     },
     "webhook": {
         "account": {

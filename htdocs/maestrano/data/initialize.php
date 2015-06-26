@@ -18,7 +18,7 @@ if (empty($timestamp)) { $timestamp = 0; }
 error_log('Fetch connec updates since ' . $timestamp);
 // Fetch updates
 $client = new Maestrano_Connec_Client();
-$msg = $client->get("updates/$timestamp?\$filter[entity]=Company,TaxCode,Account,Organization,Person,Item,Invoice,Quote,PurchaseOrder,Payment");
+$msg = $client->get("updates/$timestamp?\$filter[entity]=Company,TaxCode,Account,Organization,Person,Item,Invoice,Quote,PurchaseOrder,Payment,Warehouse");
 $code = $msg['code'];
 $body = $msg['body'];
 
@@ -38,11 +38,9 @@ if($code != 200) {
       $mapper->persistAll($result[$mapper->getConnecResourceName()]);
     }
   }
+
+  $status = true;
 }
 
-error_log('Finished processing updates');
-$status = true;
-
-if ($status) {
-  file_put_contents($filepath, $current_timestamp);
-}
+// Set update timestamp
+if ($status) { file_put_contents($filepath, $current_timestamp); }
