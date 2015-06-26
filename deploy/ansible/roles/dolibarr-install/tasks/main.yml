@@ -40,7 +40,8 @@
   template: 
     src: etc-apache24-confd-dolibarr-conf
     dest: /etc/apache2/sites-available/dolibarr.conf
-    owner: root
+    owner: www-data
+    group: www-data
     mode: 755
 
 - name: Dolibarr | Enable Apache virtual host 
@@ -55,7 +56,8 @@
   template: 
     src: dolibarr-base-schema.sql
     dest: "{{ dolibarr_root_path }}/htdocs/maestrano/app/db/base_schema.sql"
-    owner: root
+    owner: www-data
+    group: www-data
     mode: 755
 
 - name: Dolibarr | Apply Maestrano patch
@@ -68,14 +70,12 @@
     - 2_add_mno_id_map.sql
     - 3_increase_account_label_length.sql
 
-- name: Dolibarr | Set file permissions
-  file: "path={{ dolibarr_root_path }} mode=755 owner=www-data group=www-data state=directory recurse=yes"
-
 - name: Dolibarr | Configuration file config.php
   template: 
     src: dolibarr-conf.php
     dest: "{{ dolibarr_root_path }}/htdocs/conf/conf.php"
-    owner: root
+    owner: www-data
+    group: www-data
     mode: 755
   tags:
     - configuration
@@ -84,7 +84,11 @@
   template: 
     src: dolibarr-maestrano.json
     dest: "{{ dolibarr_root_path }}/htdocs/maestrano.json"
-    owner: root
+    owner: www-data
+    group: www-data
     mode: 755
   tags:
     - configuration
+
+- name: Dolibarr | Set file permissions
+  file: "path={{ dolibarr_root_path }} mode=755 owner=www-data group=www-data state=directory recurse=yes"
