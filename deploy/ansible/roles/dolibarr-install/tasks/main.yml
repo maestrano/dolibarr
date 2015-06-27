@@ -91,4 +91,12 @@
     - configuration
 
 - name: Dolibarr | Set file permissions
-  file: "path={{ dolibarr_root_path }} mode=755 owner=www-data group=www-data state=directory recurse=yes"
+  file:
+    path: "{{ dolibarr_root_path }}"
+    mode: 0755
+    owner: www-data
+    group: www-data
+    state: directory
+    recurse: yes
+  tags:
+    - configuration
