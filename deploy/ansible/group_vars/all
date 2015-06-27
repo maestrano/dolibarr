@@ -31,7 +31,7 @@ dolibarr_db_password: dolibarr
 dolibarr_db_name: dolibarr
 dolibarr_root_path: /var/lib/dolibarr/webapp
 
-# vTiger default configuration
+# Dolibarr default configuration
 sso_enabled: "false"
 connec_enabled: "false"
 maestrano_environment: "production"
