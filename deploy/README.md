@@ -1,22 +1,12 @@
-# Build Dolibarr application container
+# Dolibarr by Maestrano
+This version of Dolibarr is customized to provide Single Sing-On and Connec!™ data sharing. By default, these options are not enabled so an instance of the application can be launched in a Docker container and be run as-is.
+More information on [Maestrano SSO](https://maestrano.com) and [Connec!™ data sharing](https://maestrano.com/connec)
 
 ## Build Docker container with default Dolibarr installation
-`sudo docker build -t "maestrano:dolibarr-3.7.0" .`
+`sudo docker build -t .`
 
-## Start Docker container
-`sudo docker run -t -i --name=dolibarr_container maestrano:dolibarr-3.7.0`
-
-You can add extra hosts entry to your cotnainers with the option `--add-host hostname:IP`:
-
-`sudo docker run -t -i --add-host application.maestrano.io:172.17.42.1 --add-host connec.maestrano.io:172.17.42.1 --name=dolibarr_container maestrano:dolibarr-3.7.0`
-
-## Retrieve container details (IP address...)
-`sudo docker inspect dolibarr_container`
-
-And then access the container with http://[IP_ADDRESS] to check vTiger is running
-
-## Activate Maestrano customisation on start (SSO and Connec! data sharing)
-This is achieved by specifying environment variables
+## Activate Maestrano customisation on start (SSO and Connec!™ data sharing)
+This is achieved by specifying Maestrano environment variables
 
 ```bash
 docker run -it \
@@ -28,17 +18,5 @@ docker run -it \
   -e "MNO_API_SECRET=9309cffc-2cb2-4423-92ea-e1ff64894241" \
   --add-host application.maestrano.io:172.17.42.1 \
   --add-host connec.maestrano.io:172.17.42.1 \
-  --name=mcube-bbb bchauvet/dolibarr
+  --name=my-dolibarr maestrano/dolibarr:latest
  ```
-
-# Docker cheat-sheet
-
-## List docker containers
-`sudo docker ps`
-
-## Stop and remove all containers
-sudo docker stop $(docker ps -a -q)
-sudo docker rm -v $(docker ps -a -q)
-
-## Remove untagged images
-sudo docker images -q --filter "dangling=true" | xargs docker rmi
