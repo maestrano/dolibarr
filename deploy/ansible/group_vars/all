@@ -32,6 +32,7 @@ dolibarr_db_name: dolibarr
 dolibarr_root_path: /var/lib/dolibarr/webapp
 
 # Dolibarr default configuration
+dolibarr_version: mno-3.7.1
 sso_enabled: "false"
 connec_enabled: "false"
 maestrano_environment: "production"

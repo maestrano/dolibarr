@@ -30,11 +30,14 @@
   git: >
     repo=https://github.com/maestrano/dolibarr.git
     dest={{ dolibarr_root_path }}
-    version=3.7.0-1
+    version={{ dolibarr_version }}
     accept_hostkey=yes
     ssh_opts="-o StrictHostKeyChecking=no"
     update=yes
     force=yes
+
+- name: Dolibarr | Current commit hash
+  command: 'git log -n 1 --pretty=format:"%H" > {{ dolibarr_root_path }}/.git-version'
 
 - name: Dolibarr | Configure Apache virtual host
   template: 

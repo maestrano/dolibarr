@@ -3,7 +3,7 @@ This version of Dolibarr is customized to provide Single Sing-On and Connec!™ 
 More information on [Maestrano SSO](https://maestrano.com) and [Connec!™ data sharing](https://maestrano.com/connec)
 
 ## Build Docker container with default Dolibarr installation
-`sudo docker build -t .`
+`sudo docker build .`
 
 ## Activate Maestrano customisation on start (SSO and Connec!™ data sharing)
 This is achieved by specifying Maestrano environment variables
@@ -18,5 +18,5 @@ docker run -it \
   -e "MNO_API_SECRET=9309cffc-2cb2-4423-92ea-e1ff64894241" \
   --add-host application.maestrano.io:172.17.42.1 \
   --add-host connec.maestrano.io:172.17.42.1 \
-  --name=my-dolibarr maestrano/dolibarr:latest
+  maestrano/dolibarr:latest
  ```
