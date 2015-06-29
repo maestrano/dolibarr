@@ -76,18 +76,14 @@ class CompanyMapper extends BaseMapper {
       $company_hash['address']['shipping']['region'] = $state_hash['code_departement'];
     }
 
-    // Map phone
+    // Map phone, email and website
     $telephone = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_TEL");
     $fax = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_FAX");
     $email = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_MAIL");
     $website = dolibarr_get_const($db, "MAIN_INFO_SOCIETE_WEB"); 
-
-    $company_hash['phone'] = array();
-    if($this->is_set($telephone)) { $company_hash['phone']['landline'] = $telephone; }
-    if($this->is_set($fax)) { $company_hash['phone']['fax'] = $fax; }
-
-    if($this->is_set($email)) { $company_hash['email'] = array('address' => $email); }
-    if($this->is_set($website)) { $company_hash['website'] = array('url' => $website); }
+    $company_hash['phone'] = array('landline' => $telephone, 'fax' => $fax);
+    $company_hash['email'] = array('address' => $email);
+    $company_hash['website'] = array('url' => $website);
 
     return $company_hash;
   }

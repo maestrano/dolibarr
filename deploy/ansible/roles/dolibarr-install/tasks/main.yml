@@ -37,7 +37,9 @@
     force=yes
 
 - name: Dolibarr | Current commit hash
-  command: 'git log -n 1 --pretty=format:"%H" > {{ dolibarr_root_path }}/.git-version'
+  shell: 'git log -n 1 --pretty=format:"%H" > {{ dolibarr_root_path }}/.git-version'
+  args:
+    chdir: "{{ dolibarr_root_path }}"
 
 - name: Dolibarr | Configure Apache virtual host
   template: 
