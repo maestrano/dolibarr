@@ -105,3 +105,10 @@
     recurse: yes
   tags:
     - configuration
+
+- name: Dolibarr | Import Connec! data
+  shell: "php initialize.php"
+  args:
+    chdir: "{{ dolibarr_root_path }}/htdocs/maestrano/data"
+  tags:
+    - configuration
