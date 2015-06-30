@@ -36,6 +36,13 @@ class ConnecUtils {
     return null;
   }
 
+  public static function findCountryById($country_id) {
+    global $db;
+    $country = new Ccountry($db);
+    $country->fetch($country_id);
+    return $country;
+  }
+
   public static function findStateById($state_id) {
     global $db;
     

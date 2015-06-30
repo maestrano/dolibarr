@@ -104,12 +104,12 @@ class ContactMapper extends BaseMapper {
     $person_hash['is_lead'] = ($societe->prospect == 1);
 
     // Map Organization code as customer or supplier unique code
-    if($this->is_set($person->code)) { $person_hash['code'] = $person->code; }
-    if($this->is_set($person->civility_id)) { $person_hash['title'] = $person->getCivilityLabel(); }
-    if($this->is_set($person->firstname)) { $person_hash['first_name'] = $person->firstname; }
-    if($this->is_set($person->lastname)) { $person_hash['last_name'] = $person->lastname; }
-    if($this->is_set($person->note_public)) { $person_hash['description'] = $person->note_public; }
-    if($this->is_set($person->poste)) { $person_hash['job_title'] = $person->poste; }
+    $person_hash['code'] = $person->code;
+    $person_hash['title'] = $person->getCivilityLabel();
+    $person_hash['first_name'] = $person->firstname;
+    $person_hash['last_name'] = $person->lastname;
+    $person_hash['description'] = $person->note_public;
+    $person_hash['job_title'] = $person->poste;
 
     // Map Organization
     if($this->is_set($person->socid)) {
@@ -120,17 +120,15 @@ class ContactMapper extends BaseMapper {
     // Map address
     $address = array();
     $billing_address = array();
-    if($this->is_set($person->address)) { $billing_address['line1'] = $person->address; }
-    if($this->is_set($person->town)) { $billing_address['city'] = $person->town; }
+    $billing_address['line1'] = $person->address;
+    $billing_address['city'] = $person->town;
     if($this->is_set($person->state_id)) {
       $state_hash = ConnecUtils::findStateById($person->state_id);
       $billing_address['region'] = $state_hash['code_departement'];
     }
-    if($this->is_set($person->zip)) { $billing_address['postal_code'] = $person->zip; }
+    $billing_address['postal_code'] = $person->zip;
     if($this->is_set($person->country_id)) {
-      global $db;
-      $country = new Ccountry($db);
-      $country->fetch($person->country_id);
+      $country = ConnecUtils::findCountryById($person->country_id);
       $billing_address['country'] = $country->code;
     }
     if(!empty($billing_address)) { $address['billing'] = $billing_address; }
@@ -138,18 +136,18 @@ class ContactMapper extends BaseMapper {
 
     // Map phones
     $work_phone_hash = array();
-    if($this->is_set($person->phone_pro)) { $work_phone_hash['landline'] = $person->phone_pro; }
-    if($this->is_set($person->fax)) { $work_phone_hash['fax'] = $person->fax; }
+    $work_phone_hash['landline'] = $person->phone_pro;
+    $work_phone_hash['fax'] = $person->fax;
     if(!empty($work_phone_hash)) { $person_hash['phone_work'] = $work_phone_hash; }
 
     $home_phone_hash = array();
-    if($this->is_set($person->phone_perso)) { $home_phone_hash['landline'] = $person->phone_perso; }
-    if($this->is_set($person->phone_mobile)) { $home_phone_hash['mobile'] = $person->phone_mobile; }
+    $home_phone_hash['landline'] = $person->phone_perso;
+    $home_phone_hash['mobile'] = $person->phone_mobile;
     if(!empty($home_phone_hash)) { $person_hash['phone_home'] = $home_phone_hash; }
 
-    if($this->is_set($person->email)) { $person_hash['email'] = array('address' => $person->email); }
-    if($this->is_set($person->url)) { $person_hash['website'] = array('url' => $person->url); }
-    if($this->is_set($person->skype)) { $person_hash['contact_channel'] = array('skype' => $person->skype); }
+    $person_hash['email'] = array('address' => $person->email);
+    $person_hash['website'] = array('url' => $person->url);
+    $person_hash['contact_channel'] = array('skype' => $person->skype);
 
     return $person_hash;
   }

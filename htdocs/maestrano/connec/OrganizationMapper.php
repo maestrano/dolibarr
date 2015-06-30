@@ -103,21 +103,21 @@ class OrganizationMapper extends BaseMapper {
       $organization_hash['code'] = $organization->code_fournisseur;
     }
 
-    if($this->is_set($organization->name)) { $organization_hash['name'] = $organization->name; }
-    if($this->is_set($organization->note_public)) { $organization_hash['description'] = $organization->note_public; }
-    if($this->is_set($organization->capital)) { $organization_hash['capital'] = $organization->capital; }
-    if($this->is_set($organization->tva_intra)) { $organization_hash['reference'] = $organization->tva_intra; }
+    $organization_hash['name'] = $organization->name;
+    $organization_hash['description'] = $organization->note_public;
+    $organization_hash['capital'] = $organization->capital;
+    $organization_hash['reference'] = $organization->tva_intra;
 
     // Map billing address
     $address = array();
     $billing_address = array();
-    if($this->is_set($organization->address)) { $billing_address['line1'] = $organization->address; }
-    if($this->is_set($organization->town)) { $billing_address['city'] = $organization->town; }
+    $billing_address['line1'] = $organization->address;
+    $billing_address['city'] = $organization->town;
     if($this->is_set($organization->state_id)) {
       $state_hash = ConnecUtils::findStateById($organization->state_id);
       $billing_address['region'] = $state_hash['code_departement'];
     }
-    if($this->is_set($organization->zip)) { $billing_address['postal_code'] = $organization->zip; }
+    $billing_address['postal_code'] = $organization->zip;
     if($this->is_set($organization->country_id)) {
       global $db;
       $country = new Ccountry($db);
@@ -129,13 +129,13 @@ class OrganizationMapper extends BaseMapper {
 
     
     $phone_hash = array();
-    if($this->is_set($organization->phone)) { $phone_hash['landline'] = $organization->phone; }
-    if($this->is_set($organization->fax)) { $phone_hash['fax'] = $organization->fax; }
+    $phone_hash['landline'] = $organization->phone;
+    $phone_hash['fax'] = $organization->fax;
     if(!empty($phone_hash)) { $organization_hash['phone'] = $phone_hash; }
 
-    if($this->is_set($organization->email)) { $organization_hash['email'] = array('address' => $organization->email); }
-    if($this->is_set($organization->url)) { $organization_hash['website'] = array('url' => $organization->url); }
-    if($this->is_set($organization->skype)) { $organization_hash['contact_channel'] = array('skype' => $organization->skype); }
+    $organization_hash['email'] = array('address' => $organization->email);
+    $organization_hash['website'] = array('url' => $organization->url);
+    $organization_hash['contact_channel'] = array('skype' => $organization->skype);
 
     return $organization_hash;
   }

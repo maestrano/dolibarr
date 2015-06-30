@@ -38,7 +38,7 @@ class ProductMapper extends BaseMapper {
     if($this->is_set($item_hash['type']) && $item_hash['type'] == 'SERVICE') { $product->type = 1; } else { $product->type = 0; }
 
     // Set item pricing excluding taxes by default
-    if($this->is_new($person)) { $product->price_base_type = 'HT';}
+    if($this->is_new($product)) { $product->price_base_type = 'HT';}
 
     // Map product price
     if($this->is_set($item_hash['sale_price'])) {
@@ -49,6 +49,25 @@ class ProductMapper extends BaseMapper {
     }
 
     if($this->is_set($item_hash['purchase_price'])) { $product->status_buy = 1; }
+
+    // Item origin country
+    if($this->is_set($item_hash['country'])) {
+      $country_hash = ConnecUtils::findCountry($country);
+      if($country_hash) {
+        $product->country_id = $country_hash['rowid'];
+        $product->country_code = $country_hash['code'];
+      }
+    }
+
+    // Weight, size, area and volume
+    if($this->is_set($item_hash['weight'])) { $product->weight = $item_hash['weight']; }
+    if($this->is_set($item_hash['weight_units'])) { $product->weight_units = $item_hash['weight_units']; }
+    if($this->is_set($item_hash['length'])) { $product->length = $item_hash['length']; }
+    if($this->is_set($item_hash['length_units'])) { $product->length_units = $item_hash['length_units']; }
+    if($this->is_set($item_hash['surface'])) { $product->surface = $item_hash['surface']; }
+    if($this->is_set($item_hash['surface_units'])) { $product->surface_units = $item_hash['surface_units']; }
+    if($this->is_set($item_hash['volume'])) { $product->volume = $item_hash['volume']; }
+    if($this->is_set($item_hash['volume_units'])) { $product->volume_units = $item_hash['volume_units']; }
   }
 
   // Map the Dolibarr Product to a Connec resource hash
@@ -59,9 +78,9 @@ class ProductMapper extends BaseMapper {
     $item_hash = array();
 
     // Map Product code as customer or supplier unique code
-    if($this->is_set($product->ref)) { $item_hash['code'] = $product->ref; }
-    if($this->is_set($product->libelle)) { $item_hash['name'] = $product->libelle; }
-    if($this->is_set($product->description)) { $item_hash['description'] = $product->description; }
+    $item_hash['code'] = $product->ref;
+    $item_hash['name'] = $product->libelle;
+    $item_hash['description'] = $product->description;
 
     // Map product type
     if($product->type == 0) { $item_hash['type'] = 'PRODUCT'; }
@@ -95,6 +114,22 @@ class ProductMapper extends BaseMapper {
 
     // Product stock
     $product_hash['quantity_on_hand'] = $product->stock_reel;
+
+    // Product origin country
+    if($this->is_set($product->country_id)) {
+      $country = ConnecUtils::findCountryById($product->country_id);
+      $item_hash['country'] = $country->code;
+    }
+
+    // Weight, size, area and volume
+    $item_hash['weight'] = $product->weight;
+    $item_hash['weight_units'] = $product->weight_units;
+    $item_hash['length'] = $product->length;
+    $item_hash['length_units'] = $product->length_units;
+    $item_hash['surface'] = $product->surface;
+    $item_hash['surface_units'] = $product->surface_units;
+    $item_hash['volume'] = $product->volume;
+    $item_hash['volume_units'] = $product->volume_units;
 
     return $item_hash;
   }
