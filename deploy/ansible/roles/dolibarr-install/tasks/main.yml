@@ -107,8 +107,8 @@
     - configuration
 
 - name: Dolibarr | Import Connec! data
-  shell: "php htdocs/maestrano/data/initialize.php"
+  shell: "php initialize.php"
   args:
-    chdir: "{{ dolibarr_root_path }}"
+    chdir: "{{ dolibarr_root_path }}/htdocs/maestrano/data"
   tags:
     - configuration
