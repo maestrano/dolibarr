@@ -30,7 +30,7 @@
   git: >
     repo=https://github.com/maestrano/dolibarr.git
     dest={{ dolibarr_root_path }}
-    version={{ dolibarr_version }}
+    version={{ application_version }}
     accept_hostkey=yes
     ssh_opts="-o StrictHostKeyChecking=no"
     update=yes
