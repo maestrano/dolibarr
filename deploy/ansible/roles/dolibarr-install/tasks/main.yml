@@ -1,3 +1,11 @@
+# Include dolibarr specific configuration
+- include_vars: "{{ item }}"
+  with_items:
+    - dolibarr.yml
+    - version.yml
+  tags:
+    - configuration
+
 - name: General | Install Application packages
   apt: "name={{ item }} state=present"
   with_items:
@@ -30,7 +38,7 @@
   git: >
     repo=https://github.com/maestrano/dolibarr.git
     dest={{ dolibarr_root_path }}
-    version={{ dolibarr_version }}
+    version={{ application_version }}
     accept_hostkey=yes
     ssh_opts="-o StrictHostKeyChecking=no"
     update=yes
