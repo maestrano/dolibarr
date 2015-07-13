@@ -13,9 +13,7 @@
     - curl
 
 - name: Dolibarr | Ensure MySQL is running
-  service: 
-    name: mysql 
-    state: started
+  command: service mysql start
   tags:
     - configuration
 
@@ -105,6 +103,16 @@
   tags:
     - configuration
 
+- name: Dolibarr | Create default documents directory
+  file:
+    path: "{{ dolibarr_root_path }}/documents"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 755
+  tags:
+    - configuration
+
 - name: Dolibarr | Set file permissions
   file:
     path: "{{ dolibarr_root_path }}"
@@ -117,7 +125,7 @@
     - configuration
 
 - name: Dolibarr | Import Connec! data
-  shell: "(nohup php initialize.php 1>/dev/null 2>&1) &"
+  shell: "(nohup php initialize.php 1>/var/log/apache2/dolibarr_initialize.log 2>&1) &"
   args:
     chdir: "{{ dolibarr_root_path }}/htdocs/maestrano/data"
   tags:
