@@ -13,9 +13,7 @@
     - curl
 
 - name: Dolibarr | Ensure MySQL is running
-  service: 
-    name: mysql 
-    state: started
+  command: service mysql start
   tags:
     - configuration
 
@@ -99,6 +97,16 @@
   template: 
     src: dolibarr-maestrano.json
     dest: "{{ dolibarr_root_path }}/htdocs/maestrano.json"
+    owner: www-data
+    group: www-data
+    mode: 755
+  tags:
+    - configuration
+
+- name: Dolibarr | Create default documents directory
+  file:
+    path: "{{ dolibarr_root_path }}/documents"
+    state: directory
     owner: www-data
     group: www-data
     mode: 755
