@@ -1,3 +1,11 @@
+# Include dolibarr specific configuration
+- include_vars: "{{ item }}"
+  with_items:
+    - dolibarr.yml
+    - version.yml
+  tags:
+    - configuration
+
 - name: General | Install Application packages
   apt: "name={{ item }} state=present"
   with_items:

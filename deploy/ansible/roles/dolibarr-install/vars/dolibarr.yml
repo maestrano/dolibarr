@@ -1,0 +1,13 @@
+# Dolibarr installation
+dolibarr_db_user: dolibarr
+dolibarr_db_password: dolibarr
+dolibarr_db_name: dolibarr
+dolibarr_root_path: /var/lib/dolibarr/webapp
+
+# Dolibarr default configuration
+sso_enabled: "false"
+connec_enabled: "false"
+maestrano_environment: "production"
+server_hostname: "server_hostname"
+api_key: "api_key"
+api_secret: "api_secret"
