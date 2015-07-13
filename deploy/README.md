@@ -21,3 +21,9 @@ docker run -it \
   --add-host connec.maestrano.io:172.17.42.1 \
   maestrano/dolibarr:latest
  ```
+
+## Docker Hub
+The image can be pulled down from [Docker Hub](https://registry.hub.docker.com/u/maestrano/dolibarr/)
+**maestrano/dolibarr:stable**: Production version
+
+**maestrano/dolibarr:latest**: Develomment version

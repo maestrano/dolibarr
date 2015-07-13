@@ -16,6 +16,8 @@
   service: 
     name: mysql 
     state: started
+  tags:
+    - configuration
 
 - name: Dolibarr | Create Dolibarr database
   mysql_db:
