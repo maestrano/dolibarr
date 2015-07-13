@@ -105,6 +105,16 @@
   tags:
     - configuration
 
+- name: Dolibarr | Create default documents directory
+  file:
+    path: "{{ dolibarr_root_path }}/documents"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 755
+  tags:
+    - configuration
+
 - name: Dolibarr | Set file permissions
   file:
     path: "{{ dolibarr_root_path }}"
