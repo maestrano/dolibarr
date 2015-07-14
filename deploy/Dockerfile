@@ -10,5 +10,5 @@ WORKDIR /etc/ansible
 # Install Dolibarr
 RUN ansible-playbook -i hosts site.yml
 
-# Map MySQL and Apache volumes
-VOLUME ["/etc/mysql", "/var/lib/mysql", "/etc/apache2", "/etc/php5", "/var/lib/dolibarr", "/var/log/apache2", "/var/log/mysql"]
+# Map dolibarr mutable volumes
+VOLUME ["/var/lib/dolibarr"]
