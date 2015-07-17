@@ -46,14 +46,14 @@ class ContactMapper extends BaseMapper {
 
     // Map Address giveing precedence to work address
     $address = null;
-    if($this->is_set($person_hash['address_work']) && $this->is_set($person_hash['address_work']['billing'])) {
-      $address = $person_hash['address_work']['billing'];
-    } else if($this->is_set($person_hash['address_work']) && $this->is_set($person_hash['address_work']['shipping'])) {
+    if($this->is_set($person_hash['address_work']) && $this->is_set($person_hash['address_work']['shipping'])) {
       $address = $person_hash['address_work']['shipping'];
-    } else if($this->is_set($person_hash['address_home']) && $this->is_set($person_hash['address_home']['billing'])) {
-      $address = $person_hash['address_home']['billing'];
+    } else if($this->is_set($person_hash['address_work']) && $this->is_set($person_hash['address_work']['billing'])) {
+      $address = $person_hash['address_work']['billing'];
     } else if($this->is_set($person_hash['address_home']) && $this->is_set($person_hash['address_home']['shipping'])) {
       $address = $person_hash['address_home']['shipping'];
+    } else if($this->is_set($person_hash['address_home']) && $this->is_set($person_hash['address_home']['billing'])) {
+      $address = $person_hash['address_home']['billing'];
     }
 
     if($this->is_set($address)) {
@@ -138,20 +138,20 @@ class ContactMapper extends BaseMapper {
 
     // Map address
     $address = array();
-    $billing_address = array();
-    $billing_address['line1'] = $person->address;
-    $billing_address['city'] = $person->town;
+    $shipping_address = array();
+    $shipping_address['line1'] = $person->address;
+    $shipping_address['city'] = $person->town;
     if($this->is_set($person->state_id)) {
       $state_hash = ConnecUtils::findStateById($person->state_id);
-      $billing_address['region'] = $state_hash['code_departement'];
+      $shipping_address['region'] = $state_hash['code_departement'];
     }
-    $billing_address['postal_code'] = $person->zip;
+    $shipping_address['postal_code'] = $person->zip;
     if($this->is_set($person->country_id)) {
       $country = ConnecUtils::findCountryById($person->country_id);
-      $billing_address['country'] = $country->code;
+      $shipping_address['country'] = $country->code;
     }
-    if(!empty($billing_address)) { $address['billing'] = $billing_address; }
-    if(!empty($address)) { $person_hash['address'] = $address; }
+    if(!empty($shipping_address)) { $address['shipping'] = $shipping_address; }
+    if(!empty($address)) { $person_hash['address_work'] = $address; }
 
     // Map phones
     $work_phone_hash = array();
