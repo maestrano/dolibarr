@@ -44,47 +44,60 @@ class ContactMapper extends BaseMapper {
       if($mno_id_map) { $person->socid = $mno_id_map['app_entity_id']; }
     }
 
-    // Map Address
-    if($this->is_set($person_hash['address'])) {
-      $address = $this->is_set($person_hash['address']['billing']) ? $person_hash['address']['billing'] : $person_hash['address']['shipping'];
-      if($this->is_set($address)) {
-        if($this->is_set($address['line1'])) { $person->address = $address['line1']; }
-        if($this->is_set($address['city'])) { $person->town = $address['city']; }
-        if($this->is_set($address['postal_code'])) { $person->zip = $address['postal_code']; }
+    // Map Address giveing precedence to work address
+    $address = null;
+    if($this->is_set($person_hash['address_work']) && $this->is_set($person_hash['address_work']['billing'])) {
+      $address = $person_hash['address_work']['billing'];
+    } else if($this->is_set($person_hash['address_work']) && $this->is_set($person_hash['address_work']['shipping'])) {
+      $address = $person_hash['address_work']['shipping'];
+    } else if($this->is_set($person_hash['address_home']) && $this->is_set($person_hash['address_home']['billing'])) {
+      $address = $person_hash['address_home']['billing'];
+    } else if($this->is_set($person_hash['address_home']) && $this->is_set($person_hash['address_home']['shipping'])) {
+      $address = $person_hash['address_home']['shipping'];
+    }
 
-        // Map Country and state
-        $state = $address['region'];
-        $country = $address['country'];
+    if($this->is_set($address)) {
+      if($this->is_set($address['line1'])) { $person->address = $address['line1']; }
+      if($this->is_set($address['city'])) { $person->town = $address['city']; }
+      if($this->is_set($address['postal_code'])) { $person->zip = $address['postal_code']; }
 
-        // Map country
-        if(isset($country)) {
-          $country_hash = ConnecUtils::findCountry($country);
-          if($country_hash) {
-            $person->country_id = $country_hash['rowid'];
-            $person->country_code = $country_hash['code'];
+      // Map Country and state
+      $state = $address['region'];
+      $country = $address['country'];
 
-            // Map state
-            if (isset($state)) {
-              $state_hash = ConnecUtils::findState($country_hash['rowid'], $state);
-              if($state_hash) {
-                $person->state_id = $state_hash['rowid'];
-                $person->state_code = $state_hash['code_departement'];
-              }
+      // Map country
+      if(isset($country)) {
+        $country_hash = ConnecUtils::findCountry($country);
+        if($country_hash) {
+          $person->country_id = $country_hash['rowid'];
+          $person->country_code = $country_hash['code'];
+
+          // Map state
+          if (isset($state)) {
+            $state_hash = ConnecUtils::findState($country_hash['rowid'], $state);
+            if($state_hash) {
+              $person->state_id = $state_hash['rowid'];
+              $person->state_code = $state_hash['code_departement'];
             }
           }
         }
       }
     }
 
-    if($this->is_set($person_hash['phone_work'])) {
-      if($this->is_set($person_hash['phone_work']['landline'])) { $person->phone_pro = $person_hash['phone_work']['landline']; }
-      if($this->is_set($person_hash['phone_work']['fax'])) { $person->fax = $person_hash['phone_work']['fax']; }
-    }
-
+    // Map phones with precedence givent to work phones
     if($this->is_set($person_hash['phone_home'])) {
       if($this->is_set($person_hash['phone_home']['landline'])) { $person->phone_perso = $person_hash['phone_home']['landline']; }
+      else if($this->is_set($person_hash['phone_home']['landline2'])) { $person->phone_perso = $person_hash['phone_home']['landline2']; }
+      if($this->is_set($person_hash['phone_home']['fax'])) { $person->fax = $person_hash['phone_home']['fax']; }
       if($this->is_set($person_hash['phone_home']['mobile'])) { $person->phone_mobile = $person_hash['phone_home']['mobile']; }
     }
+
+    if($this->is_set($person_hash['phone_work'])) {
+      if($this->is_set($person_hash['phone_work']['landline'])) { $person->phone_pro = $person_hash['phone_work']['landline']; }
+      else if($this->is_set($person_hash['phone_work']['landline2'])) { $person->phone_pro = $person_hash['phone_work']['landline2']; }
+      if($this->is_set($person_hash['phone_work']['fax'])) { $person->fax = $person_hash['phone_work']['fax']; }
+      if($this->is_set($person_hash['phone_work']['mobile'])) { $person->phone_mobile = $person_hash['phone_work']['mobile']; }
+    } 
 
     if($this->is_set($person_hash['email']['address'])) { $person->email = $person_hash['email']['address']; }
     if($this->is_set($person_hash['contact_channel']['skype'])) { $person->skype = $person_hash['contact_channel']['skype']; }
@@ -96,26 +109,32 @@ class ContactMapper extends BaseMapper {
 
     $person_hash = array();
 
-    // Organization type (customer/supplier/lead)
-    $societe = new Societe($db);
-    $societe->fetch($person->socid);
-    $person_hash['is_customer'] = ($societe->client == 1);
-    $person_hash['is_supplier'] = ($societe->fournisseur == 1);
-    $person_hash['is_lead'] = ($societe->prospect == 1);
+    // Organization and type (customer/supplier/lead)
+    if($person->socid > 0) {
+      $societe = new Societe($db);
+      $societe->fetch($person->socid);
 
-    // Map Organization code as customer or supplier unique code
+      $person_hash['is_customer'] = ($societe->client == 1);
+      $person_hash['is_supplier'] = ($societe->fournisseur == 1);
+      $person_hash['is_lead'] = ($societe->prospect == 1);
+
+      // Map Organization reference
+      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($person->socid, 'Societe');
+      if($mno_id_map) { $person_hash['organization_id'] = $mno_id_map['mno_entity_guid']; }
+    } else {
+      // Default contact to Customer if not belonging to an Organization
+      $person_hash['is_customer'] = true;
+      $person_hash['is_supplier'] = false;
+      $person_hash['is_lead'] = false;
+    }
+    
+    // Map contact attributes
     $person_hash['code'] = $person->code;
     $person_hash['title'] = $person->getCivilityLabel();
     $person_hash['first_name'] = $person->firstname;
     $person_hash['last_name'] = $person->lastname;
     $person_hash['description'] = $person->note_public;
     $person_hash['job_title'] = $person->poste;
-
-    // Map Organization
-    if($this->is_set($person->socid)) {
-      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($person->socid, 'Societe');
-      if($mno_id_map) { $person_hash['organization_id'] = $mno_id_map['mno_entity_guid']; }
-    }
 
     // Map address
     $address = array();
@@ -138,11 +157,11 @@ class ContactMapper extends BaseMapper {
     $work_phone_hash = array();
     $work_phone_hash['landline'] = $person->phone_pro;
     $work_phone_hash['fax'] = $person->fax;
+    $work_phone_hash['mobile'] = $person->phone_mobile;
     if(!empty($work_phone_hash)) { $person_hash['phone_work'] = $work_phone_hash; }
 
     $home_phone_hash = array();
     $home_phone_hash['landline'] = $person->phone_perso;
-    $home_phone_hash['mobile'] = $person->phone_mobile;
     if(!empty($home_phone_hash)) { $person_hash['phone_home'] = $home_phone_hash; }
 
     $person_hash['email'] = array('address' => $person->email);
