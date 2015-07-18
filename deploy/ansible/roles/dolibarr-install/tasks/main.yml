@@ -124,9 +124,15 @@
   tags:
     - configuration
 
+- name: Dolibarr | Create initiailize log file
+  file: path=/var/log/apache2/dolibarr_initialize.log state=touch mode=0777
+  tags:
+    - configuration
+
 - name: Dolibarr | Import Connec! data
   shell: "(nohup php initialize.php 1>/var/log/apache2/dolibarr_initialize.log 2>&1) &"
   args:
     chdir: "{{ dolibarr_root_path }}/htdocs/maestrano/data"
+  sudo_user: www-data
   tags:
     - configuration
