@@ -15,7 +15,7 @@ class CustomerInvoiceMapper extends TransactionMapper {
 
   protected function validate($invoice_hash) {
     // Process only Customer Invoices
-    return $invoice_hash['type'] == 'CUSTOMER';
+    return $invoice_hash['type'] == 'CUSTOMER' && $this->is_set($invoice_hash['organization_id']);
   }
 
   // Map the Connec resource attributes onto the Dolibarr Invoice
