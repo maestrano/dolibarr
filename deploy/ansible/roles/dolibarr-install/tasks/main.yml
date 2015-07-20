@@ -5,6 +5,7 @@
     - version.yml
   tags:
     - configuration
+    - update
 
 - name: General | Install Application packages
   apt: "name={{ item }} state=present"
@@ -43,11 +44,20 @@
     ssh_opts="-o StrictHostKeyChecking=no"
     update=yes
     force=yes
+  tags:
+    - update
 
 - name: Dolibarr | Current commit hash
   shell: 'git log -n 1 --pretty=format:"%H" > {{ dolibarr_root_path }}/.git-version'
   args:
     chdir: "{{ dolibarr_root_path }}"
+  tags:
+    - update
+
+- name: Git | Ignore files permissions changes
+  command: "git config core.filemode false chdir={{ dolibarr_root_path }}"
+  tags:
+    - update
 
 - name: Dolibarr | Configure Apache virtual host
   template: 
@@ -124,8 +134,14 @@
   tags:
     - configuration
 
-- name: Dolibarr | Create initiailize log file
-  file: path=/var/log/apache2/dolibarr_initialize.log state=touch mode=0777
+- name: Dolibarr | Set log files permissions
+  file:
+    path: /var/log/apache2
+    mode: 0755
+    owner: www-data
+    group: www-data
+    state: directory
+    recurse: yes
   tags:
     - configuration
 

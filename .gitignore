@@ -19,4 +19,7 @@ Thumbs.db
 .vagrant
 
 # Maestrano
+.git-version
 htdocs/maestrano/var/*
+htdocs/maestrano.json
+htdocs/maestrano/app/db/base_schema.sql

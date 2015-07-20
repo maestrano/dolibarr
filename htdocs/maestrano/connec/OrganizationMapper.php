@@ -92,9 +92,9 @@ class OrganizationMapper extends BaseMapper {
     $organization_hash = array();
 
     // Organization type (customer/supplier/lead)
-    $organization_hash['is_customer'] = ($organization->client == 1);
+    $organization_hash['is_customer'] = ($organization->client == 1) || ($organization->client == 3);
     $organization_hash['is_supplier'] = ($organization->fournisseur == 1);
-    $organization_hash['is_lead'] = ($organization->prospect == 1);
+    $organization_hash['is_lead'] = ($organization->prospect == 1) || ($organization->client == 3);
 
     // Map Organization code as customer or supplier unique code
     if($this->is_set($organization->code_client)) {
