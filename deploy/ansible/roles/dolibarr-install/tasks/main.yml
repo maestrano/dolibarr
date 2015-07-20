@@ -134,8 +134,14 @@
   tags:
     - configuration
 
-- name: Dolibarr | Create initiailize log file
-  file: path=/var/log/apache2/dolibarr_initialize.log state=touch mode=0777
+- name: Dolibarr | Set log files permissions
+  file:
+    path: /var/log/apache2
+    mode: 0755
+    owner: www-data
+    group: www-data
+    state: directory
+    recurse: yes
   tags:
     - configuration
 
