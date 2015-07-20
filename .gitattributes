@@ -31,3 +31,6 @@
 *.frm binary
 *.MYD binary
 *.MYI binary
+
+# Maestrano
+maestrano.json merge=ours
