@@ -14,7 +14,7 @@
         "php": ">=5.3.0",
         "ext-gd": "*",
         "ext-curl": "*",
-        "maestrano/maestrano-php": "*"
+        "maestrano/maestrano-php": "^0.8.1"
     },
     "suggest": {
         "ext-mysqli": "*",
