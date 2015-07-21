@@ -66,7 +66,7 @@
     dest: /etc/apache2/sites-available/dolibarr.conf
     owner: www-data
     group: www-data
-    mode: 755
+    mode: 0755
 
 - name: Dolibarr | Enable Apache virtual host 
   file: src=/etc/apache2/sites-available/dolibarr.conf dest=/etc/apache2/sites-enabled/dolibarr.conf state=link
@@ -82,7 +82,7 @@
     dest: "{{ dolibarr_root_path }}/htdocs/maestrano/app/db/base_schema.sql"
     owner: www-data
     group: www-data
-    mode: 755
+    mode: 0755
 
 - name: Dolibarr | Apply Maestrano patch
   shell: "mysql {{ dolibarr_db_name }} -u{{dolibarr_db_user}} -p{{dolibarr_db_password}} < maestrano/app/db/{{ item }}"
@@ -94,33 +94,13 @@
     - 2_add_mno_id_map.sql
     - 3_increase_account_label_length.sql
 
-- name: Dolibarr | Configuration file config.php
-  template: 
-    src: dolibarr-conf.php
-    dest: "{{ dolibarr_root_path }}/htdocs/conf/conf.php"
-    owner: www-data
-    group: www-data
-    mode: 755
-  tags:
-    - configuration
-
-- name: Dolibarr | Configuration file maestrano.json
-  template: 
-    src: dolibarr-maestrano.json
-    dest: "{{ dolibarr_root_path }}/htdocs/maestrano.json"
-    owner: www-data
-    group: www-data
-    mode: 755
-  tags:
-    - configuration
-
 - name: Dolibarr | Create default documents directory
   file:
     path: "{{ dolibarr_root_path }}/documents"
     state: directory
     owner: www-data
     group: www-data
-    mode: 755
+    mode: 0755
   tags:
     - configuration
 
@@ -132,6 +112,31 @@
     group: www-data
     state: directory
     recurse: yes
+  tags:
+    - configuration
+
+- name: Dolibarr | Add an install lock file
+  file:
+    path: "{{ dolibarr_root_path }}/documents/install.lock"
+    state: touch
+
+- name: Dolibarr | Configuration file config.php
+  template: 
+    src: dolibarr-conf.php
+    dest: "{{ dolibarr_root_path }}/htdocs/conf/conf.php"
+    owner: www-data
+    group: www-data
+    mode: 0500
+  tags:
+    - configuration
+
+- name: Dolibarr | Configuration file maestrano.json
+  template: 
+    src: dolibarr-maestrano.json
+    dest: "{{ dolibarr_root_path }}/htdocs/maestrano.json"
+    owner: www-data
+    group: www-data
+    mode: 0755
   tags:
     - configuration
 
