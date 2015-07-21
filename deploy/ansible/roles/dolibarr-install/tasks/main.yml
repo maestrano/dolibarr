@@ -15,6 +15,7 @@
 
 - name: Dolibarr | Ensure MySQL is running
   command: service mysql start
+  ignore_errors: yes
   tags:
     - configuration
 
