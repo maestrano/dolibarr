@@ -10,7 +10,7 @@ Maestrano Cloud Integration is currently in closed beta. Want to know more? Send
   
 - - -
 
-1.  [Getting Setup](#getting-setup)
+1. [Getting Setup](#getting-setup)
 2. [Getting Started](#getting-started)
   * [Installation](#installation)
   * [Configuration](#configuration)
@@ -174,14 +174,16 @@ The json file may look like this:
 
   # ===> Connec!™ Configuration
   #
-  # => host and base_path
+  # => host and API paths
   # The Connec!™ endpoint to use if you need to overwrite it (i.e. if you want to proxy requests or use a stub) 
   "connec": {
     "enabled": true,
     "host": "http://connec.maestrano.io",
-    "base_path": "/api/v2"
+    "base_path": "/api",
+    "v2_path": "/v2",
+    "reports_path": "/reports"
   },
-    
+
   # ===> Webhooks
   # This section describe how to configure the Account and Connec!™ webhooks
   
@@ -243,11 +245,15 @@ The json file may look like this:
         "pay_runs": false,
         "people": true,
         "projects": false,
+        "purchase_orders": false,
+        "quotes": false,
+        "sales_orders": false,
         "tax_codes": true,
         "tax_rates": false,
         "time_activities": false,
         "time_sheets": false,
         "venues": false,
+        "warehouses": false,
         "work_locations": false
       }
     }
@@ -294,6 +300,9 @@ if (Maestrano::authenticate($_SERVER['PHP_AUTH_USER'],$_SERVER['PHP_AUTH_PW'])) 
 ```
 
 ## Single Sign-On Setup
+
+> **Heads up!** Prefer to use OpenID rather than our SAML implementation? Just look at our [OpenID Guide](https://maestrano.atlassian.net/wiki/display/CONNECAPIV2/SSO+via+OpenID) to get started!
+
 In order to get setup with single sign-on you will need a user model and a group model. It will also require you to write a controller for the init phase and consume phase of the single sign-on handshake.
 
 You might wonder why we need a 'group' on top of a user. Well Maestrano works with businesses and as such expects your service to be able to manage groups of users. A group represents 1) a billing entity 2) a collaboration group. During the first single sign-on handshake both a user and a group should be created. Additional users logging in via the same group should then be added to this existing group (see controller setup below)
@@ -560,8 +569,17 @@ $bill->setPriceCents(2000);
 <td>read/write</td>
 <td>Date</td>
 <td>-</td>
-<td>-</td>
+<td>false</td>
 <td>If the bill relates to a specific period then specifies when the period ended. Both period_started_at and period_ended_at need to be filled in order to appear on customer invoice.</td>
+<tr>
+
+<tr>
+<td><b>thirdParty</b></td>
+<td>read/write</td>
+<td>Boolean</td>
+<td>-</td>
+<td>-</td>
+<td>Whether this bill is related to a third party cost or not. External expenses engaged for customers - such as paying a  provider for sending SMS on behalf of customers - should be flagged as third party.</td>
 <tr>
 
 </table>
@@ -1041,8 +1059,10 @@ $client->post('/organizations', array('organizations' => array('name' => "DoeCor
 
 # Update an organization
 $client->put('/organizations/e32303c1-5102-0132-661e-600308937d74', array('organizations' => array('is_customer_' => true)))
-```
 
+# Retrieve a report
+$client->getReport('/profit_and_loss', array('from' => '2015-01-01', 'to' => '2015-01-01', 'period' => 'MONTHLY'))
+```
 
 
 ### Webhook Notifications
@@ -1075,4 +1095,3 @@ So if you have any question or need help integrating with us just let us know at
 MIT License. Copyright 2014 Maestrano Pty Ltd. https://maestrano.com
 
 You are not granted rights or licenses to the trademarks of Maestrano.
-
