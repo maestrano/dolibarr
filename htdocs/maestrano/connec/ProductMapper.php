@@ -49,6 +49,7 @@ class ProductMapper extends BaseMapper {
     }
 
     if($this->is_set($item_hash['purchase_price'])) { $product->status_buy = 1; }
+    if($this->is_set($item_hash['minimum_quantity'])) { $product->seuil_stock_alerte = $item_hash['minimum_quantity']; }
 
     // Item origin country
     if($this->is_set($item_hash['country'])) {
@@ -113,7 +114,8 @@ class ProductMapper extends BaseMapper {
     }
 
     // Product stock
-    $product_hash['quantity_on_hand'] = $product->stock_reel;
+    $item_hash['quantity_on_hand'] = $product->stock_reel;
+    $item_hash['minimum_quantity'] = $product->seuil_stock_alerte;
 
     // Product origin country
     if($this->is_set($product->country_id)) {
@@ -135,19 +137,34 @@ class ProductMapper extends BaseMapper {
   }
 
   // Persist the Dolibarr Product
-  protected function persistLocalModel($product, $product_hash) {
-    $user = ConnecUtils::defaultUser();
-    if($this->is_new($product)) {
-      $product->id = $product->create($user, 0, false);
+  protected function persistLocalModel($product, $item_hash) {
+    $new_product = $this->is_new($product);
 
-      // Set initial stock into default Warehouse
-      if($this->is_set($product_hash['is_inventoried']) && $product_hash['is_inventoried']) {
-        $quantity = is_null($product_hash['initial_quantity']) ? $product_hash['quantity_on_hand'] : $product_hash['initial_quantity'];
-        $warehouse = WarehouseMapper::getDefault();
-        $product->correct_stock($user, $warehouse->id, $quantity, 0);
-      }
+    // Save the Product before updating inventory
+    $user = ConnecUtils::defaultUser();
+    if($new_product) {
+      $product->id = $product->create($user, 0, false);
     } else {
       $product->update($product->id, $user, false, 'update', false);
+      $product->updatePrice($product->price, 'HT', $user, $product->tva_tx);
+    }
+
+    // Adjust product inventory
+    if($this->is_set($item_hash['is_inventoried']) && $item_hash['is_inventoried']) {
+      $quantity = 0;
+      if(!is_null($item_hash['quantity_on_hand'])) { $quantity = $item_hash['quantity_on_hand']; }
+      else if(!is_null($item_hash['initial_quantity'])) { $quantity = $item_hash['initial_quantity']; }
+      $warehouse = WarehouseMapper::getDefault();
+      
+      if($new_product) {
+        // For new Products, set initial stock into default Warehouse
+        $product->correct_stock($user, $warehouse->id, $quantity, 0, 'Automatic stock adjustment', $product->price, false);
+      } else {
+        // Existing product, adjust quantity
+        $current_quantity = $product->stock_reel;
+        $adjustment = $quantity - $current_quantity;
+        if($adjustment != 0) { $product->correct_stock($user, $warehouse->id, $adjustment, 0, 'Automatic stock adjustment', $product->price, false); }
+      }
     }
   }
 }
