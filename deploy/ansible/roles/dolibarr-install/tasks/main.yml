@@ -37,14 +37,14 @@
 
 - name: Dolibarr | Download application from Github
   sudo: false
-  git: >
-    repo=https://github.com/maestrano/dolibarr.git
-    dest={{ dolibarr_root_path }}
-    version={{ application_version }}
-    accept_hostkey=yes
-    ssh_opts="-o StrictHostKeyChecking=no"
-    update=yes
-    force=yes
+  git:
+    repo: "https://github.com/{{ application_repository }}/dolibarr.git"
+    dest: "{{ dolibarr_root_path }}"
+    version: "{{ application_version }}"
+    accept_hostkey: yes
+    ssh_opts: "-o StrictHostKeyChecking=no"
+    update: yes
+    force: yes
   tags:
     - update
 
@@ -57,6 +57,13 @@
 
 - name: Git | Ignore files permissions changes
   command: "git config core.filemode false chdir={{ dolibarr_root_path }}"
+  tags:
+    - update
+
+- name: Ansible | Update scripts
+  copy:
+    src: "{{ dolibarr_root_path }}/deploy/ansible"
+    dest: /etc/
   tags:
     - update
 
