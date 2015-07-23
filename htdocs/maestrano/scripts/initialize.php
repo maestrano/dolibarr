@@ -26,5 +26,5 @@ function setLastDataUpdateTimestamp($timestamp) {
   file_put_contents(DATA_SEQUENCE_FILE, $timestamp);
 }
 
-require_once 'maestrano/scripts/import_data.php';
-require_once 'maestrano/scripts/init_script.php';
+require_once MAESTRANO_ROOT . '/scripts/init_script.php';
+require_once MAESTRANO_ROOT . '/scripts/import_data.php';

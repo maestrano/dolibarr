@@ -4,9 +4,9 @@
 // Scripts are run only once on application initialize
 
 // Run init scripts
-$init_script_file = 'maestrano/var/_init_scripts';
+$init_script_file = MAESTRANO_ROOT . '/var/_init_scripts';
 $init_script_content = file_get_contents($init_script_file);
-$script_dirs = 'maestrano/scripts/scripts';
+$script_dirs = MAESTRANO_ROOT . '/scripts/scripts';
 $script_files = array_diff(scandir($script_dirs), array('..', '.'));
 
 // Iterate over already loaded scripts
