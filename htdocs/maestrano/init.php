@@ -93,13 +93,3 @@ $hookmanager=new HookManager($db);
 // Set the dolibarr session name
 $session_name='DOLSESSID_' . dol_getprefix();
 session_name($session_name);
-
-// Utility method to open and create file if necessary
-function openAndReadFile($file_path) {
-  if(!file_exists($file_path)) {
-    $fp = fopen($file_path, "w");
-    fwrite($fp,"");
-    fclose($fp);
-  }
-  return file_get_contents($file_path);
-}

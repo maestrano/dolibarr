@@ -2960,7 +2960,7 @@ class Product extends CommonObject
 	 * 	@param		double	$price			Price to use for stock eval
 	 * 	@return     int     				<0 if KO, >0 if OK
 	 */
-	function correct_stock($user, $id_entrepot, $nbpiece, $movement, $label='', $price=0)
+	function correct_stock($user, $id_entrepot, $nbpiece, $movement, $label='', $price=0, $pushToConnec=true)
 	{
 		if ($id_entrepot)
 		{
@@ -2977,6 +2977,8 @@ class Product extends CommonObject
 			if ($result >= 0)
 			{
 				$this->db->commit();
+        $this->load_stock();
+        $this->pushToConnec($pushToConnec);
 				return 1;
 			}
 			else
