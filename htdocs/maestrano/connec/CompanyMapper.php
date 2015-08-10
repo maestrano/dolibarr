@@ -141,11 +141,9 @@ class CompanyMapper extends BaseMapper {
       // Save logo file locally
       $filename = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 10) . '.jpg';
       $dir = $conf->mycompany->dir_output . '/logos/';
-      if (!file_exists($dir)) {
-        mkdir($dir, 0777, true);
-      }
+      if (!file_exists($dir)) { mkdir($dir, 0777, true); }
       $tmpLogoFilePath = $dir . $filename;
-      file_put_contents($tmpLogoFilePath, file_get_contents($logo_url));
+      file_put_contents($tmpLogoFilePath, file_get_contents("http:" . $logo_url));
 
       dolibarr_set_const($db, "MAIN_INFO_SOCIETE_LOGO", $filename);
       $imgThumbSmall = vignette($tmpLogoFilePath, $maxwidthsmall, $maxheightsmall, '_small', $quality);
