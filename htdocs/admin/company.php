@@ -185,6 +185,13 @@ if ( ($action == 'update' && empty($_POST["cancel"]))
     	dolibarr_set_const($db,"MAIN_INFO_LOCALTAX_CALC2", $_POST["clt2"],'chaine',0,'',$conf->entity);
     }
 
+    // Hook: Maestrano
+    $mapper = 'CompanyMapper';
+    if(class_exists($mapper)) {
+      $companyMapper = new $mapper();
+      $companyMapper->processLocalUpdate(null);
+    }
+
     if ($action != 'updateedit' && ! $error)
     {
         header("Location: ".$_SERVER["PHP_SELF"]);
@@ -259,14 +266,6 @@ if ($action == 'removelogo')
     dol_delete_file($logominifile);
     dolibarr_del_const($db, "MAIN_INFO_SOCIETE_LOGO_MINI",$conf->entity);
     $mysoc->logo_mini='';
-}
-
-
-// Hook: Maestrano
-$mapper = 'CompanyMapper';
-if(class_exists($mapper)) {
-  $companyMapper = new $mapper();
-  $companyMapper->processLocalUpdate(null);
 }
 
 
