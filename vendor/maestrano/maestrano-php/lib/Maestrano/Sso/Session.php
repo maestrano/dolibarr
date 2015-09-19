@@ -4,13 +4,14 @@
  * Helper class used to check the validity
  * of a Maestrano session
  */
-class Maestrano_Sso_Session
+class Maestrano_Sso_Session extends Maestrano_Util_PresetObject
 {
   private $httpSession = null;
   private $uid = '';
   private $groupUid = '';
   private $sessionToken = '';
   private $recheck = null;
+  protected $preset;
 
   /**
    * Construct the Maestrano_Sso_Session object
@@ -42,6 +43,19 @@ class Maestrano_Sso_Session
         $this->recheck = new DateTime($sessionObj['session_recheck']);
       }
     }
+  }
+
+  /**
+   * @param string $id The ID of the bill to instantiate.
+   * @param string|null $apiToken
+   *
+   * @return Maestrano_Billing_Bill
+   */
+  public static function newWithPreset($preset, &$http_session, $user = null)
+  {
+    $obj = new Maestrano_Sso_Session($http_session, $user, $preset);
+    $obj->_preset = $preset;
+    return $obj;
   }
 
   /**
@@ -82,7 +96,7 @@ class Maestrano_Sso_Session
     */
     public function getSessionCheckUrl()
     {
-      $url = Maestrano::sso()->getSessionCheckUrl($this->uid, $this->sessionToken);
+      $url = Maestrano::with($this->_preset)->sso()->getSessionCheckUrl($this->uid, $this->sessionToken);
       return $url;
     }
 
@@ -105,19 +119,21 @@ class Maestrano_Sso_Session
      *
      * @return boolean the validity of the session
      */
-     public function performRemoteCheck($httpClient = null) {
-       $json = $this->fetchUrl($this->getSessionCheckUrl(), $httpClient);
-       if ($json) {
+    public function performRemoteCheck($httpClient = null) {
+      if(empty($this->sessionToken)) { return false; }
+      
+      $json = $this->fetchUrl($this->getSessionCheckUrl(), $httpClient);
+      if ($json) {
         $response = json_decode($json,true);
 
         if ($response['valid'] == "true" && $response['recheck'] != null) {
           $this->recheck = new DateTime($response['recheck']);
           return true;
         }
-       }
+      }
 
-       return false;
-     }
+      return false;
+    }
 
   /**
   * Perform check to see if session is valid
@@ -129,13 +145,10 @@ class Maestrano_Sso_Session
   * @return boolean the validity of the session
   */
   public function isValid($ifSession = false, $httpClient = null) {
-    $svc = Maestrano::sso();
-
+    if ($ifSession) { return true; }
+    
+    $svc = Maestrano::with($this->_preset)->sso();
     if (!$svc->isSloEnabled()) return true;
-
-    if ($ifSession) {
-      return true;
-    }
 
     if (!$this->ssoTokenExists() || $this->isRemoteCheckRequired()) {
       if ($this->performRemoteCheck($httpClient)) {
@@ -164,42 +177,42 @@ class Maestrano_Sso_Session
   }
 
   public function getUid() {
-  	return $this->uid;
+    return $this->uid;
   }
 
   public function getGroupUid() {
-  	return $this->groupUid;
+    return $this->groupUid;
   }
 
   public function getRecheck() {
-  	return $this->recheck;
+    return $this->recheck;
   }
 
   public function getSessionToken() {
-  	return $this->sessionToken;
+    return $this->sessionToken;
   }
 
   public function getHttpSession() {
-  	return $this->httpSession;
+    return $this->httpSession;
   }
 
   public function setUid($uid) {
-  	$this->uid = $this->uid;
+    $this->uid = $this->uid;
   }
 
   public function setGroupUid($groupUid) {
-  	$this->groupUid = $groupUid;
+    $this->groupUid = $groupUid;
   }
 
   public function setRecheck($recheck) {
-  	$this->recheck = $recheck;
+    $this->recheck = $recheck;
   }
 
   public function setSessionToken($sessionToken) {
-  	$this->sessionToken = $sessionToken;
+    $this->sessionToken = $sessionToken;
   }
 
   public function setHttpSession($httpSession) {
-  	$this->httpSession = $httpSession;
+    $this->httpSession = $httpSession;
   }
 }
