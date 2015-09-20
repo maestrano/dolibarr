@@ -84,7 +84,7 @@ class pdf_standard extends ModelePDFFactures
 		$this->marge_haute =isset($conf->global->MAIN_PDF_MARGIN_TOP)?$conf->global->MAIN_PDF_MARGIN_TOP:10;
 		$this->marge_basse =isset($conf->global->MAIN_PDF_MARGIN_BOTTOM)?$conf->global->MAIN_PDF_MARGIN_BOTTOM:10;
     $this->marge_basse = 25;
-    
+
 		$this->option_logo = 1;                    // Affiche logo
 		$this->option_tva = 1;                     // Gere option tva FACTURE_TVAOPTION
 		$this->option_modereg = 1;                 // Affiche mode reglement
@@ -739,7 +739,7 @@ class pdf_standard extends ModelePDFFactures
 					$cury=$posy;
 
 					$posy=$this->pdf_bank_custom($pdf,$outputlangs,$curx,$cury,$account,0,$default_font_size);
-          
+
           // Display notice on invoice reference
           $posy+=6;
           $pdf->SetXY($this->marge_gauche, $posy);
@@ -753,7 +753,7 @@ class pdf_standard extends ModelePDFFactures
 
 		return $posy;
 	}
-  
+
   /**
    *  Show bank informations for PDF generation
    *
@@ -799,7 +799,7 @@ class pdf_standard extends ModelePDFFactures
   			$pdf->SetXY($curx, $cury);
   			$pdf->MultiCell(100, 3, $outputlangs->transnoentities("Bank").': ' . $outputlangs->convToOutputCharset($account->bank), 0, 'L', 0);
   			$cury+=3;
-        
+
         // Show account owner
   			$pdf->SetXY($curx, $cury);
   			$pdf->MultiCell(100, 3, $outputlangs->convToOutputCharset($account->proprio), 0, 'L', 0);
@@ -1499,6 +1499,12 @@ class pdf_standard extends ModelePDFFactures
 			$pdf->MultiCell(80, 4, $outputlangs->convToOutputCharset($this->emetteur->name), 0, 'L');
 			$posy=$pdf->getY();
 
+      // Show sender ABN
+			$pdf->SetXY($posx+2,$posy+3);
+			$pdf->SetFont('','', $default_font_size - 1);
+			$pdf->MultiCell(80, 4, $outputlangs->transnoentities("ProfId1Short") . ": " . $outputlangs->convToOutputCharset($this->emetteur->idprof1), 0, 'L');
+			$posy=$pdf->getY();
+
 			// Show sender information
 			$pdf->SetXY($posx+2,$posy);
 			$pdf->SetFont('','', $default_font_size - 1);
@@ -1576,17 +1582,17 @@ class pdf_standard extends ModelePDFFactures
 		$pdf->SetFont('','', 9);
 		$pdf->SetXY($this->marge_gauche,$posy);
 		$pdf->MultiCell(190, 5, "133 Alexander Street, Crows Nest 2065; Suite 15 / 103 George Street, Parramatta 2150; PO Box 3308 Parramatta 2124.",0,'C');
-    
+
     $posy +=4;
     $pdf->SetFont('','', 9);
 		$pdf->SetXY($this->marge_gauche,$posy);
 		$pdf->MultiCell(190, 5, "www.Advbac.com.au",0,'C');
-    
+
     $posy+=7;
     $pdf->SetFont('','', 13);
 		$pdf->SetXY($this->marge_gauche,$posy);
 		$pdf->MultiCell(190, 5, "Accurate Accounts with Advance",0,'R');
-    
+
     return $posy;
 	}
 

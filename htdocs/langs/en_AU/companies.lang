@@ -1,6 +1,7 @@
 # Dolibarr language file - en_AU - companies
 # This file contains only line that must differs from en_US
 CHARSET=UTF-8
+ProfId1Short=ABN
 VATIsUsed=GST is used
 VATIsNotUsed=GST is not used
 VATIntra=GST number
