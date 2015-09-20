@@ -1,3 +1,6 @@
 # Dolibarr language file - en_AU - bills
 CHARSET=UTF-8
 BankCode=BSB
+Invoice=Tax Invoice
+SendBillRef=Your invoice from Advanced Accounts
+SendReminderBillRef=Your invoice from Advanced Accounts (reminder)
