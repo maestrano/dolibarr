@@ -3362,7 +3362,7 @@ class Facture extends CommonInvoice
       $this->fetch($this->id);
 
       $customerInvoiceMapper = new $mapper();
-      $customerInvoiceMapper->processLocalUpdate($this, $pushToConnec, $delete);
+      $customerInvoiceMapper->processLocalUpdate($this, $pushToConnec, $delete, true);
     }
 
     return $this;
