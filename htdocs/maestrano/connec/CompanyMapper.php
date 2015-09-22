@@ -97,27 +97,40 @@ class CompanyMapper extends BaseMapper {
     if($this->is_set($company_hash['currency'])) { dolibarr_set_const($db, "MAIN_MONNAIE", $company_hash['currency']); }
     if($this->is_set($company_hash['tax_number'])) { dolibarr_set_const($db, "MAIN_INFO_TVAINTRA", $company_hash['tax_number']); }
 
-    // Map company name
-    $address = $this->is_set($company_hash['address']['shipping']) ? $company_hash['address']['shipping'] : $company_hash['address']['billing'];
-    if($this->is_set($address['line1'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_ADDRESS", $address['line1']); }
-    if($this->is_set($address['city'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_TOWN", $address['city']); }
-    if($this->is_set($address['postal_code'])) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_ZIP", $address['postal_code']); }
+    // Map company address (shipping or billing)
+    if(array_key_exists('address', $company_hash)) {
+      $line1 = $city = $postal_code = $state = $country = null;
 
-    // Map Country and state
-    $state = $address['region'];
-    $country = $address['country'];
+      if(array_key_exists('shipping', $company_hash['address'])) {
+        if(array_key_exists('line1', $company_hash['address']['shipping'])) { $line1 = $company_hash['address']['shipping']['line1']; }
+        if(array_key_exists('city', $company_hash['address']['shipping'])) { $city = $company_hash['address']['shipping']['city']; }
+        if(array_key_exists('postal_code', $company_hash['address']['shipping'])) { $postal_code = $company_hash['address']['shipping']['postal_code']; }
+        if(array_key_exists('region', $company_hash['address']['shipping'])) { $state = $company_hash['address']['shipping']['region']; }
+        if(array_key_exists('country', $company_hash['address']['shipping'])) { $country = $company_hash['address']['shipping']['country']; }
 
-    // Map country
-    if(isset($country)) {
-      $country_hash = ConnecUtils::findCountry($country);
-      if($country_hash) {
-        $s = $country_hash['rowid'] . ':'. $country_hash['code'] .':'.$country_hash['label'];
-        dolibarr_set_const($db, "MAIN_INFO_SOCIETE_COUNTRY", $s);
+      }
+      if(array_key_exists('billing', $company_hash['address'])) {
+        if(array_key_exists('line1', $company_hash['address']['billing'])) { $line1 = $company_hash['address']['billing']['line1']; }
+        if(array_key_exists('city', $company_hash['address']['billing'])) { $city = $company_hash['address']['billing']['city']; }
+        if(array_key_exists('postal_code', $company_hash['address']['billing'])) { $postal_code = $company_hash['address']['billing']['postal_code']; }
+      }
 
-        // Map state
-        if (isset($state)) {
-          $state_hash = ConnecUtils::findState($country_hash['rowid'], $state);
-          if($state_hash) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_STATE", $state_hash['rowid']); }
+      if($this->is_set($line1)) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_ADDRESS", $line1); }
+      if($this->is_set($city)) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_TOWN", $city); }
+      if($this->is_set($postal_code)) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_ZIP", $postal_code); }
+
+      // Map Country and state
+      if(isset($country)) {
+        $country_hash = ConnecUtils::findCountry($country);
+        if($country_hash) {
+          $s = $country_hash['rowid'] . ':'. $country_hash['code'] .':'.$country_hash['label'];
+          dolibarr_set_const($db, "MAIN_INFO_SOCIETE_COUNTRY", $s);
+
+          // Map state
+          if (isset($state)) {
+            $state_hash = ConnecUtils::findState($country_hash['rowid'], $state);
+            if($state_hash) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_STATE", $state_hash['rowid']); }
+          }
         }
       }
     }
