@@ -25,7 +25,7 @@ class CustomerInvoiceMapper extends TransactionMapper {
     // Map invoice type
     $this->mapInvoiceTypeToDolibarr($invoice_hash, $invoice);
 
-    if($this->is_set($transaction_hash['transaction_number'])) { $transaction->ref_ext = $transaction_hash['transaction_number']; }
+    if($this->is_set($invoice_hash['transaction_number'])) { $invoice->ref_ext = $invoice_hash['transaction_number']; }
   }
 
   // Map the Dolibarr Invoice to a Connec resource hash
