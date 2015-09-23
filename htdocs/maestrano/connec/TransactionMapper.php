@@ -48,7 +48,7 @@ abstract class TransactionMapper extends BaseMapper {
 
     // Map Contact
     if($this->is_set($transaction_hash['person_id'])) {
-      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($transaction_hash['person_id'], 'PERSON', 'CONTACTS');
+      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($transaction_hash['person_id'], 'PERSON', 'CONTACT');
       if($mno_id_map) { $transaction->add_contact($mno_id_map['app_entity_id']. 'BILLING'); }
     }
   }

@@ -58,7 +58,7 @@ class SupplierInvoiceMapper extends TransactionMapper {
     if(!empty($contacts)) {
       $contact = $contacts[0];
       $contact_id = $contact['id'];
-      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($contact_id, 'CONTACTS');
+      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($contact_id, 'CONTACT');
       if($mno_id_map) { $invoice_hash['person_id'] = $mno_id_map['mno_entity_guid']; }
     }
 

@@ -40,12 +40,20 @@ class CustomerInvoiceMapper extends TransactionMapper {
     // Map invoice status
     $this->mapInvoiceStatusToConnec($invoice_hash, $invoice);
 
+        // Map sales order
+    $invoice->fetchObjectLinked();
+    if (count($invoice->linkedObjectsIds['commande']) > 0) {
+      $sales_order_id = $invoice->linkedObjectsIds['commande'][0];
+      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($sales_order_id, 'COMMANDE');
+      if($mno_id_map) { $invoice_hash['sales_order_id'] = $mno_id_map['mno_entity_guid']; }
+    }
+
     // Map first Contact
     $contacts = $invoice->liste_contact();
     if(!empty($contacts)) {
       $contact = $contacts[0];
       $contact_id = $contact['id'];
-      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($contact_id, 'CONTACTS');
+      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($contact_id, 'CONTACT');
       if($mno_id_map) { $invoice_hash['person_id'] = $mno_id_map['mno_entity_guid']; }
     }
 
