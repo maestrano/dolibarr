@@ -40,7 +40,7 @@ class CustomerInvoiceMapper extends TransactionMapper {
     // Map invoice status
     $this->mapInvoiceStatusToConnec($invoice_hash, $invoice);
 
-        // Map sales order
+    // Map sales order
     $invoice->fetchObjectLinked();
     if (count($invoice->linkedObjectsIds['commande']) > 0) {
       $sales_order_id = $invoice->linkedObjectsIds['commande'][0];
@@ -104,6 +104,25 @@ class CustomerInvoiceMapper extends TransactionMapper {
 
     // Apply invoice status
     $this->mapInvoiceStatusToDolibarr($invoice_hash, $invoice);
+
+    // Map Contact
+    if(array_key_exists('person_id', $invoice_hash)) {
+      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($invoice_hash['person_id'], 'PERSON', 'CONTACT');
+      if($mno_id_map) { $invoice->add_contact($mno_id_map['app_entity_id'], 'BILLING'); }
+    }
+
+    // Map sales order reference
+    if(array_key_exists('sales_order_id', $invoice_hash)) {
+      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($invoice_hash['sales_order_id'], 'SALESORDER', 'COMMANDE');
+      if($mno_id_map && !is_null($mno_id_map)) {
+        // Find if object is already linked
+        $invoice->fetchObjectLinked();
+        if (count($invoice->linkedObjectsIds['commande']) == 0) {
+          // Add object link
+          $invoice->add_object_linked('commande', $mno_id_map['app_entity_id']);
+        }
+      }
+    }
   }
 
   // Set default invoice type to TYPE_STANDARD
@@ -117,7 +136,9 @@ class CustomerInvoiceMapper extends TransactionMapper {
     $user = ConnecUtils::defaultUser();
     if(is_null($user->rights)) { $user->rights = (object) array(); }
     if(is_null($user->rights->facture)) { $user->rights->facture = (object) array(); }
+    if(is_null($user->rights->commande)) { $user->rights->commande = (object) array(); }
     $user->rights->facture->valider = true;
+    $user->rights->commande->valider = true;
     
     switch($invoice_hash['status']) {
       case "PAID":
