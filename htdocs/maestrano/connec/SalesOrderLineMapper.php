@@ -61,6 +61,7 @@ class SalesOrderLineMapper extends BaseMapper {
     $sales_order_line->total_ttc = $sales_order_line_hash['total_price']['total_amount'] ? $sales_order_line_hash['total_price']['total_amount'] : 0;
     $sales_order_line->remise_percent = $sales_order_line_hash['reduction_percent'];
     $sales_order_line->subprice = $sales_order_line_hash['unit_price']['net_amount'];
+    $sales_order_line->price = $sales_order_line_hash['unit_price']['net_amount'];
 
     // Map item
     if(!empty($sales_order_line_hash['item_id'])) {

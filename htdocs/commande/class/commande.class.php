@@ -1273,7 +1273,7 @@ class Commande extends CommonOrder
 				$this->line->array_options=$array_option;
 			}
 
-            $result=$this->line->insert();
+            $result=$this->line->insert(0, false);
             if ($result > 0)
             {
                 // Reorder if child line
@@ -1558,7 +1558,7 @@ class Commande extends CommonOrder
             $line->total_tva = -$remise->amount_tva;
             $line->total_ttc = -$remise->amount_ttc;
 
-            $result=$line->insert();
+            $result=$line->insert(0, false);
             if ($result > 0)
             {
                 $result=$this->update_price(1);
