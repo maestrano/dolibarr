@@ -1213,7 +1213,7 @@ class Facture extends CommonInvoice
 			$facligne->total_tva = -$remise->amount_tva;
 			$facligne->total_ttc = -$remise->amount_ttc;
 
-			$lineid=$facligne->insert();
+			$lineid=$facligne->insert($pushToConnec);
 			if ($lineid > 0)
 			{
 				$result=$this->update_price(1);
@@ -2097,7 +2097,7 @@ class Facture extends CommonInvoice
 				$this->line->array_options=$array_option;
 			}
 
-			$result=$this->line->insert();
+			$result=$this->line->insert($pushToConnec);
 			if ($result > 0)
 			{
 				// Reorder if child line
