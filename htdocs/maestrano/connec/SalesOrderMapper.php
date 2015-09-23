@@ -85,6 +85,12 @@ class SalesOrderMapper extends TransactionMapper {
 
     // Apply sales_order status
     $this->mapSalesOrderStatusToDolibarr($sales_order_hash, $sales_order);
+
+    // Map Contact
+    if(array_key_exists('person_id', $sales_order_hash)) {
+      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($sales_order_hash['person_id'], 'PERSON', 'CONTACT');
+      if($mno_id_map) { $sales_order->add_contact($mno_id_map['app_entity_id'], 'BILLING'); }
+    }
   }
 
   // Map sales_order status from Connec to Dolibarr
@@ -93,7 +99,9 @@ class SalesOrderMapper extends TransactionMapper {
     $user = ConnecUtils::defaultUser();
     if(is_null($user->rights)) { $user->rights = (object) array(); }
     if(is_null($user->rights->facture)) { $user->rights->facture = (object) array(); }
+    if(is_null($user->rights->commande)) { $user->rights->commande = (object) array(); }
     $user->rights->facture->valider = true;
+    $user->rights->commande->valider = true;
 
     switch($sales_order_hash['status']) {
       case "SUBMITTED":
