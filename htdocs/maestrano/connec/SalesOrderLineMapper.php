@@ -124,7 +124,6 @@ class SalesOrderLineMapper extends BaseMapper {
 
   // Persist the Dolibarr SalesOrderLine
   protected function persistLocalModel($sales_order_line, $sales_order_line_hash) {
-error_log("PERSISTING LINE : " . json_encode($sales_order_line->rowid) . " => " . json_encode($sales_order_line));
     if(!$this->is_set($sales_order_line->rowid)) {
       $sales_order_line->rowid = $sales_order_line->insert(0, false);
     } else {
