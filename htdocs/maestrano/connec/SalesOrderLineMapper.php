@@ -61,6 +61,7 @@ class SalesOrderLineMapper extends BaseMapper {
     $sales_order_line->total_ttc = $sales_order_line_hash['total_price']['total_amount'] ? $sales_order_line_hash['total_price']['total_amount'] : 0;
     $sales_order_line->remise_percent = $sales_order_line_hash['reduction_percent'];
     $sales_order_line->subprice = $sales_order_line_hash['unit_price']['net_amount'];
+    $sales_order_line->price = $sales_order_line_hash['unit_price']['net_amount'];
 
     // Map item
     if(!empty($sales_order_line_hash['item_id'])) {
@@ -123,6 +124,7 @@ class SalesOrderLineMapper extends BaseMapper {
 
   // Persist the Dolibarr SalesOrderLine
   protected function persistLocalModel($sales_order_line, $sales_order_line_hash) {
+error_log("PERSISTING LINE : " . json_encode($sales_order_line->rowid) . " => " . json_encode($sales_order_line));
     if(!$this->is_set($sales_order_line->rowid)) {
       $sales_order_line->rowid = $sales_order_line->insert(0, false);
     } else {
