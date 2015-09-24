@@ -894,7 +894,7 @@ if (empty($reshook))
 						$object->linked_objects = array_merge($object->linked_objects, $_POST['other_linked_objects']);
 					}
 
-					$id = $object->create($user);
+					$id = $object->create($user, 0, 0, false);
 
 					if ($id > 0)
 					{
@@ -963,7 +963,9 @@ if (empty($reshook))
 									0,
 									0,
 									0,
-									$langs->trans('Deposit')
+									$langs->trans('Deposit'),
+									0,
+									false
 								);
 						}
 						else
@@ -1008,7 +1010,7 @@ if (empty($reshook))
 										$discount->description = $desc;
 										$discountid = $discount->create($user);
 										if ($discountid > 0) {
-											$result = $object->insert_discount($discountid); // This include link_to_invoice
+											$result = $object->insert_discount($discountid, false); // This include link_to_invoice
 										} else {
 											setEventMessage($discount->error, 'errors');
 											$error ++;
@@ -1051,7 +1053,7 @@ if (empty($reshook))
 										$localtax1_tx = get_localtax($lines[$i]->tva_tx, 1, $object->client);
 										$localtax2_tx = get_localtax($lines[$i]->tva_tx, 2, $object->client);
 
-										$result = $object->addline($desc, $lines[$i]->subprice, $lines[$i]->qty, $lines[$i]->tva_tx, $localtax1_tx, $localtax2_tx, $lines[$i]->fk_product, $lines[$i]->remise_percent, $date_start, $date_end, 0, $lines[$i]->info_bits, $lines[$i]->fk_remise_except, 'HT', 0, $product_type, $lines[$i]->rang, $lines[$i]->special_code, $object->origin, $lines[$i]->rowid, $fk_parent_line, $lines[$i]->fk_fournprice, $lines[$i]->pa_ht, $label, $array_option);
+										$result = $object->addline($desc, $lines[$i]->subprice, $lines[$i]->qty, $lines[$i]->tva_tx, $localtax1_tx, $localtax2_tx, $lines[$i]->fk_product, $lines[$i]->remise_percent, $date_start, $date_end, 0, $lines[$i]->info_bits, $lines[$i]->fk_remise_except, 'HT', 0, $product_type, $lines[$i]->rang, $lines[$i]->special_code, $object->origin, $lines[$i]->rowid, $fk_parent_line, $lines[$i]->fk_fournprice, $lines[$i]->pa_ht, $label, $array_option, false);
 
 										if ($result > 0) {
 											$lineid = $result;
@@ -1104,6 +1106,17 @@ if (empty($reshook))
 		if ($id > 0 && ! $error)
 		{
 			$db->commit();
+
+      // Hook Maestrano
+      $mapper = 'CustomerInvoiceMapper';
+      if(class_exists($mapper)) {
+        // Reload invoice to committed modifications
+        $object->fetch($object->id);
+
+        $customerInvoiceMapper = new $mapper();
+        $customerInvoiceMapper->processLocalUpdate($object, true, false, true);
+      }
+
 			header('Location: ' . $_SERVER["PHP_SELF"] . '?facid=' . $id);
 			exit();
 		}

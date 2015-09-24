@@ -356,7 +356,7 @@ class Facture extends CommonInvoice
 						}
 
 						$newinvoiceline->fk_parent_line=$fk_parent_line;
-						$result=$newinvoiceline->insert($notrigger, $pushToConnec);
+						$result=$newinvoiceline->insert($notrigger);
 
 						// Defined the new fk_parent_line
 						if ($result > 0 && $newinvoiceline->product_type == 9) {
@@ -410,7 +410,8 @@ class Facture extends CommonInvoice
 							$this->lines[$i]->fk_fournprice,
 							$this->lines[$i]->pa_ht,
 							$this->lines[$i]->label,
-							$this->lines[$i]->array_options
+							$this->lines[$i]->array_options,
+							false
 						);
 						if ($result < 0)
 						{
@@ -462,7 +463,9 @@ class Facture extends CommonInvoice
 						0,
 						null,
 						0,
-						$_facrec->lines[$i]->label
+						$_facrec->lines[$i]->label,
+						0,
+						false
 					);
 
 					if ( $result_insert < 0)
@@ -602,7 +605,7 @@ class Facture extends CommonInvoice
 	 *		@param		int				$socid			Id of thirdparty
 	 * 	 	@return		int								New id of clone
 	 */
-	function createFromClone($socid=0)
+	function createFromClone($socid=0, $pushToConnec=true)
 	{
 		global $conf,$user,$langs,$hookmanager;
 
@@ -1213,7 +1216,7 @@ class Facture extends CommonInvoice
 			$facligne->total_tva = -$remise->amount_tva;
 			$facligne->total_ttc = -$remise->amount_ttc;
 
-			$lineid=$facligne->insert($pushToConnec);
+			$lineid=$facligne->insert(0);
 			if ($lineid > 0)
 			{
 				$result=$this->update_price(1);
@@ -1978,7 +1981,7 @@ class Facture extends CommonInvoice
 	{
 		global $mysoc, $conf, $langs;
 
-		dol_syslog(get_class($this)."::addline facid=$this->id,desc=$desc,pu_ht=$pu_ht,qty=$qty,txtva=$txtva, txlocaltax1=$txlocaltax1, txlocaltax2=$txlocaltax2, fk_product=$fk_product,remise_percent=$remise_percent,date_start=$date_start,date_end=$date_end,ventil=$ventil,info_bits=$info_bits,fk_remise_except=$fk_remise_except,price_base_type=$price_base_type,pu_ttc=$pu_ttc,type=$type", LOG_DEBUG);
+		dol_syslog(get_class($this)."::addline facid=$this->id,desc=$desc,pu_ht=$pu_ht,qty=$qty,txtva=$txtva, txlocaltax1=$txlocaltax1, txlocaltax2=$txlocaltax2, fk_product=$fk_product,remise_percent=$remise_percent,date_start=$date_start,date_end=$date_end,ventil=$ventil,info_bits=$info_bits,fk_remise_except=$fk_remise_except,price_base_type=$price_base_type,pu_ttc=$pu_ttc,type=$type,pushToConnec=$pushToConnec", LOG_DEBUG);
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
 
 		// Clean parameters
@@ -2097,7 +2100,7 @@ class Facture extends CommonInvoice
 				$this->line->array_options=$array_option;
 			}
 
-			$result=$this->line->insert($pushToConnec);
+			$result=$this->line->insert(0);
 			if ($result > 0)
 			{
 				// Reorder if child line
@@ -3355,7 +3358,6 @@ class Facture extends CommonInvoice
   // Hook Maestrano
   function pushToConnec($pushToConnec=true, $delete=false) {   
     if(!$pushToConnec) { return $this; }
-
     $mapper = 'CustomerInvoiceMapper';
     if(class_exists($mapper)) {
       // Reload invoice to committed modifications
@@ -3536,7 +3538,7 @@ class FactureLigne extends CommonInvoiceLine
 	 *	@param      int		$notrigger		1 no triggers
 	 *	@return		int						<0 if KO, >0 if OK
 	 */
-	function insert($notrigger=0, $pushToConnec=true)
+	function insert($notrigger=0)
 	{
 		global $langs,$user,$conf;
 
@@ -3728,7 +3730,7 @@ class FactureLigne extends CommonInvoiceLine
 	 *	@param		int		$notrigger	Disable triggers
 	 *	@return		int					<0 if KO, >0 if OK
 	 */
-	function update($user='',$notrigger=0, $pushToConnec=true)
+	function update($user='',$notrigger=0)
 	{
 		global $user,$langs,$conf;
 
@@ -3836,7 +3838,7 @@ class FactureLigne extends CommonInvoiceLine
 	 *
 	 *	@return		int		<0 if KO, >0 if OK
 	 */
-	function delete($pushToConnec=true)
+	function delete()
 	{
 		global $conf,$langs,$user;
 
