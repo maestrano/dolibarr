@@ -58,7 +58,6 @@ abstract class TransactionMapper extends BaseMapper {
 
     // // Map attributes
     if($this->is_set($transaction->ref)) { $transaction_hash['code'] = $transaction->ref; }
-    if($this->is_set($transaction->ref_ext)) { $transaction_hash['transaction_number'] = $transaction->ref_ext; }
     if($this->is_set($transaction->date)) { $transaction_hash['transaction_date'] = date('c', $transaction->date); }
     if($this->is_set($transaction->date_lim_reglement)) { $transaction_hash['due_date'] = date('c', $transaction->date_lim_reglement); }
     if($this->is_set($transaction->note_public)) { $transaction_hash['public_note'] = $transaction->note_public; }

@@ -17,7 +17,8 @@ class SalesOrderMapper extends TransactionMapper {
   protected function mapConnecResourceToModel($sales_order_hash, $sales_order) {
     parent::mapConnecResourceToModel($sales_order_hash, $sales_order);
 
-    if($this->is_set($sales_order_hash['transaction_number'])) { $sales_order->ref_ext = $sales_order_hash['transaction_number']; }
+    if($this->is_set($sales_order_hash['transaction_number'])) { $sales_order->ref_int = $sales_order_hash['transaction_number']; }
+    if($this->is_set($sales_order_hash['title'])) { $sales_order->ref_ext = $sales_order_hash['title']; }
   }
 
   // Map the Dolibarr SalesOrder to a Connec resource hash
@@ -26,6 +27,10 @@ class SalesOrderMapper extends TransactionMapper {
 
     $sales_order_hash = parent::mapModelToConnecResource($sales_order);
 
+    // Map attributes
+    if($this->is_set($sales_order->ref_int)) { $sales_order_hash['transaction_number'] = $sales_order->ref_int; }
+    if($this->is_set($sales_order->ref_ext)) { $sales_order_hash['title'] = $sales_order->ref_ext; }
+
     // Map sales_order status
     $this->mapSalesOrderStatusToConnec($sales_order_hash, $sales_order);
 
@@ -33,7 +38,7 @@ class SalesOrderMapper extends TransactionMapper {
     $customer_id = $sales_order->getIdcontact('external', 'CUSTOMER');
     if($this->is_set($customer_id)) {
       $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($customer_id, 'CONTACT');
-      if($mno_id_map) { $invoice_hash['person_id'] = $mno_id_map['mno_entity_guid']; }
+      if($mno_id_map) { $sales_order_hash['person_id'] = $mno_id_map['mno_entity_guid']; }
     }
 
     // Map SalesOrder lines

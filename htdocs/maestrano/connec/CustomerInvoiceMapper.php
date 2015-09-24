@@ -25,7 +25,8 @@ class CustomerInvoiceMapper extends TransactionMapper {
     // Map invoice type
     $this->mapInvoiceTypeToDolibarr($invoice_hash, $invoice);
 
-    if($this->is_set($invoice_hash['transaction_number'])) { $invoice->ref_ext = $invoice_hash['transaction_number']; }
+    if($this->is_set($invoice_hash['transaction_number'])) { $invoice->ref_int = $invoice_hash['transaction_number']; }
+    if($this->is_set($invoice_hash['title'])) { $invoice->ref_ext = $invoice_hash['title']; }
   }
 
   // Map the Dolibarr Invoice to a Connec resource hash
@@ -36,6 +37,10 @@ class CustomerInvoiceMapper extends TransactionMapper {
 
     // Default invoice type to CUSTOMER
     $invoice_hash['type'] = 'CUSTOMER';
+
+    // Map attributes
+    if($this->is_set($invoice->ref_int)) { $invoice_hash['transaction_number'] = $invoice->ref_int; }
+    if($this->is_set($invoice->ref_ext)) { $invoice_hash['title'] = $invoice->ref_ext; }
 
     // Map invoice status
     $this->mapInvoiceStatusToConnec($invoice_hash, $invoice);
