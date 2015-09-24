@@ -97,7 +97,7 @@ abstract class BaseMapper {
     }
   }
 
-  // Fetch and persist a Connec! resounce by id
+  // Fetch and persist a Connec! resource by id
   public function fetchConnecResource($entity_id) {
     error_log("fetch connec resource entity_name=$this->connec_entity_name, entity_id=$entity_id");
 
@@ -289,7 +289,7 @@ abstract class BaseMapper {
       if($saveResult) {
         // Save the complete response
         error_log("saving entity back after pushing entity_name=$this->local_entity_name");
-        return $this->saveConnecResource($result[$this->connec_resource_name], true, $model);
+        return $this->saveConnecResource($result[$this->connec_resource_name], true, $model, false);
       } else {
         // Map the Connec! ID with the local one
         error_log("mapping entity back after pushing entity_name=$this->local_entity_name");
