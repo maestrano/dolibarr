@@ -29,13 +29,11 @@ class SalesOrderMapper extends TransactionMapper {
     // Map sales_order status
     $this->mapSalesOrderStatusToConnec($sales_order_hash, $sales_order);
 
-    // Map first Contact
-    $contacts = $sales_order->liste_contact();
-    if(!empty($contacts)) {
-      $contact = $contacts[0];
-      $contact_id = $contact['id'];
-      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($contact_id, 'CONTACTS');
-      if($mno_id_map) { $sales_order_hash['person_id'] = $mno_id_map['mno_entity_guid']; }
+    // Map Contact
+    $customer_id = $sales_order->getIdcontact('external', 'CUSTOMER');
+    if($this->is_set($customer_id)) {
+      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($customer_id, 'CONTACT');
+      if($mno_id_map) { $invoice_hash['person_id'] = $mno_id_map['mno_entity_guid']; }
     }
 
     // Map SalesOrder lines
@@ -89,7 +87,8 @@ class SalesOrderMapper extends TransactionMapper {
     // Map Contact
     if(array_key_exists('person_id', $sales_order_hash)) {
       $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($sales_order_hash['person_id'], 'PERSON', 'CONTACT');
-      if($mno_id_map) { $sales_order->add_contact($mno_id_map['app_entity_id'], 'BILLING'); }
+      $customer_id = $sales_order->getIdcontact('external', 'CUSTOMER');
+      if($mno_id_map && $mno_id_map['app_entity_id'] != $customer_id) { $sales_order->add_contact($mno_id_map['app_entity_id'], 'CUSTOMER', 'external'); }
     }
   }
 
