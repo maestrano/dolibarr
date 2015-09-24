@@ -753,7 +753,7 @@ class Commande extends CommonOrder
                         $this->lines[$i]->pa_ht,
                     	$this->lines[$i]->label,
 						$this->lines[$i]->array_options,
-            $pushToConnec
+            false
                     );
                     if ($result < 0)
                     {

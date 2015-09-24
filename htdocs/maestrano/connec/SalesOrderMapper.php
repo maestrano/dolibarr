@@ -87,8 +87,8 @@ class SalesOrderMapper extends TransactionMapper {
     // Map Contact
     if(array_key_exists('person_id', $sales_order_hash)) {
       $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($sales_order_hash['person_id'], 'PERSON', 'CONTACT');
-      $customer_id = $sales_order->getIdcontact('external', 'CUSTOMER');
-      if($mno_id_map && $mno_id_map['app_entity_id'] != $customer_id) { $sales_order->add_contact($mno_id_map['app_entity_id'], 'CUSTOMER', 'external'); }
+      $customer_id = $sales_order->getIdcontact('external', 'BILLING');
+      if($mno_id_map && !in_array($mno_id_map['app_entity_id'], $customer_id)) { $sales_order->add_contact($mno_id_map['app_entity_id'], 'BILLING', 'external'); }
     }
   }
 

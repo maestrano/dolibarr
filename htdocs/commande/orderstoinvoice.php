@@ -178,7 +178,7 @@ if (($action == 'create' || $action == 'add') && !$error)
 					$object->origin    = $_POST['origin'];
 					$object->origin_id = $orders_id[$ii];
 					$object->linked_objects = $orders_id;
-					$id = $object->create($user);
+					$id = $object->create($user, 0, 0, false);
 
 					if ($id>0)
 					{
@@ -246,7 +246,7 @@ if (($action == 'create' || $action == 'add') && !$error)
 										$discountid=$discount->create($user);
 										if ($discountid > 0)
 										{
-											$result=$object->insert_discount($discountid);
+											$result=$object->insert_discount($discountid, false);
 											//$result=$discount->link_to_invoice($lineid,$id);
 										}
 										else
@@ -298,7 +298,10 @@ if (($action == 'create' || $action == 'add') && !$error)
 												$lines[$i]->rowid,
 												$fk_parent_line,
 												$lines[$i]->fk_fournprice,
-												$lines[$i]->pa_ht
+												$lines[$i]->pa_ht,
+                        '',
+                        0,
+                        false
 										);
 										if ($result > 0)
 										{
@@ -339,6 +342,17 @@ if (($action == 'create' || $action == 'add') && !$error)
 		if ($id > 0 && ! $error)
 		{
 			$db->commit();
+      
+      // Hook Maestrano
+      $mapper = 'CustomerInvoiceMapper';
+      if(class_exists($mapper)) {
+        // Reload invoice to committed modifications
+        $object->fetch($object->id);
+
+        $customerInvoiceMapper = new $mapper();
+        $customerInvoiceMapper->processLocalUpdate($object, true, false, true);
+      }
+
 			header('Location: '.DOL_URL_ROOT.'/compta/facture.php?facid='.$id);
 			exit;
 		}
