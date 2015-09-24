@@ -53,7 +53,7 @@ class SalesOrderMapper extends TransactionMapper {
   protected function persistLocalModel($sales_order, $sales_order_hash) {
     $user = ConnecUtils::defaultUser();
     if($this->is_new($sales_order)) {
-      $sales_order->id = $sales_order->create($user, 0, $sales_order->date_lim_reglement, false);
+      $sales_order->id = $sales_order->create($user, 0, false);
     } else {
       $sales_order->update($user, 0, false);
     }
