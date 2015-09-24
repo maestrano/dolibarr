@@ -54,9 +54,10 @@ class CustomerInvoiceMapper extends TransactionMapper {
     }
 
     // Map Contact
-    $customer_id = $invoice->getIdcontact('external', 'CUSTOMER');
-    if($this->is_set($customer_id)) {
-      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($customer_id, 'CONTACT');
+    $customer_ids = $invoice->getIdBillingContact();
+    if(empty($customer_ids)) { $customer_ids = $invoice->getIdShippingContact(); }
+    if(!empty($customer_ids)) {
+      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($customer_ids[0], 'CONTACT');
       if($mno_id_map) { $invoice_hash['person_id'] = $mno_id_map['mno_entity_guid']; }
     }
 
