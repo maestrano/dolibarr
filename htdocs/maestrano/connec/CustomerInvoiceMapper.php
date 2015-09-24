@@ -48,12 +48,10 @@ class CustomerInvoiceMapper extends TransactionMapper {
       if($mno_id_map) { $invoice_hash['sales_order_id'] = $mno_id_map['mno_entity_guid']; }
     }
 
-    // Map first Contact
-    $contacts = $invoice->liste_contact();
-    if(!empty($contacts)) {
-      $contact = $contacts[0];
-      $contact_id = $contact['id'];
-      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($contact_id, 'CONTACT');
+    // Map Contact
+    $customer_id = $invoice->getIdcontact('external', 'CUSTOMER');
+    if($this->is_set($customer_id)) {
+      $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($customer_id, 'CONTACT');
       if($mno_id_map) { $invoice_hash['person_id'] = $mno_id_map['mno_entity_guid']; }
     }
 
@@ -106,9 +104,10 @@ class CustomerInvoiceMapper extends TransactionMapper {
     $this->mapInvoiceStatusToDolibarr($invoice_hash, $invoice);
 
     // Map Contact
-    if(array_key_exists('person_id', $invoice_hash)) {
-      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($invoice_hash['person_id'], 'PERSON', 'CONTACT');
-      if($mno_id_map) { $invoice->add_contact($mno_id_map['app_entity_id'], 'BILLING'); }
+    if(array_key_exists('person_id', $sales_order_hash)) {
+      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($sales_order_hash['person_id'], 'PERSON', 'CONTACT');
+      $customer_id = $invoice->getIdcontact('external', 'CUSTOMER');
+      if($mno_id_map && $mno_id_map['app_entity_id'] != $customer_id) { $invoice->add_contact($mno_id_map['app_entity_id'], 'CUSTOMER', 'external'); }
     }
 
     // Map sales order reference

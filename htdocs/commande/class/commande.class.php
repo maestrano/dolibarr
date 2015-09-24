@@ -752,7 +752,8 @@ class Commande extends CommonOrder
                         $this->lines[$i]->fk_fournprice,
                         $this->lines[$i]->pa_ht,
                     	$this->lines[$i]->label,
-						$this->lines[$i]->array_options
+						$this->lines[$i]->array_options,
+            $pushToConnec
                     );
                     if ($result < 0)
                     {
