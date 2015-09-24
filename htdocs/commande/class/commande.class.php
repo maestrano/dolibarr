@@ -195,7 +195,7 @@ class Commande extends CommonOrder
      *  @param		int		$notrigger		1=Does not execute triggers, 0= execuete triggers
      *	@return  	int						<=0 if OK, >0 if KO
      */
-    function valid($user, $idwarehouse=0, $notrigger=0)
+    function valid($user, $idwarehouse=0, $notrigger=0, $pushToConnec=true)
     {
         global $conf,$langs;
         require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
@@ -337,6 +337,7 @@ class Commande extends CommonOrder
         if (! $error)
         {
             $this->db->commit();
+            $this->pushToConnec($pushToConnec);
             return 1;
         }
         else
@@ -353,7 +354,7 @@ class Commande extends CommonOrder
      *	@param	int		$idwarehouse	Id warehouse to use for stock change.
      *	@return	int						<0 if KO, >0 if OK
      */
-    function set_draft($user, $idwarehouse=-1)
+    function set_draft($user, $idwarehouse=-1, $pushToConnec=true)
     {
         global $conf,$langs;
 
@@ -402,6 +403,7 @@ class Commande extends CommonOrder
                 {
                     $this->statut=0;
                     $this->db->commit();
+                    $this->pushToConnec($pushToConnec);
                     return $result;
                 }
                 else
@@ -414,6 +416,7 @@ class Commande extends CommonOrder
 
             $this->statut=0;
             $this->db->commit();
+            $this->pushToConnec($pushToConnec);
             return 1;
         }
         else
@@ -432,7 +435,7 @@ class Commande extends CommonOrder
      *	@param      User	$user       Object user that change status
      *	@return     int         		<0 if KO, 0 if nothing is done, >0 if OK
      */
-    function set_reopen($user)
+    function set_reopen($user, $pushToConnec=true)
     {
         global $conf,$langs;
         $error=0;
@@ -472,6 +475,7 @@ class Commande extends CommonOrder
         	$this->facturee = 0; // deprecated
 
             $this->db->commit();
+            $this->pushToConnec($pushToConnec);
             return 1;
         }
         else
@@ -492,7 +496,7 @@ class Commande extends CommonOrder
      * 	@param      User	$user       Objet user that close
      *	@return		int					<0 if KO, >0 if OK
      */
-    function cloture($user)
+    function cloture($user, $pushToConnec=true)
     {
         global $conf, $langs;
 
@@ -522,6 +526,7 @@ class Commande extends CommonOrder
                 	$this->statut=3;
 
                     $this->db->commit();
+                    $this->pushToConnec($pushToConnec);
                     return 1;
                 }
                 else
@@ -547,7 +552,7 @@ class Commande extends CommonOrder
      *	@param	int		$idwarehouse	Id warehouse to use for stock change.
      *	@return	int						<0 if KO, >0 if OK
      */
-	function cancel($idwarehouse=-1)
+	function cancel($idwarehouse=-1, $pushToConnec=true)
 	{
 		global $conf,$user,$langs;
 
@@ -599,6 +604,7 @@ class Commande extends CommonOrder
 			{
 				$this->statut=-1;
 				$this->db->commit();
+        $this->pushToConnec($pushToConnec);
 				return 1;
 			}
 			else
@@ -628,7 +634,7 @@ class Commande extends CommonOrder
      *	@param		int		$notrigger	Disable all triggers
      *	@return 	int					<0 if KO, >0 if OK
      */
-    function create($user, $notrigger=0)
+    function create($user, $notrigger=0, $pushToConnec=true)
     {
         global $conf,$langs,$mysoc,$hookmanager;
         $error=0;
@@ -746,7 +752,8 @@ class Commande extends CommonOrder
                         $this->lines[$i]->fk_fournprice,
                         $this->lines[$i]->pa_ht,
                     	$this->lines[$i]->label,
-						$this->lines[$i]->array_options
+						$this->lines[$i]->array_options,
+            false
                     );
                     if ($result < 0)
                     {
@@ -846,6 +853,7 @@ class Commande extends CommonOrder
 
 	                if (!$error) {
 		                $this->db->commit();
+                    $this->pushToConnec($pushToConnec);
 		                return $this->id;
 	                }
 
@@ -932,7 +940,7 @@ class Commande extends CommonOrder
 
 
         // Create clone
-        $result=$this->create($user);
+        $result=$this->create($user, 0, $pushToConnec);
         if ($result < 0) $error++;
 
         if (! $error)
@@ -958,6 +966,7 @@ class Commande extends CommonOrder
         if (! $error)
         {
             $this->db->commit();
+            $this->pushToConnec($pushToConnec);
             return $this->id;
         }
         else
@@ -1056,7 +1065,7 @@ class Commande extends CommonOrder
             	$this->linked_objects = array_merge($this->linked_objects, $object->other_linked_objects);
             }
 
-            $ret = $this->create($user);
+            $ret = $this->create($user, 0, $pushToConnec);
 
             if ($ret > 0)
             {
@@ -1120,7 +1129,7 @@ class Commande extends CommonOrder
      *	par l'appelant par la methode get_default_tva(societe_vendeuse,societe_acheteuse,produit)
      *	et le desc doit deja avoir la bonne valeur (a l'appelant de gerer le multilangue)
      */
-	function addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $info_bits=0, $fk_remise_except=0, $price_base_type='HT', $pu_ttc=0, $date_start='', $date_end='', $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='',$array_option=0)
+	function addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $info_bits=0, $fk_remise_except=0, $price_base_type='HT', $pu_ttc=0, $date_start='', $date_end='', $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='',$array_option=0, $pushToConnec=true)
     {
     	global $mysoc, $conf, $langs;
 
@@ -1265,7 +1274,7 @@ class Commande extends CommonOrder
 				$this->line->array_options=$array_option;
 			}
 
-            $result=$this->line->insert();
+            $result=$this->line->insert(0, false);
             if ($result > 0)
             {
                 // Reorder if child line
@@ -1276,6 +1285,7 @@ class Commande extends CommonOrder
                 if ($result > 0)
                 {
                     $this->db->commit();
+                    $this->pushToConnec($pushToConnec);
                     return $this->line->rowid;
                 }
                 else
@@ -1509,7 +1519,7 @@ class Commande extends CommonOrder
      *	@param     int	$idremise			Id de la remise fixe
      *	@return    int          			>0 si ok, <0 si ko
      */
-    function insert_discount($idremise)
+    function insert_discount($idremise, $pushToConnec=true)
     {
         global $langs;
 
@@ -1549,13 +1559,14 @@ class Commande extends CommonOrder
             $line->total_tva = -$remise->amount_tva;
             $line->total_ttc = -$remise->amount_ttc;
 
-            $result=$line->insert();
+            $result=$line->insert(0, false);
             if ($result > 0)
             {
                 $result=$this->update_price(1);
                 if ($result > 0)
                 {
                     $this->db->commit();
+                    $this->pushToConnec($pushToConnec);
                     return 1;
                 }
                 else
@@ -1833,7 +1844,7 @@ class Commande extends CommonOrder
      *  @param      int		$lineid		Id of line to delete
      *  @return     int        		 	>0 if OK, 0 if nothing to do, <0 if KO
      */
-    function deleteline($lineid)
+    function deleteline($lineid, $pushToConnec=true)
     {
         global $user;
 
@@ -1868,6 +1879,7 @@ class Commande extends CommonOrder
                         if ($result > 0)
                         {
                             $this->db->commit();
+                            $this->pushToConnec($pushToConnec);
                             return 1;
                         }
                         else
@@ -2279,7 +2291,7 @@ class Commande extends CommonOrder
 	 *
 	 * @return     int     <0 if ko, >0 if ok
 	 */
-	function classifyBilled()
+	function classifyBilled($pushToConnec=true)
 	{
 		global $conf, $user, $langs;
 
@@ -2302,6 +2314,7 @@ class Commande extends CommonOrder
 				$this->billed=1;
 
 				$this->db->commit();
+        $this->pushToConnec($pushToConnec);
 				return 1;
 			}
 			else
@@ -2360,7 +2373,7 @@ class Commande extends CommonOrder
 	 *  @param		array			$array_option		extrafields array
      *  @return   	int              					< 0 if KO, > 0 if OK
      */
-	function updateline($rowid, $desc, $pu, $qty, $remise_percent, $txtva, $txlocaltax1=0.0,$txlocaltax2=0.0, $price_base_type='HT', $info_bits=0, $date_start='', $date_end='', $type=0, $fk_parent_line=0, $skip_update_total=0, $fk_fournprice=null, $pa_ht=0, $label='', $special_code=0, $array_option=0)
+  function updateline($rowid, $desc, $pu, $qty, $remise_percent, $txtva, $txlocaltax1=0.0,$txlocaltax2=0.0, $price_base_type='HT', $info_bits=0, $date_start='', $date_end='', $type=0, $fk_parent_line=0, $skip_update_total=0, $fk_fournprice=null, $pa_ht=0, $label='', $special_code=0, $array_option=0, $pushToConnec=true)
     {
         global $conf, $mysoc;
 
@@ -2483,6 +2496,7 @@ class Commande extends CommonOrder
                 $this->update_price(1);
 
                 $this->db->commit();
+                $this->pushToConnec($pushToConnec);
                 return $result;
             }
             else
@@ -2508,7 +2522,7 @@ class Commande extends CommonOrder
 	 *      @param      int		$notrigger	    0=launch triggers after, 1=disable triggers
 	 *      @return     int      			   	<0 if KO, >0 if OK
 	 */
-	function update($user=null, $notrigger=0)
+	function update($user=null, $notrigger=0, $pushToConnec=true)
 	{
 		global $conf, $langs;
 		$error=0;
@@ -2584,6 +2598,7 @@ class Commande extends CommonOrder
 		else
 		{
 			$this->db->commit();
+      $this->pushToConnec($pushToConnec);
 			return 1;
 		}
 	}
@@ -2636,7 +2651,7 @@ class Commande extends CommonOrder
      *	@param	int		$notrigger	1=Does not execute triggers, 0= execuete triggers
      * 	@return	int					<=0 if KO, >0 if OK
      */
-    function delete($user, $notrigger=0)
+    function delete($user, $notrigger=0, $pushToConnec=true)
     {
         global $conf, $langs;
         require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
@@ -2727,6 +2742,7 @@ class Commande extends CommonOrder
         {
         	dol_syslog(get_class($this)."::delete $this->id by $user->id", LOG_DEBUG);
         	$this->db->commit();
+          $this->pushToConnec($pushToConnec);
         	return 1;
         }
         else
@@ -3209,6 +3225,23 @@ class Commande extends CommonOrder
 		return $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref);
 	}
 
+
+  // Hook Maestrano
+  function pushToConnec($pushToConnec=true, $delete=false) {   
+    if(!$pushToConnec) { return $this; }
+
+    $mapper = 'SalesOrderMapper';
+    if(class_exists($mapper)) {
+      // Reload invoice to committed modifications
+      $this->fetch($this->id);
+
+      $salesOrderMapper = new $mapper();
+      $salesOrderMapper->processLocalUpdate($this, $pushToConnec, $delete, true);
+    }
+
+    return $this;
+  }
+
 }
 
 
@@ -3416,7 +3449,7 @@ class OrderLine extends CommonOrderLine
      *	@param      int		$notrigger		1 = disable triggers
      *	@return		int						<0 if KO, >0 if OK
      */
-    function insert($notrigger=0)
+    function insert($notrigger=0, $pushToConnec=true)
     {
         global $langs, $conf, $user;
 

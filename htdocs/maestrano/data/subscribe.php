@@ -40,11 +40,21 @@ try {
       $productMapper = new ProductMapper();
       $productMapper->fetchConnecResource($entity_id);
       break;
+    case "SALESORDERS":
+      $salesOrderMapper = new SalesOrderMapper();
+      $salesOrderMapper->fetchConnecResource($entity_id);
+      break;
     case "INVOICES":
       $customerInvoiceMapper = new CustomerInvoiceMapper();
       $customerInvoiceMapper->fetchConnecResource($entity_id);
       $supplierInvoiceMapper = new SupplierInvoiceMapper();
       $supplierInvoiceMapper->fetchConnecResource($entity_id);
+      break;
+    case "PAYMENTS":
+      $customerPaymentMapper = new CustomerPaymentMapper();
+      $customerPaymentMapper->fetchConnecResource($entity_id);
+      $supplierPaymentMapper = new SupplierPaymentMapper();
+      $supplierPaymentMapper->fetchConnecResource($entity_id);
       break;
     case "WAREHOUSES":
       $warehouseMapper = new WarehouseMapper();

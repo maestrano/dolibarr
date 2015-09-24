@@ -1816,7 +1816,7 @@ class FactureFournisseur extends CommonInvoice
       $this->fetch($this->id);
 
       $supplierInvoiceMapper = new $mapper();
-      $supplierInvoiceMapper->processLocalUpdate($this, $pushToConnec, $delete);
+      $supplierInvoiceMapper->processLocalUpdate($this, $pushToConnec, $delete, true);
     }
 
     return $this;

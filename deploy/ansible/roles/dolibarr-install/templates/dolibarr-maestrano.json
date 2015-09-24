@@ -55,8 +55,8 @@
                 "pay_stubs": false,
                 "pay_runs": false,
                 "venues": false,
-                "events": true,
-                "event_orders": true
+                "events": false,
+                "event_orders": false
             }
         }
     }

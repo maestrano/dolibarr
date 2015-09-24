@@ -822,7 +822,7 @@ class Paiement extends CommonObject
       $this->fk_account = GETPOST('accountid');
 
       $customerPaymentMapper = new $mapper();
-      $customerPaymentMapper->processLocalUpdate($this, $pushToConnec, $delete);
+      $customerPaymentMapper->processLocalUpdate($this, $pushToConnec, $delete, true);
     }
 
     return $this;

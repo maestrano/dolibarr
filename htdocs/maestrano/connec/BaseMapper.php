@@ -64,6 +64,13 @@ abstract class BaseMapper {
   }
 
   // Overwrite me!
+  // Optional: Method called after pushing an Entity to Connec
+  // Add any custom logic to map the response back to the model
+  public function processConnecResponse($resource_hash, $model) {
+    return $model;
+  }
+
+  // Overwrite me!
   // Optional: Returns the Connec! Resource ID. When dealing with embedded documents, ID is unique only within the embedded collection.
   // In this case it is advised to prefix the Embedded Document ID with the Parent Document ID (eg: PARENT_ID#EMBEDDED_DOCUMENT_ID)
   protected function getConnecResourceId($resource_hash) {
@@ -90,7 +97,7 @@ abstract class BaseMapper {
     }
   }
 
-  // Fetch and persist a Connec! resounce by id
+  // Fetch and persist a Connec! resource by id
   public function fetchConnecResource($entity_id) {
     error_log("fetch connec resource entity_name=$this->connec_entity_name, entity_id=$entity_id");
 
@@ -282,11 +289,15 @@ abstract class BaseMapper {
       if($saveResult) {
         // Save the complete response
         error_log("saving entity back after pushing entity_name=$this->local_entity_name");
-        return $this->saveConnecResource($result[$this->connec_resource_name], true, $model);
+        return $this->saveConnecResource($result[$this->connec_resource_name], true, $model, false);
       } else {
         // Map the Connec! ID with the local one
         error_log("mapping entity back after pushing entity_name=$this->local_entity_name");
         $this->findOrCreateIdMap($result[$this->connec_resource_name], $model);
+        
+        // Custom response processing
+        error_log("processing back entity_name=$this->local_entity_name");
+        $this->processConnecResponse($result[$this->connec_resource_name], $model);
         return $model;
       }
     }

@@ -45,12 +45,6 @@ abstract class TransactionMapper extends BaseMapper {
       $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($transaction_hash['organization_id'], 'ORGANIZATION', 'SOCIETE');
       if($mno_id_map) { $transaction->socid = $mno_id_map['app_entity_id']; }
     }
-
-    // Map Contact
-    if($this->is_set($transaction_hash['person_id'])) {
-      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($transaction_hash['person_id'], 'PERSON', 'CONTACTS');
-      if($mno_id_map) { $transaction->add_contact($mno_id_map['app_entity_id']. 'BILLING'); }
-    }
   }
 
   // Map the Dolibarr Transaction to a Connec resource hash
@@ -64,7 +58,6 @@ abstract class TransactionMapper extends BaseMapper {
 
     // // Map attributes
     if($this->is_set($transaction->ref)) { $transaction_hash['code'] = $transaction->ref; }
-    if($this->is_set($transaction->ref_ext)) { $transaction_hash['transaction_number'] = $transaction->ref_ext; }
     if($this->is_set($transaction->date)) { $transaction_hash['transaction_date'] = date('c', $transaction->date); }
     if($this->is_set($transaction->date_lim_reglement)) { $transaction_hash['due_date'] = date('c', $transaction->date_lim_reglement); }
     if($this->is_set($transaction->note_public)) { $transaction_hash['public_note'] = $transaction->note_public; }

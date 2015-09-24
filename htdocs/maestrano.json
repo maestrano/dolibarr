@@ -35,7 +35,7 @@
                 "people": true,
                 "items": true,
                 "opportunities": false,
-                "quotes": true,
+                "quotes": false,
                 "purchase_orders": true,
                 "sales_orders": true,
                 "invoices": true,
@@ -51,8 +51,8 @@
                 "pay_stubs": false,
                 "pay_runs": false,
                 "venues": false,
-                "events": true,
-                "event_orders": true
+                "events": false,
+                "event_orders": false
             }
         }
     }
