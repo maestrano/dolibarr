@@ -34,14 +34,14 @@ class ContactMapper extends BaseMapper {
     if($this->is_set($person_hash['description'])) { $person->note_public = $person_hash['description']; }
     if($this->is_set($person_hash['first_name'])) { $person->firstname = $person_hash['first_name']; }
     if($this->is_set($person_hash['last_name'])) { $person->lastname = $person_hash['last_name']; }
-    // TODO: Title?
 
     if($this->is_set($person_hash['job_title'])) { $person->poste = $person_hash['job_title']; }
   
     // Map Organization
-    if($this->is_set($person_hash['organization_id'])) {
-      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($person_hash['organization_id'], 'Organization');
-      if($mno_id_map) { $person->socid = $mno_id_map['app_entity_id']; }
+    if(array_key_exists('organization_id', $person_hash)) {
+      $organizationMapper = new OrganizationMapper();
+      $organization = $organizationMapper->loadModelByConnecId($person_hash['organization_id']);
+      if($organization) { $person->socid = $organization->id; }
     }
 
     // Map Address giveing precedence to work address
