@@ -41,9 +41,10 @@ abstract class TransactionMapper extends BaseMapper {
     if($this->is_set($transaction_hash['discount_amount'])) { $transaction->remise_absolue = $transaction_hash['discount_amount']; }
 
     // Map Organization
-    if($this->is_set($transaction_hash['organization_id'])) {
-      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($transaction_hash['organization_id'], 'ORGANIZATION', 'SOCIETE');
-      if($mno_id_map) { $transaction->socid = $mno_id_map['app_entity_id']; }
+    if(array_key_exists('organization_id', $transaction_hash)) {
+      $organizationMapper = new OrganizationMapper();
+      $organization = $organizationMapper->loadModelByConnecId($transaction_hash['organization_id']);
+      if($organization) { $transaction->socid = $organization->id; }
     }
   }
 
