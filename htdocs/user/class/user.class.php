@@ -8,6 +8,7 @@
  * Copyright (C) 2005      Lionel Cousteix      <etm_ltd@tiscali.co.uk>
  * Copyright (C) 2011      Herve Prot           <herve.prot@symeos.com>
  * Copyright (C) 2013      Philippe Grand       <philippe.grand@atoo-net.com>
+ * Copyright (C) 2013      Alexandre Spangaro   <alexandre.spangaro@gmail.com> 
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +51,7 @@ class User extends CommonObject
 	var $firstname;
 	var $note;
 	var $email;
+  var $skype;
 	var $job;
 	var $signature;
 	var $office_phone;
@@ -97,6 +99,8 @@ class User extends CommonObject
 	var $users;						// To store all tree of users hierarchy
 	var $parentof;					// To store an array of all parents for all ids.
 
+	var $accountancy_code;				// Accountancy code in prevision of the complete accountancy module
+
 
 	/**
 	 *    Constructor de la classe
@@ -138,7 +142,7 @@ class User extends CommonObject
 		$login=trim($login);
 
 		// Get user
-		$sql = "SELECT u.rowid, u.lastname, u.firstname, u.email, u.job, u.signature, u.office_phone, u.office_fax, u.user_mobile,";
+		$sql = "SELECT u.rowid, u.lastname, u.firstname, u.email, u.job, u.skype, u.signature, u.office_phone, u.office_fax, u.user_mobile,";
 		$sql.= " u.admin, u.login, u.note,";
 		$sql.= " u.pass, u.pass_crypted, u.pass_temp,";
 		$sql.= " u.fk_societe, u.fk_socpeople, u.fk_member, u.fk_user, u.ldap_sid,";
@@ -149,6 +153,7 @@ class User extends CommonObject
 		$sql.= " u.datepreviouslogin as datep,";
 		$sql.= " u.photo as photo,";
 		$sql.= " u.openid as openid,";
+		$sql.= " u.accountancy_code,";
 		$sql.= " u.ref_int, u.ref_ext";
 		$sql.= " FROM ".MAIN_DB_PREFIX."user as u";
 
@@ -200,6 +205,7 @@ class User extends CommonObject
 				$this->office_fax   = $obj->office_fax;
 				$this->user_mobile  = $obj->user_mobile;
 				$this->email		= $obj->email;
+        $this->skype		= $obj->skype;
 				$this->job			= $obj->job;
 				$this->signature	= $obj->signature;
 				$this->admin		= $obj->admin;
@@ -209,6 +215,7 @@ class User extends CommonObject
 				$this->openid		= $obj->openid;
 				$this->lang			= $obj->lang;
 				$this->entity		= $obj->entity;
+				$this->accountancy_code		= $obj->accountancy_code;
 
 				$this->datec				= $this->db->jdate($obj->datec);
 				$this->datem				= $this->db->jdate($obj->datem);
@@ -219,15 +226,13 @@ class User extends CommonObject
 				$this->contact_id           = $obj->fk_socpeople;
 				$this->fk_member            = $obj->fk_member;
 				$this->fk_user        		= $obj->fk_user;
-				
+
 				// Retreive all extrafield for thirdparty
 				// fetch optionals attributes and labels
 				require_once(DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php');
 				$extrafields=new ExtraFields($this->db);
 				$extralabels=$extrafields->fetch_name_optionals_label($this->table_element,true);
-				if (count($extralabels)>0) {
-					$this->fetch_optionals($this->id,$extralabels);
-				}
+				$this->fetch_optionals($this->id,$extralabels);
 
 				$this->db->free($result);
 			}
@@ -915,6 +920,7 @@ class User extends CommonObject
 		$this->lastname		= $contact->lastname;
 		$this->firstname	= $contact->firstname;
 		$this->email		= $contact->email;
+    $this->skype 		= $contact->skype;
 		$this->office_phone	= $contact->phone_pro;
 		$this->office_fax	= $contact->fax;
 		$this->user_mobile	= $contact->phone_mobile;
@@ -1108,6 +1114,7 @@ class User extends CommonObject
 		$this->office_fax   = trim($this->office_fax);
 		$this->user_mobile  = trim($this->user_mobile);
 		$this->email        = trim($this->email);
+		$this->skype        = trim($this->skype);
 		$this->job    		= trim($this->job);
 		$this->signature    = trim($this->signature);
 		$this->note         = trim($this->note);
@@ -1116,7 +1123,8 @@ class User extends CommonObject
 		$this->address		= empty($this->address)?'':$this->address;
 		$this->zip			= empty($this->zip)?'':$this->zip;
 		$this->town			= empty($this->town)?'':$this->town;
-		
+		$this->accountancy_code = trim($this->accountancy_code);
+
 		// Check parameters
 		if (! empty($conf->global->USER_MAIL_REQUIRED) && ! isValidEMail($this->email))
 		{
@@ -1142,8 +1150,10 @@ class User extends CommonObject
 		$sql.= ", office_fax = '".$this->db->escape($this->office_fax)."'";
 		$sql.= ", user_mobile = '".$this->db->escape($this->user_mobile)."'";
 		$sql.= ", email = '".$this->db->escape($this->email)."'";
+		$sql.= ", skype = '".$this->db->escape($this->skype)."'";
 		$sql.= ", job = '".$this->db->escape($this->job)."'";
 		$sql.= ", signature = '".$this->db->escape($this->signature)."'";
+		$sql.= ", accountancy_code = '".$this->db->escape($this->accountancy_code)."'";
 		$sql.= ", note = '".$this->db->escape($this->note)."'";
 		$sql.= ", photo = ".($this->photo?"'".$this->db->escape($this->photo)."'":"null");
 		$sql.= ", openid = ".($this->openid?"'".$this->db->escape($this->openid)."'":"null");
@@ -1202,6 +1212,7 @@ class User extends CommonObject
 						$adh->societe=(empty($adh->societe) && $this->societe_id ? $this->societe_id : $adh->societe);
 
 						$adh->email=$this->email;
+						$adh->skype=$this->skype;
 						$adh->phone=$this->office_phone;
 						$adh->phone_mobile=$this->user_mobile;
 
@@ -1453,7 +1464,6 @@ class User extends CommonObject
 
 		require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 
-		$subject = $langs->trans("SubjectNewPassword");
 		$msgishtml=0;
 
 		// Define $msg
@@ -1470,35 +1480,41 @@ class User extends CommonObject
 			$outputlangs=$langs;
 		}
 
+		$outputlangs->load("main");
+		$outputlangs->load("errors");
+		$outputlangs->load("users");
+		$outputlangs->load("other");
+
+		$subject = $outputlangs->trans("SubjectNewPassword");
+
 		// Define $urlwithroot
 		//$urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT,'/').'$/i','',trim($dolibarr_main_url_root));
 		//$urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
 		$urlwithroot=DOL_MAIN_URL_ROOT;						// This is to use same domain name than current
 
-		// TODO Use outputlangs to translate messages
 		if (! $changelater)
 		{
-			$mesg.= "A request to change your Dolibarr password has been received.\n";
-			$mesg.= "This is your new keys to login:\n\n";
-			$mesg.= $langs->trans("Login")." : $this->login\n";
-			$mesg.= $langs->trans("Password")." : $password\n\n";
+			$mesg.= $outputlangs->transnoentitiesnoconv("RequestToResetPasswordReceived").".\n";
+			$mesg.= $outputlangs->transnoentitiesnoconv("NewKeyIs")." :\n\n";
+			$mesg.= $outputlangs->transnoentitiesnoconv("Login")." = ".$this->login."\n";
+			$mesg.= $outputlangs->transnoentitiesnoconv("Password")." = ".$password."\n\n";
 			$mesg.= "\n";
 			$url = $urlwithroot;
-			$mesg.= 'Click here to go to Dolibarr: '.$url."\n\n";
+			$mesg.= $outputlangs->transnoentitiesnoconv("ClickHereToGoTo", $conf->global->MAIN_APPLICATION_TITLE).': '.$url."\n\n";
 			$mesg.= "--\n";
-			$mesg.= $user->getFullName($langs);	// Username that make then sending
+			$mesg.= $user->getFullName($outputlangs);	// Username that make then sending
 		}
 		else
 		{
-			$mesg.= "A request to change your Dolibarr password has been received.\n";
-			$mesg.= "Your new key to login will be:\n\n";
-			$mesg.= $langs->trans("Login")." : $this->login\n";
-			$mesg.= $langs->trans("Password")." : $password\n\n";
+			$mesg.= $outputlangs->transnoentitiesnoconv("RequestToResetPasswordReceived")."\n";
+			$mesg.= $outputlangs->transnoentitiesnoconv("NewKeyWillBe")." :\n\n";
+			$mesg.= $outputlangs->transnoentitiesnoconv("Login")." = ".$this->login."\n";
+			$mesg.= $outputlangs->transnoentitiesnoconv("Password")." = ".$password."\n\n";
 			$mesg.= "\n";
-			$mesg.= "You must click on the folowing link to validate its change.\n";
+			$mesg.= $outputlangs->transnoentitiesnoconv("YouMustClickToChange")." :\n";
 			$url = $urlwithroot.'/user/passwordforgotten.php?action=validatenewpassword&username='.$this->login."&passwordmd5=".dol_hash($password);
 			$mesg.= $url."\n\n";
-			$mesg.= "If you didn't ask anything, just forget this email\n\n";
+			$mesg.= $outputlangs->transnoentitiesnoconv("ForgetIfNothing")."\n\n";
 			dol_syslog(get_class($this)."::send_password url=".$url);
 		}
         $mailfile = new CMailFile(
@@ -1751,14 +1767,11 @@ class User extends CommonObject
 		$lien = '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$this->id.'">';
 		$lienfin='</a>';
 
-		if ($option == 'xxx')
+		if ($withpicto)
 		{
-			$lien = '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$this->id.'">';
-			$lienfin='</a>';
+			$result.=($lien.img_object($langs->trans("ShowUser"),'user').$lienfin);
+			if ($withpicto != 2) $result.=' ';
 		}
-
-		if ($withpicto) $result.=($lien.img_object($langs->trans("ShowUser"),'user').$lienfin);
-		if ($withpicto && $withpicto != 2) $result.=' ';
 		$result.=$lien.$this->getFullName($langs).$lienfin;
 		return $result;
 	}
@@ -1908,6 +1921,7 @@ class User extends CommonObject
 		if ($this->office_fax && ! empty($conf->global->LDAP_FIELD_FAX))	     $info[$conf->global->LDAP_FIELD_FAX] = $this->office_fax;
 		if ($this->note && ! empty($conf->global->LDAP_FIELD_DESCRIPTION))    $info[$conf->global->LDAP_FIELD_DESCRIPTION] = $this->note;
 		if ($this->email && ! empty($conf->global->LDAP_FIELD_MAIL))          $info[$conf->global->LDAP_FIELD_MAIL] = $this->email;
+    if ($this->skype && ! empty($conf->global->LDAP_FIELD_SKYPE))          $info[$conf->global->LDAP_FIELD_SKYPE] = $this->skype;
 
 		if ($conf->global->LDAP_SERVER_TYPE == 'egroupware')
 		{
@@ -1950,7 +1964,7 @@ class User extends CommonObject
 		global $user,$langs;
 
 		$now=dol_now();
-		
+
 		// Initialise parametres
 		$this->id=0;
 		$this->ref = 'SPECIMEN';
@@ -1960,6 +1974,7 @@ class User extends CommonObject
 		$this->firstname='SPECIMEN';
 		$this->note='This is a note';
 		$this->email='email@specimen.com';
+    $this->skype='tom.hanson';
 		$this->office_phone='0999999999';
 		$this->office_fax='0999999998';
 		$this->user_mobile='0999999997';
@@ -2107,6 +2122,7 @@ class User extends CommonObject
 		$this->user_mobile=$ldapuser->{$conf->global->LDAP_FIELD_MOBILE};
 		$this->office_fax=$ldapuser->{$conf->global->LDAP_FIELD_FAX};
 		$this->email=$ldapuser->{$conf->global->LDAP_FIELD_MAIL};
+		$this->skype=$ldapuser->{$conf->global->LDAP_FIELD_SKYPE};
 		$this->ldap_sid=$ldapuser->{$conf->global->LDAP_FIELD_SID};
 
 		$this->job=$ldapuser->{$conf->global->LDAP_FIELD_TITLE};

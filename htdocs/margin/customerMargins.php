@@ -153,12 +153,12 @@ if (! empty($conf->global->DISPLAY_MARK_RATES)) {
 print "</table>";
 print '</form>';
 
-$sql = "SELECT s.nom, s.rowid as socid, s.code_client, s.client,";
-$sql.= " f.facnumber, f.total as total_ht,";
+$sql = "SELECT s.rowid as socid, s.nom, s.code_client, s.client,";
+$sql.= " f.rowid as facid, f.facnumber, f.total as total_ht,";
+$sql.= " f.datef, f.paye, f.fk_statut as statut,";
 $sql.= " sum(d.total_ht) as selling_price,";
-$sql.= "sum(".$db->ifsql('d.total_ht <=0','d.qty * d.buy_price_ht * -1','d.qty * d.buy_price_ht').") as buying_price,";
-$sql.= "sum(".$db->ifsql('d.total_ht <=0','-1 * (abs(d.total_ht) - (d.buy_price_ht * d.qty))','d.total_ht - (d.buy_price_ht * d.qty)').") as marge," ;
-$sql.= " f.datef, f.paye, f.fk_statut as statut, f.rowid as facid";
+$sql.= " sum(".$db->ifsql('d.total_ht <=0','d.qty * d.buy_price_ht * -1','d.qty * d.buy_price_ht').") as buying_price,";
+$sql.= " sum(".$db->ifsql('d.total_ht <=0','-1 * (abs(d.total_ht) - (d.buy_price_ht * d.qty))','d.total_ht - (d.buy_price_ht * d.qty)').") as marge";
 $sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
 $sql.= ", ".MAIN_DB_PREFIX."facture as f";
 $sql.= ", ".MAIN_DB_PREFIX."facturedet as d";
@@ -175,10 +175,7 @@ if (!empty($enddate))
 $sql .= " AND d.buy_price_ht IS NOT NULL";
 if (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1)
 	$sql .= " AND d.buy_price_ht <> 0";
-if ($client)
-  $sql.= " GROUP BY f.rowid, s.rowid";
-else
-  $sql.= " GROUP BY s.rowid";
+if ($client) $sql.= " GROUP BY s.rowid, s.nom, s.code_client, s.client, f.rowid, f.facnumber, f.total, f.datef, f.paye, f.fk_statut";
 $sql.= " ORDER BY $sortfield $sortorder ";
 // TODO: calculate total to display then restore pagination
 //$sql.= $db->plimit($conf->liste_limit +1, $offset);

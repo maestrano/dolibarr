@@ -25,12 +25,13 @@ if (GETPOST('dol_optimize_smallscreen')) $conf->dol_optimize_smallscreen=1;
 if (GETPOST('dol_no_mouse_hover')) $conf->dol_no_mouse_hover=1;
 if (GETPOST('dol_use_jmobile')) $conf->dol_use_jmobile=1;
 
-$arrayofjs=array('/core/js/dst.js');	// Javascript code on logon page only to detect user tz, dst_observed, dst_first, dst_second
-print top_htmlhead('',$langs->trans('Login').' '.$title,0,0,$arrayofjs);
+$arrayofjs=array('/core/js/dst.js');					// Javascript code on logon page only to detect user tz, dst_observed, dst_first, dst_second
+$titleofloginpage=$langs->trans('Login').' '.$title;	// title is defined by dol_loginfunction in security2.lib.php
+print top_htmlhead('',$titleofloginpage,0,0,$arrayofjs);
 ?>
 <!-- BEGIN PHP TEMPLATE LOGIN.TPL.PHP -->
 
-<body class="body">
+<body class="body bodylogin">
 
 <script type="text/javascript">
 $(document).ready(function () {
@@ -58,7 +59,7 @@ $(document).ready(function () {
 <input type="hidden" name="dol_no_mouse_hover" id="dol_no_mouse_hover" value="<?php echo $dol_no_mouse_hover; ?>" />
 <input type="hidden" name="dol_use_jmobile" id="dol_use_jmobile" value="<?php echo $dol_use_jmobile; ?>" />
 
-<table class="login_table_title" summary="<?php echo dol_escape_htmltag($title); ?>" cellpadding="0" cellspacing="0" border="0" align="center">
+<table class="login_table_title" summary="<?php echo dol_escape_htmltag($title); ?>" align="center">
 <tr class="vmenu"><td align="center"><?php echo $title; ?></td></tr>
 </table>
 <br>
@@ -152,6 +153,27 @@ if ($forgetpasslink || $helpcenterlink)
 	}
 	echo '</div>';
 }
+
+if (isset($conf->file->main_authentication) && preg_match('/openid/',$conf->file->main_authentication))
+{
+	$langs->load("users");
+
+	//if (! empty($conf->global->MAIN_OPENIDURL_PERUSER)) $url=
+	echo '<br>';
+	echo '<div align="center" style="margin-top: 4px;">';
+
+	$url=$conf->global->MAIN_AUTHENTICATION_OPENID_URL;
+	if (! empty($url)) print '<a class="alogin" href="'.$url.'">'.$langs->trans("LoginUsingOpenID").'</a>';
+	else
+	{
+		$langs->load("errors");
+		print '<font class="warning">'.$langs->trans("ErrorOpenIDSetupNotComplete",'MAIN_AUTHENTICATION_OPENID_URL').'</font>';
+	}
+
+	echo '</div>';
+}
+
+
 ?>
 
 </div>
@@ -184,8 +206,10 @@ if ($forgetpasslink || $helpcenterlink)
 ?>
 
 <?php
-if (! empty($conf->global->MAIN_GOOGLE_AD_CLIENT) && ! empty($conf->global->MAIN_GOOGLE_AD_SLOT))
+if (! empty($conf->google->enabled) && ! empty($conf->global->MAIN_GOOGLE_AD_CLIENT) && ! empty($conf->global->MAIN_GOOGLE_AD_SLOT))
 {
+	if (empty($conf->dol_use_jmobile))
+	{
 ?>
 	<div align="center"><br>
 		<script type="text/javascript"><!--
@@ -200,6 +224,7 @@ if (! empty($conf->global->MAIN_GOOGLE_AD_CLIENT) && ! empty($conf->global->MAIN
 		</script>
 	</div>
 <?php
+	}
 }
 ?>
 

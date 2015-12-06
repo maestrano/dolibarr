@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2001-2002	Rodolphe Quiedeville	<rodolphe@quiedeville.org>
- * Copyright (C) 2006-2009	Laurent Destailleur		<eldy@users.sourceforge.net>
+ * Copyright (C) 2006-2013	Laurent Destailleur		<eldy@users.sourceforge.net>
  * Copyright (C) 2012		Regis Houssin			<regis.houssin@capnetworks.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,12 +29,11 @@
 define("NOLOGIN",1);		// This means this output page does not require to be logged.
 define("NOCSRFCHECK",1);	// We accept to go on this page from external web site.
 
-// For MultiCompany module
+// For MultiCompany module. 
+// Do not use GETPOST here, function is not defined and define must be done before including main.inc.php
+// TODO This should be useless. Because entity must be retreive from object ref and not from url.
 $entity=(! empty($_GET['entity']) ? (int) $_GET['entity'] : (! empty($_POST['entity']) ? (int) $_POST['entity'] : 1));
-if (is_int($entity))
-{
-	define("DOLENTITY", $entity);
-}
+if (is_int($entity)) define("DOLENTITY", $entity);
 
 require '../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/paypal/lib/paypal.lib.php';
@@ -127,42 +126,17 @@ if ($PAYPALTOKEN)
     // From env
     $ipaddress          = $_SESSION['ipaddress'];
 
-	dol_syslog("Call newpaymentok with token=".$token." paymentType=".$paymentType." currencyCodeType=".$currencyCodeType." payerID=".$payerID." ipaddress=".$ipaddress." FinalPaymentAmt=".$FinalPaymentAmt." fulltag=".$fulltag);
-
-
-	// Send an email
-	if (! empty($conf->global->MEMBER_PAYONLINE_SENDEMAIL) && preg_match('/MEM=/',$fulltag))
-	{
-		$sendto=$conf->global->MEMBER_PAYONLINE_SENDEMAIL;
-		$from=$conf->global->MAILING_EMAIL_FROM;
-		require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-		$mailfile = new CMailFile(
-			'New subscription payed',
-			$sendto,
-			$from,
-			'New subscription payed '.$fulltag
-			);
-
-		$result=$mailfile->sendfile();
-		if ($result)
-		{
-			dol_syslog("EMail sent to ".$sendto);
-		}
-		else
-		{
-			dol_syslog("Failed to send EMail to ".$sendto, LOG_ERR);
-		}
-	}
+	dol_syslog("Call paymentok with token=".$token." paymentType=".$paymentType." currencyCodeType=".$currencyCodeType." payerID=".$payerID." ipaddress=".$ipaddress." FinalPaymentAmt=".$FinalPaymentAmt." fulltag=".$fulltag, LOG_DEBUG, 0, '_paypal');
 
 
 	// Validate record
     if (! empty($paymentType))
     {
-        dol_syslog("We call GetExpressCheckoutDetails");
+        dol_syslog("We call GetExpressCheckoutDetails", LOG_DEBUG, 0, '_paypal');
         $resArray=getDetails($token);
         //var_dump($resarray);
 
-        dol_syslog("We call DoExpressCheckoutPayment token=".$token." paymentType=".$paymentType." currencyCodeType=".$currencyCodeType." payerID=".$payerID." ipaddress=".$ipaddress." FinalPaymentAmt=".$FinalPaymentAmt." fulltag=".$fulltag);
+        dol_syslog("We call DoExpressCheckoutPayment token=".$token." paymentType=".$paymentType." currencyCodeType=".$currencyCodeType." payerID=".$payerID." ipaddress=".$ipaddress." FinalPaymentAmt=".$FinalPaymentAmt." fulltag=".$fulltag, LOG_DEBUG, 0, '_paypal');
         $resArray=confirmPayment($token, $paymentType, $currencyCodeType, $payerID, $ipaddress, $FinalPaymentAmt, $fulltag);
 
         $ack = strtoupper($resArray["ACK"]);
@@ -183,7 +157,7 @@ if ($PAYPALTOKEN)
             $NOTE=urldecode($resArray["NOTE"]);
 
             print $langs->trans("YourPaymentHasBeenRecorded")."<br>\n";
-            print $langs->trans("ThisIsTransactionId",$TRANSACTIONID)."<br>\n";
+            print $langs->trans("ThisIsTransactionId",$TRANSACTIONID)."<br><br>\n";
             if (! empty($conf->global->PAYPAL_MESSAGE_OK)) print $conf->global->PAYPAL_MESSAGE_OK;
 
             // Appel des triggers
@@ -192,6 +166,30 @@ if ($PAYPALTOKEN)
             $result=$interface->run_triggers('PAYPAL_PAYMENT_OK',$object,$user,$langs,$conf);
             if ($result < 0) { $error++; $errors=$interface->errors; }
             // Fin appel triggers
+            
+        	// Send an email
+			if (! empty($conf->global->PAYPAL_PAYONLINE_SENDEMAIL))
+			{
+				$sendto=$conf->global->PAYPAL_PAYONLINE_SENDEMAIL;
+				$from=$conf->global->MAILING_EMAIL_FROM;
+				require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+				$mailfile = new CMailFile(
+					'['.$conf->global->MAIN_APPLICATION_TITLE.'] '.$langs->transnoentitiesnoconv("NewPaypalPaymentReceived"),
+					$sendto,
+					$from,
+					$langs->transnoentitiesnoconv("NewPaypalPaymentReceived")."\ntag=".$fulltag."\ntoken=".$token." paymentType=".$paymentType." currencycodeType=".$currencyCodeType." payerId=".$payerID." ipaddress=".$ipaddress." FinalPaymentAmt=".$FinalPaymentAmt
+				);
+		
+				$result=$mailfile->sendfile();
+				if ($result)
+				{
+					dol_syslog("EMail sent to ".$sendto, LOG_DEBUG, 0, '_paypal');
+				}
+				else
+				{
+					dol_syslog("Failed to send EMail to ".$sendto, LOG_ERR, 0, '_paypal');
+				}
+			}
         }
         else
         {
@@ -208,6 +206,30 @@ if ($PAYPALTOKEN)
             echo "Error Severity Code: " . $ErrorSeverityCode;
 
             if ($mysoc->email) echo "\nPlease, send a screenshot of this page to ".$mysoc->email;
+            
+           	// Send an email
+			if (! empty($conf->global->PAYPAL_PAYONLINE_SENDEMAIL))
+			{
+				$sendto=$conf->global->PAYPAL_PAYONLINE_SENDEMAIL;
+				$from=$conf->global->MAILING_EMAIL_FROM;
+				require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+				$mailfile = new CMailFile(
+					'['.$conf->global->MAIN_APPLICATION_TITLE.'] '.$langs->transnoentitiesnoconv("ValidationOfPaypalPaymentFailed"),
+					$sendto,
+					$from,
+					$langs->transnoentitiesnoconv("PaypalConfirmPaymentPageWasCalledButFailed")."\ntag=".$fulltag."\ntoken=".$token." paymentType=".$paymentType." currencycodeType=".$currencyCodeType." payerId=".$payerID." ipaddress=".$ipaddress." FinalPaymentAmt=".$FinalPaymentAmt."\nErrorCode=".$ErrorCode."\nErrorLongMsg=".$ErrorLongMsg
+				);
+		
+				$result=$mailfile->sendfile();
+				if ($result)
+				{
+					dol_syslog("EMail sent to ".$sendto, LOG_DEBUG, 0, '_paypal');
+				}
+				else
+				{
+					dol_syslog("Failed to send EMail to ".$sendto, LOG_ERR, 0, '_paypal');
+				}
+			}
         }
     }
     else

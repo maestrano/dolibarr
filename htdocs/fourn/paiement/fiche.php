@@ -2,6 +2,7 @@
 /* Copyright (C) 2005      Rodolphe Quiedeville  <rodolphe@quiedeville.org>
  * Copyright (C) 2005      Marc Barilley / Ocebo <marc@ocebo.com>
  * Copyright (C) 2006-2010 Laurent Destailleur   <eldy@users.sourceforge.net>
+ * Copyright (C) 2013		Marcos García		<marcosgdf@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +29,7 @@ require '../../main.inc.php';
 require DOL_DOCUMENT_ROOT.'/fourn/class/paiementfourn.class.php';
 require DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.class.php';
 require DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php';
+require DOL_DOCUMENT_ROOT.'/core/lib/payments.lib.php';
 
 $langs->load('bills');
 $langs->load('banks');
@@ -115,7 +117,7 @@ if ($action == 'setnum' && ! empty($_POST['num_paiement']))
 	}
 }
 
-if ($action == 'setdate' && ! empty($_POST['datepday']))
+if ($action == 'setdatep' && ! empty($_POST['datepday']))
 {
 	$object->fetch($id);
     $datepaye = dol_mktime(12, 0, 0, $_POST['datepmonth'], $_POST['datepday'], $_POST['datepyear']);
@@ -137,23 +139,14 @@ if ($action == 'setdate' && ! empty($_POST['datepday']))
 
 llxHeader();
 
+$result=$object->fetch($id);
+
 $form = new Form($db);
 
-$h=0;
+$head = payment_supplier_prepare_head($object);
 
-$head[$h][0] = $_SERVER['PHP_SELF'].'?id='.$id;
-$head[$h][1] = $langs->trans('Card');
-$hselected = $h;
-$h++;
+dol_fiche_head($head, 'payment', $langs->trans('SupplierPayment'), 0, 'payment');
 
-$head[$h][0] = DOL_URL_ROOT.'/fourn/paiement/info.php?id='.$id;
-$head[$h][1] = $langs->trans('Info');
-$h++;
-
-
-dol_fiche_head($head, $hselected, $langs->trans('SupplierPayment'), 0, 'payment');
-
-$result=$object->fetch($id);
 if ($result > 0)
 {
 	/*
@@ -161,8 +154,8 @@ if ($result > 0)
 	 */
 	if ($action == 'delete')
 	{
-		$ret=$form->form_confirm($_SERVER['PHP_SELF'].'?id='.$object->id, $langs->trans("DeletePayment"), $langs->trans("ConfirmDeletePayment"), 'confirm_delete');
-		if ($ret == 'html') print '<br>';
+		print $form->formconfirm($_SERVER['PHP_SELF'].'?id='.$object->id, $langs->trans("DeletePayment"), $langs->trans("ConfirmDeletePayment"), 'confirm_delete');
+
 	}
 
 	/*
@@ -170,8 +163,8 @@ if ($result > 0)
 	 */
 	if ($action == 'valide')
 	{
-		$ret=$form->form_confirm($_SERVER['PHP_SELF'].'?id='.$object->id, $langs->trans("ValidatePayment"), $langs->trans("ConfirmValidatePayment"), 'confirm_valide');
-		if ($ret == 'html') print '<br>';
+		print $form->formconfirm($_SERVER['PHP_SELF'].'?id='.$object->id, $langs->trans("ValidatePayment"), $langs->trans("ConfirmValidatePayment"), 'confirm_valide');
+
 	}
 
 	print '<table class="border" width="100%">';
@@ -195,7 +188,7 @@ if ($result > 0)
     print '</td></tr>';
 
 	// Amount
-	print '<tr><td valign="top" colspan="2">'.$langs->trans('Amount').'</td><td colspan="3">'.price($object->montant).'&nbsp;'.$langs->trans('Currency'.$conf->currency).'</td></tr>';
+	print '<tr><td valign="top" colspan="2">'.$langs->trans('Amount').'</td><td colspan="3">'.price($object->montant,'',$langs,0,0,-1,$conf->currency).'</td></tr>';
 
 	if (! empty($conf->global->BILL_ADD_PAYMENT_VALIDATION))
 	{
@@ -218,9 +211,19 @@ if ($result > 0)
             print '<tr>';
             print '<td colspan="2">'.$langs->trans('BankTransactionLine').'</td>';
             print '<td colspan="3">';
-            print $bankline->getNomUrl(1,0,'showall');
+            print $bankline->getNomUrl(1,0,'showconciliated');
             print '</td>';
             print '</tr>';
+
+	    	print '<tr>';
+	    	print '<td colspan="2">'.$langs->trans('BankAccount').'</td>';
+			print '<td colspan="3">';
+			$accountstatic=new Account($db);
+	        $accountstatic->id=$bankline->fk_account;
+	        $accountstatic->label=$bankline->bank_account_ref.' - '.$bankline->bank_account_label;
+	        print $accountstatic->getNomUrl(0);
+	    	print '</td>';
+	    	print '</tr>';
         }
     }
 
@@ -269,7 +272,7 @@ if ($result > 0)
 				print '<tr '.$bc[$var].'>';
 				// Ref
 				print '<td><a href="'.DOL_URL_ROOT.'/fourn/facture/fiche.php?facid='.$objp->facid.'">'.img_object($langs->trans('ShowBill'),'bill').' ';
-				print $objp->ref;
+				print ($objp->ref?$objp->ref:$objp->rowid);
 				print "</a></td>\n";
 				// Ref supplier
 				print '<td>'.$objp->ref_supplier."</td>\n";

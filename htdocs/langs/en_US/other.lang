@@ -1,5 +1,4 @@
-# Dolibarr language file - en_US - other
-CHARSET=UTF-8
+# Dolibarr language file - Source file is en_US - other
 SecurityCode=Security code
 Calendar=Calendar
 AddTrip=Add trip
@@ -7,7 +6,7 @@ Tools=Tools
 ToolsDesc=This area is dedicated to group miscellaneous tools not available into other menu entries.<br><br>Those tools can be reached from menu on the side.
 Birthday=Birthday
 BirthdayDate=Birthday
-DateToBirth=Date to birth
+DateToBirth=Date of birth
 BirthdayAlertOn= birthday alert active
 BirthdayAlertOff= birthday alert inactive
 Notify_FICHINTER_VALIDATE=Intervention validated
@@ -139,10 +138,12 @@ StatsByNumberOfEntities=Statistics in number of referring entities
 NumberOfProposals=Number of proposals on last 12 month
 NumberOfCustomerOrders=Number of customer orders on last 12 month
 NumberOfCustomerInvoices=Number of customer invoices on last 12 month
+NumberOfSupplierOrders=Number of supplier orders on last 12 month
 NumberOfSupplierInvoices=Number of supplier invoices on last 12 month
 NumberOfUnitsProposals=Number of units on proposals on last 12 month
 NumberOfUnitsCustomerOrders=Number of units on customer orders on last 12 month
 NumberOfUnitsCustomerInvoices=Number of units on customer invoices on last 12 month
+NumberOfUnitsSupplierOrders=Number of units on supplier orders on last 12 month
 NumberOfUnitsSupplierInvoices=Number of units on supplier invoices on last 12 month
 EMailTextInterventionValidated=The intervention %s has been validated.
 EMailTextInvoiceValidated=The invoice %s has been validated.
@@ -174,6 +175,12 @@ StartUpload=Start upload
 CancelUpload=Cancel upload
 FileIsTooBig=Files is too big
 PleaseBePatient=Please be patient...
+RequestToResetPasswordReceived=A request to change your Dolibarr password has been received
+NewKeyIs=This is your new keys to login
+NewKeyWillBe=Your new key to login to software will be
+ClickHereToGoTo=Click here to go to %s
+YouMustClickToChange=You must however first click on the following link to validate this password change
+ForgetIfNothing=If you didn't request this change, just forget this email. Your credentials are kept safe.
 
 ##### Calendar common #####
 AddCalendarEntry=Add entry in calendar %s
@@ -195,6 +202,7 @@ MemberResiliatedInDolibarr=Member %s resiliated in Dolibarr
 MemberDeletedInDolibarr=Member %s deleted from Dolibarr
 MemberSubscriptionAddedInDolibarr=Subscription for member %s added in Dolibarr
 ShipmentValidatedInDolibarr=Shipment %s validated in Dolibarr
+ShipmentDeletedInDolibarr=Shipment %s deleted from Dolibarr
 ##### Export #####
 Export=Export
 ExportsArea=Exports area

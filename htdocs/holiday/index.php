@@ -274,7 +274,7 @@ print '</td>';
 // DATE CREATE
 print '<td class="liste_titre" colspan="1" align="center">';
 print '<input class="flat" type="text" size="1" maxlength="2" name="month_create" value="'.$month_create.'">';
-$formother->select_year($year_create,'year_create',1, $min_year, $max_year);
+$formother->select_year($year_create,'year_create',1, $min_year, 0);
 print '</td>';
 
 // UTILISATEUR

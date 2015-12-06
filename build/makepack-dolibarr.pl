@@ -2,15 +2,23 @@
 #----------------------------------------------------------------------------
 # \file         build/makepack-dolibarr.pl
 # \brief        Dolibarr package builder (tgz, zip, rpm, deb, exe, aps)
-# \author       (c)2004-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
+# \author       (c)2004-2013 Laurent Destailleur  <eldy@users.sourceforge.net>
+#
+# This is list of constant you can set to have generated packages moved into a specific dir: 
+#DESTIBETARC='/media/HDDATA1_LD/Mes Sites/Web/Dolibarr/dolibarr.org/files/lastbuild'
+#DESTISTABLE='/media/HDDATA1_LD/Mes Sites/Web/Dolibarr/dolibarr.org/files/stable'
+#DESTIMODULES='/media/HDDATA1_LD/Mes Sites/Web/Admin1/wwwroot/files/modules'
+#DESTIDOLIMEDBETARC='/media/HDDATA1_LD/Mes Sites/Web/DoliCloud/dolimed.com/htdocs/files/lastbuild'
+#DESTIDOLIMEDMODULES='/media/HDDATA1_LD/Mes Sites/Web/DoliCloud/dolimed.com/htdocs/files/modules'
+#DESTIDOLIMEDSTABLE='/media/HDDATA1_LD/Mes Sites/Web/DoliCloud/dolimed.com/htdocs/files/stable'
 #----------------------------------------------------------------------------
 
 use Cwd;
 
 $PROJECT="dolibarr";
 $MAJOR="3";
-$MINOR="4";
-$BUILD="2";		# Mettre x pour release, x-dev pour dev, x-beta pour beta, x-rc pour release candidate
+$MINOR="6";
+$BUILD="0-dev";		# Mettre x pour release, x-dev pour dev, x-beta pour beta, x-rc pour release candidate
 $RPMSUBVERSION="auto";	# auto use value found into BUILD
 
 @LISTETARGET=("TGZ","ZIP","RPM_GENERIC","RPM_FEDORA","RPM_MANDRIVA","RPM_OPENSUSE","DEB","APS","EXEDOLIWAMP","SNAPSHOT");   # Possible packages
@@ -270,6 +278,8 @@ if ($nboftargetok) {
 	    	mkdir "$BUILDROOT/$PROJECT";
 	    	print "Copy $SOURCE into $BUILDROOT/$PROJECT\n";
 	    	$ret=`cp -pr "$SOURCE" "$BUILDROOT/$PROJECT"`;
+	    	print "Copy $SOURCE/build/debian/apache/.htaccess into $BUILDROOT/$PROJECT/build/debian/apache/.htaccess\n";
+	    	$ret=`cp -pr "$SOURCE/build/debian/apache/.htaccess" "$BUILDROOT/$PROJECT/build/debian/apache/.htaccess"`;
 	    }
 	    print "Clean $BUILDROOT\n";
 	    $ret=`rm -f  $BUILDROOT/$PROJECT/.buildpath`;
@@ -279,6 +289,7 @@ if ($nboftargetok) {
         $ret=`rm -f  $BUILDROOT/$PROJECT/.gitignore`;
 	    $ret=`rm -fr $BUILDROOT/$PROJECT/.project`;
 	    $ret=`rm -fr $BUILDROOT/$PROJECT/.settings`;
+	    $ret=`rm -fr $BUILDROOT/$PROJECT/.tx`;
 	    $ret=`rm -f  $BUILDROOT/$PROJECT/build.xml`;
 	    $ret=`rm -f  $BUILDROOT/$PROJECT/quickbuild.xml`;
         $ret=`rm -f  $BUILDROOT/$PROJECT/pom.xml`;
@@ -355,6 +366,7 @@ if ($nboftargetok) {
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/jquery/plugins/template`;  # Package not valid for most linux distributions (errors reported into compile.js). Package should be embed by modules to avoid problems.
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/phpmailer`;                # Package not valid for most linux distributions (errors reported into file LICENSE). Package should be embed by modules to avoid problems.
    	    
+	    $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/jquery/plugins/multiselect/MIT-LICENSE.txt`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/nusoap/lib/Mail`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/phpexcel/license.txt`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/phpexcel/PHPExcel/Shared/PDF`;
@@ -625,6 +637,8 @@ if ($nboftargetok) {
 			print "Copy $BUILDROOT/$PROJECT to $BUILDROOT/$PROJECT.tmp\n";
 			$cmd="cp -pr \"$BUILDROOT/$PROJECT\" \"$BUILDROOT/$PROJECT.tmp\"";
 			$ret=`$cmd`;
+			$cmd="cp -pr \"$BUILDROOT/$PROJECT/build/debian/apache/.htaccess\" \"$BUILDROOT/$PROJECT.tmp/build/debian/apache/.htaccess\"";
+			$ret=`$cmd`;
 
  			print "Remove other files\n";
             $ret=`rm -f  $BUILDROOT/$PROJECT.tmp/README-FR`;
@@ -687,11 +701,15 @@ if ($nboftargetok) {
             $ret=`cp -fr "$SOURCE/build/debian/patches"        "$BUILDROOT/$PROJECT.tmp/debian"`;
             $ret=`cp -fr "$SOURCE/build/debian/po"             "$BUILDROOT/$PROJECT.tmp/debian"`;
             $ret=`cp -fr "$SOURCE/build/debian/source"         "$BUILDROOT/$PROJECT.tmp/debian"`;
+            $ret=`cp -fr "$SOURCE/build/debian/apache"         "$BUILDROOT/$PROJECT.tmp/debian/apache"`;
+            $ret=`cp -f  "$SOURCE/build/debian/apache/.htaccess" "$BUILDROOT/$PROJECT.tmp/debian/apache"`;
+            $ret=`cp -fr "$SOURCE/build/debian/lighttpd"       "$BUILDROOT/$PROJECT.tmp/debian/lighttpd"`;
             # Add files also required to build binary package
             $ret=`cp -f  "$SOURCE/build/debian/dolibarr.config"         "$BUILDROOT/$PROJECT.tmp/debian"`;
             $ret=`cp -f  "$SOURCE/build/debian/dolibarr.postinst"       "$BUILDROOT/$PROJECT.tmp/debian"`;
             $ret=`cp -f  "$SOURCE/build/debian/dolibarr.postrm"         "$BUILDROOT/$PROJECT.tmp/debian"`;
             $ret=`cp -f  "$SOURCE/build/debian/dolibarr.templates"      "$BUILDROOT/$PROJECT.tmp/debian"`;
+            $ret=`cp -f  "$SOURCE/build/debian/install.forced.php.install"      "$BUILDROOT/$PROJECT.tmp/debian"`;
             
 			# Set owners and permissions
             print "Set owners on files/dir\n";

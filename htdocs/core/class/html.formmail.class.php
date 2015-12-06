@@ -46,8 +46,8 @@ class FormMail
 
     var $withsubstit;			// Show substitution array
     var $withfrom;
-    var $withto;
-    var $withtofree;
+    var $withto;				// Show recipient emails
+    var $withtofree;			// Show free text for recipient emails
     var $withtocc;
     var $withtoccc;
     var $withtopic;
@@ -432,7 +432,7 @@ class FormMail
         			if (! empty($this->withtocc) && is_array($this->withtocc))
         			{
         				$out.= " ".$langs->trans("or")." ";
-        				$out.= $form->selectarray("receivercc", $this->withto, GETPOST("receivercc"), 1);
+        				$out.= $form->selectarray("receivercc", $this->withtocc, GETPOST("receivercc"), 1);
         			}
         		}
         		$out.= "</td></tr>\n";
@@ -454,7 +454,7 @@ class FormMail
         			if (! empty($this->withtoccc) && is_array($this->withtoccc))
         			{
         				$out.= " ".$langs->trans("or")." ";
-        				$out.= $form->selectarray("receiverccc", $this->withto, GETPOST("receiverccc"), 1);
+        				$out.= $form->selectarray("receiverccc", $this->withtoccc, GETPOST("receiverccc"), 1);
         			}
         		}
         		//if (! empty($conf->global->MAIN_MAIL_AUTOCOPY_TO)) print ' '.info_admin("+ ".$conf->global->MAIN_MAIL_AUTOCOPY_TO,1);
@@ -493,7 +493,7 @@ class FormMail
         		}
         		else
         		{
-        			$out.= '<input type="text" size="60" id="subject" name="subject" value="'. (isset($_POST["subject"])?$_POST["subject"]:$this->withtopic) .'" />';
+        			$out.= '<input type="text" size="60" id="subject" name="subject" value="'. (isset($_POST["subject"])?$_POST["subject"]:(is_numeric($this->withtopic)?'':$this->withtopic)) .'" />';
         		}
         		$out.= "</td></tr>\n";
         	}
@@ -575,9 +575,17 @@ class FormMail
         			}
         		}
 
+				$defaultmessage=str_replace('\n',"\n",$defaultmessage);
+				
+				// Deal with format differences between message and signature (text / HTML)
+				if(dol_textishtml($defaultmessage) && !dol_textishtml($this->substit['__SIGNATURE__'])) {
+					$this->substit['__SIGNATURE__'] = dol_nl2br($this->substit['__SIGNATURE__']);
+				} else if(!dol_textishtml($defaultmessage) && dol_textishtml($this->substit['__SIGNATURE__'])) {
+					$defaultmessage = dol_nl2br($defaultmessage);
+				}
+				
         		$defaultmessage=make_substitutions($defaultmessage,$this->substit);
         		if (isset($_POST["message"])) $defaultmessage=$_POST["message"];
-        		$defaultmessage=str_replace('\n',"\n",$defaultmessage);
 
         		$out.= '<tr>';
         		$out.= '<td width="180" valign="top">'.$langs->trans("MailText").'</td>';

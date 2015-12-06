@@ -104,14 +104,14 @@ print '</td></tr>';
 print "</table>";
 print '</form>';
 
-$sql = "SELECT s.nom, s.rowid as socid, s.code_client, s.client, u.rowid as agent,";
-$sql.= " u.login, u.lastname, u.firstname,";
+$sql = "SELECT s.rowid as socid, s.nom, s.code_client, s.client, ";
+$sql.= " u.rowid as agent, u.login, u.lastname, u.firstname,";
 $sql.= " sum(d.total_ht) as selling_price,";
-$sql.= "sum(".$db->ifsql('d.total_ht <=0','d.qty * d.buy_price_ht * -1','d.qty * d.buy_price_ht').") as buying_price,";
+$sql.= " sum(".$db->ifsql('d.total_ht <=0','d.qty * d.buy_price_ht * -1','d.qty * d.buy_price_ht').") as buying_price,";
 $sql.= " sum(".$db->ifsql('d.total_ht <=0','-1 * (abs(d.total_ht) - (d.buy_price_ht * d.qty))','d.total_ht - (d.buy_price_ht * d.qty)').") as marge" ;
 $sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
 $sql.= ", ".MAIN_DB_PREFIX."facture as f";
-$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."element_contact e ON e.element_id = f.rowid and e.statut = 4 and e.fk_c_type_contact = ".(empty($conf->global->AGENT_CONTACT_TYPE)?-1:$conf->global->AGENT_CONTACT_TYPE);
+$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."element_contact e ON e.element_id = f.rowid and e.statut = 4 and e.fk_c_type_contact = ".(empty($conf->global->AGENT_CONTACT_TYPE)?-1:$conf->global->AGENT_CONTACT_TYPE);
 $sql.= ", ".MAIN_DB_PREFIX."facturedet as d";
 $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $sql.= ", ".MAIN_DB_PREFIX."user as u";
@@ -135,13 +135,9 @@ if (!empty($startdate))
 if (!empty($enddate))
   $sql.= " AND f.datef <= '".$enddate."'";
 $sql .= " AND d.buy_price_ht IS NOT NULL";
-if (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1)
-	$sql .= " AND d.buy_price_ht <> 0";
-if ($agentid > 0)
-  $sql.= " GROUP BY s.rowid, u.rowid";
-else
-  $sql.= " GROUP BY u.rowid";
-$sql.= " ORDER BY $sortfield $sortorder ";
+if (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1) $sql .= " AND d.buy_price_ht <> 0";
+$sql.= " GROUP BY s.rowid, s.nom, s.code_client, s.client, u.rowid, u.login, u.lastname, u.firstname";
+$sql.= " ORDER BY ".$sortfield." ".$sortorder;
 // TODO: calculate total to display then restore pagination
 //$sql.= $db->plimit($conf->liste_limit +1, $offset);
 

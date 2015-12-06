@@ -140,6 +140,20 @@ class InterfaceActionsAuto
 			$object->socid=$object->id;
 			$ok=1;
         }
+        elseif ($action == 'COMPANY_SENTBYMAIL')
+        {
+            dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+            $langs->load("orders");
+            $langs->load("agenda");
+
+            if (empty($object->actiontypecode)) $object->actiontypecode='AC_OTH_AUTO';
+            if (empty($object->actionmsg2)) dol_syslog('Trigger called with property actionmsg2 on object not defined', LOG_ERR);
+            $object->actionmsg.="\n".$langs->transnoentities("Author").': '.$user->login;
+
+            // Parameters $object->sendtoid defined by caller
+            //$object->sendtoid=0;
+            $ok=1;
+		}
         elseif ($action == 'CONTRACT_VALIDATE')
         {
             dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
@@ -555,6 +569,23 @@ class InterfaceActionsAuto
 			$ok=1;
         }
 
+        // Projects
+        elseif ($action == 'PROJECT_CREATE')
+        {
+        	dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+        	$langs->load("other");
+        	$langs->load("projects");
+        	$langs->load("agenda");
+
+        	$object->actiontypecode='AC_OTH_AUTO';
+        	if (empty($object->actionmsg2)) $object->actionmsg2=$langs->transnoentities("ProjectCreatedInDolibarr",$object->ref);
+        	$object->actionmsg=$langs->transnoentities("ProjectCreatedInDolibarr",$object->ref);
+        	$object->actionmsg.="\n".$langs->transnoentities("Project").': '.$object->ref;
+        	$object->actionmsg.="\n".$langs->transnoentities("Author").': '.$user->login;
+        	$object->sendtoid=0;
+        	$ok=1;
+        }
+
 		// If not found
         /*
         else
@@ -605,8 +636,9 @@ class InterfaceActionsAuto
 			}
 			else
 			{
-                $error ="Failed to insert : ".$actioncomm->error." ";
+                $error ="Failed to insert event : ".$actioncomm->error." ".join(',',$actioncomm->errors);
                 $this->error=$error;
+                $this->errors=$actioncomm->errors;
 
                 dol_syslog("interface_modAgenda_ActionsAuto.class.php: ".$this->error, LOG_ERR);
                 return -1;
