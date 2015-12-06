@@ -1536,7 +1536,7 @@ class pdf_cashflow extends ModelePDFFactures
 			$posy=42;
 			$posx=$this->marge_gauche;
 			if (! empty($conf->global->MAIN_INVERT_SENDER_RECIPIENT)) $posx=$this->page_largeur-$this->marge_droite-80;
-			$hautcadre=40;
+			$hautcadre=43;
 
 			// Show sender frame
 			$pdf->SetTextColor(0,0,0);
