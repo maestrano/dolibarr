@@ -7,8 +7,8 @@
 //
 $dolibarr_main_url_root='http://{{ server_hostname }}';
 $dolibarr_main_document_root='{{ dolibarr_root_path }}/htdocs';
-//$dolibarr_main_url_root_alt='/custom';
-//$dolibarr_main_document_root_alt='/var/www/dolibarr/htdocs/custom';
+$dolibarr_main_url_root_alt='/custom';
+$dolibarr_main_document_root_alt='{{ dolibarr_root_path }}/htdocs/custom';
 $dolibarr_main_data_root='{{ dolibarr_root_path }}/documents';
 $dolibarr_main_db_host='localhost';
 $dolibarr_main_db_port='';
