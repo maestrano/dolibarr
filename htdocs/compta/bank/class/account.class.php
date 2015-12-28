@@ -1149,7 +1149,6 @@ class AccountLine extends CommonObject
         }
         else
         {
-            dol_print_error($this->db);
             return -1;
         }
     }
@@ -1168,7 +1167,7 @@ class AccountLine extends CommonObject
         if ($this->rappro)
         {
             // Protection to avoid any delete of consolidated lines
-            $this->error="DeleteNotPossibleLineIsConsolidated";
+            $this->error="ErrorDeleteNotPossibleLineIsConsolidated";
             return -1;
         }
 

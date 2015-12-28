@@ -34,7 +34,7 @@ if (! empty($conf->propal->enabled)) require_once DOL_DOCUMENT_ROOT.'/comm/propa
 if (! empty($conf->commande->enabled)) require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
 if (! empty($conf->productbatch->enabled)) require_once DOL_DOCUMENT_ROOT.'/expedition/class/expeditionbatch.class.php';
 
-
+ 
 /**
  *	Class to manage shipments
  */
@@ -752,10 +752,11 @@ class Expedition extends CommonObject
 
 		$orderline = new OrderLine($this->db);
 		$orderline->fetch($id);
-		$fk_product = $orderline->fk_product;
 
-		if (! empty($orderline->fk_product))
+		if (! empty($conf->stock->enabled) && ! empty($orderline->fk_product))
 		{
+			$fk_product = $orderline->fk_product;
+
 			if (! ($entrepot_id > 0) && empty($conf->global->STOCK_WAREHOUSE_NOT_REQUIRED_FOR_SHIPMENTS))
 			{
 				$this->error=$langs->trans("ErrorWarehouseRequiredIntoShipmentLine");
@@ -979,7 +980,7 @@ class Expedition extends CommonObject
 					$mouvS->origin = &$this;
 					// We decrement stock of product (and sub-products)
 					// We use warehouse selected for each line
-					$result=$mouvS->reception($user, $obj->fk_product, $obj->fk_entrepot, $obj->qty, $obj->subprice, $langs->trans("ShipmentDeletedInDolibarr",$this->ref));
+					$result=$mouvS->reception($user, $obj->fk_product, $obj->fk_entrepot, $obj->qty, 0, $langs->trans("ShipmentDeletedInDolibarr",$this->ref));
 					if ($result < 0)
 					{
 						$error++;
@@ -1139,6 +1140,8 @@ class Expedition extends CommonObject
 				$line->details_entrepot[]     = $detail_entrepot;
 
                 $line->line_id          = $obj->line_id;
+                $line->rowid            = $obj->line_id;    // TODO deprecated
+                $line->id               = $obj->line_id;
 				$line->fk_origin_line 	= $obj->fk_origin_line;
 				$line->origin_line_id 	= $obj->fk_origin_line;	    // TODO deprecated
 				$line->fk_product     	= $obj->fk_product;

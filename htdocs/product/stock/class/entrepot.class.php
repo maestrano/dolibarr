@@ -136,14 +136,14 @@ class Entrepot extends CommonObject
 	 */
 	function update($id, $user, $pushToConnec=true)
 	{
-		$this->libelle=$this->db->escape(trim($this->libelle));
-		$this->description=$this->db->escape(trim($this->description));
+		$this->libelle=trim($this->libelle);
+		$this->description=trim($this->description);
 
-		$this->lieu=$this->db->escape(trim($this->lieu));
+		$this->lieu=trim($this->lieu);
 
-		$this->address=$this->db->escape(trim($this->address));
-        $this->zip=$this->zip?trim($this->zip):trim($this->zip);
-        $this->town=$this->town?trim($this->town):trim($this->town);
+		$this->address=trim($this->address);
+	        $this->zip=trim($this->zip);
+        	$this->town=trim($this->town);
 		$this->country_id=($this->country_id > 0 ? $this->country_id : $this->country_id);
 
 		$sql = "UPDATE ".MAIN_DB_PREFIX."entrepot ";
@@ -357,7 +357,7 @@ class Entrepot extends CommonObject
 
 		$sql = "SELECT rowid, label";
 		$sql.= " FROM ".MAIN_DB_PREFIX."entrepot";
-		$sql.= " WHERE entity IN (".getEntity('warehouse', 1).")";
+		$sql.= " WHERE entity IN (".getEntity('stock', 1).")";
 		$sql.= " AND statut = ".$status;
 		$sql.= " ORDER BY label";
 
