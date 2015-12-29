@@ -24,7 +24,7 @@
 
 
 /**
-*    Show header of a VAT report
+*	Show header of a VAT report
 *
 *    @param		string				$nom            Name of report
 *    @param 	string				$variante       Link for alternate report
@@ -42,6 +42,8 @@ function report_header($nom,$variante,$period,$periodlink,$description,$builddat
 {
 	global $langs;
 
+	if (empty($hselected)) $hselected='report';
+	
 	print "\n\n<!-- debut cartouche rapport -->\n";
 	
 	if(! empty($varlink)) $varlink = '?'.$varlink;
@@ -56,13 +58,13 @@ function report_header($nom,$variante,$period,$periodlink,$description,$builddat
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].$varlink.'">';
 	foreach($moreparam as $key => $value)
 	{
-	     print '<input type="hidden" name="'.$key.'" value="'.$value.'">';
+		 print '<input type="hidden" name="'.$key.'" value="'.$value.'">';
 	}
 	print '<table width="100%" class="border">';
 
 	// Ligne de titre
 	print '<tr>';
-	print '<td valign="top" width="110">'.$langs->trans("ReportName").'</td>';
+	print '<td width="110">'.$langs->trans("ReportName").'</td>';
 	if (! $variantexxx) print '<td colspan="3">';
 	else print '<td>';
 	print $nom;
@@ -74,7 +76,7 @@ function report_header($nom,$variante,$period,$periodlink,$description,$builddat
 	if ($calcmode)
 	{
 		print '<tr>';
-		print '<td valign="top" width="110">'.$langs->trans("CalculationMode").'</td>';
+		print '<td width="110">'.$langs->trans("CalculationMode").'</td>';
 		if (! $variante) print '<td colspan="3">';
 		else print '<td>';
 		print $calcmode;
@@ -95,7 +97,7 @@ function report_header($nom,$variante,$period,$periodlink,$description,$builddat
 
 	// Ligne de description
 	print '<tr>';
-	print '<td valign="top">'.$langs->trans("ReportDescription").'</td>';
+	print '<td>'.$langs->trans("ReportDescription").'</td>';
 	print '<td colspan="3">'.$description.'</td>';
 	print '</tr>';
 
@@ -116,7 +118,8 @@ function report_header($nom,$variante,$period,$periodlink,$description,$builddat
 
 	print '</form>';
 
-	print '</div>';
+	dol_fiche_end();
+	
 	print "\n<!-- fin cartouche rapport -->\n\n";
 }
 

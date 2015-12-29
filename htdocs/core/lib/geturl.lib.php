@@ -25,7 +25,7 @@
  * Function get content from an URL (use proxy if proxy defined)
  *
  * @param	string	  $url 				    URL to call.
- * @param	string    $postorget		    'POST', 'GET', 'HEAD', 'PUTALREADYFORMATED'
+ * @param	string    $postorget		    'POST', 'GET', 'HEAD', 'PUT', 'PUTALREADYFORMATED', 'DELETE'
  * @param	string    $param			    Parameters of URL (x=value1&y=value2) or may be a formated content with PUTALREADYFORMATED
  * @param	string    $followlocation		1=Follow location, 0=Do not follow
  * @param	array     $addheaders			Array of string to add into header. Example: ('Accept: application/xrds+xml', ....)
@@ -91,6 +91,10 @@ function getURLContent($url,$postorget='GET',$param='',$followlocation=1,$addhea
     {
     	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'HEAD'); // HTTP request is 'HEAD'
     	curl_setopt($ch, CURLOPT_NOBODY, true);
+    }
+    else if ($postorget == 'DELETE')
+    {
+    	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');	// POST
     }
     else
     {
