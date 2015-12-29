@@ -67,6 +67,13 @@
   tags:
     - update
 
+- name: Dolibarr | Remove lock file for update
+  file:
+    path: "{{ dolibarr_root_path }}/documents/install.lock"
+    state: absent
+  tags:
+    - update
+
 - name: Dolibarr | Update Application
   shell: "php mno_upgrade.php"
   args:
@@ -133,6 +140,8 @@
   file:
     path: "{{ dolibarr_root_path }}/documents/install.lock"
     state: touch
+  tags:
+    - update
 
 - name: Dolibarr | Configuration file config.php
   template: 
