@@ -36,7 +36,11 @@ $setuplang=GETPOST("selectlang",'',3)?GETPOST("selectlang",'',3):'auto';
 $langs->setDefaultLang($setuplang);
 $versionfrom=GETPOST("versionfrom",'',3)?GETPOST("versionfrom",'',3):(empty($argv[1])?'':$argv[1]);
 $versionto=GETPOST("versionto",'',3)?GETPOST("versionto",'',3):(empty($argv[2])?'':$argv[2]);
-$action=GETPOST('action', 'alpha');
+$action=(GETPOST('action')?GETPOST('action', 'alpha'):(empty($argv[3])?'':$argv[3]));
+
+$login=$_POST["login"]?$_POST["login"]:(empty($argv[4])?'':$argv[4]);
+$password=$_POST["pass"]?$_POST["pass"]:(empty($argv[5])?'':$argv[5]);
+$password_verif=$_POST["pass_verif"]?$_POST["pass_verif"]:(empty($argv[5])?'':$argv[5]);
 
 // Define targetversion used to update MAIN_VERSION_LAST_INSTALL for first install
 // or MAIN_VERSION_LAST_UPGRADE for upgrade.
@@ -79,21 +83,21 @@ dolibarr_install_syslog("--- step5: entering step5.php page");
 // If install, check pass and pass_verif used to create admin account
 if ($action == "set")
 {
-    if ($_POST["pass"] <> $_POST["pass_verif"])
+    if ($password <> $password_verif)
     {
-        header("Location: step4.php?error=1&selectlang=$setuplang".(isset($_POST["login"])?'&login='.$_POST["login"]:''));
+        header("Location: step4.php?error=1&selectlang=$setuplang".(isset($login)?'&login='.$login:''));
         exit;
     }
 
-    if (dol_strlen(trim($_POST["pass"])) == 0)
+    if (dol_strlen(trim($password)) == 0)
     {
-        header("Location: step4.php?error=2&selectlang=$setuplang".(isset($_POST["login"])?'&login='.$_POST["login"]:''));
+        header("Location: step4.php?error=2&selectlang=$setuplang".(isset($login)?'&login='.$login:''));
         exit;
     }
 
-    if (dol_strlen(trim($_POST["login"])) == 0)
+    if (dol_strlen(trim($login)) == 0)
     {
-        header("Location: step4.php?error=3&selectlang=$setuplang".(isset($_POST["login"])?'&login='.$_POST["login"]:''));
+        header("Location: step4.php?error=3&selectlang=$setuplang".(isset($login)?'&login='.$login:''));
         exit;
     }
 }
@@ -173,8 +177,8 @@ if ($action == "set" || empty($action) || preg_match('/upgrade/i',$action))
             $newuser = new User($db);
             $newuser->lastname='SuperAdmin';
             $newuser->firstname='';
-            $newuser->login=$_POST["login"];
-            $newuser->pass=$_POST["pass"];
+            $newuser->login=$login;
+            $newuser->pass=$password;
             $newuser->admin=1;
             $newuser->entity=0;
 
@@ -182,7 +186,7 @@ if ($action == "set" || empty($action) || preg_match('/upgrade/i',$action))
             $result=$newuser->create($createuser,1);
             if ($result > 0)
             {
-                print $langs->trans("AdminLoginCreatedSuccessfuly",$_POST["login"])."<br>";
+                print $langs->trans("AdminLoginCreatedSuccessfuly",$login)."<br>";
                 $success = 1;
             }
             else
@@ -190,7 +194,7 @@ if ($action == "set" || empty($action) || preg_match('/upgrade/i',$action))
                 if ($newuser->error == 'ErrorLoginAlreadyExists')
                 {
                     dolibarr_install_syslog('step5: AdminLoginAlreadyExists', LOG_WARNING);
-                    print '<br><div class="warning">'.$langs->trans("AdminLoginAlreadyExists",$_POST["login"])."</div><br>";
+                    print '<br><div class="warning">'.$langs->trans("AdminLoginAlreadyExists",$login)."</div><br>";
                     $success = 1;
                 }
                 else
@@ -338,7 +342,7 @@ if ($action == "set")
 
         print $langs->trans("YouNeedToPersonalizeSetup")."<br><br>";
 
-        print '<div class="center"><a href="../admin/index.php?mainmenu=home&leftmenu=setup'.(isset($_POST["login"])?'&username='.urlencode($_POST["login"]):'').'">';
+        print '<div class="center"><a href="../admin/index.php?mainmenu=home&leftmenu=setup'.(isset($login)?'&username='.urlencode($login):'').'">';
         print $langs->trans("GoToSetupArea");
         print '</a></div>';
     }
@@ -386,7 +390,7 @@ elseif (empty($action) || preg_match('/upgrade/i',$action))
 
         print "<br>";
 
-        print '<div class="center"><a href="../index.php?mainmenu=home'.(isset($_POST["login"])?'&username='.urlencode($_POST["login"]):'').'">';
+        print '<div class="center"><a href="../index.php?mainmenu=home'.(isset($login)?'&username='.urlencode($login):'').'">';
         print $langs->trans("GoToDolibarr");
         print '</a></div>';
     }

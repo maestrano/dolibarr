@@ -67,20 +67,6 @@
   tags:
     - update
 
-- name: Dolibarr | Remove lock file for update
-  file:
-    path: "{{ dolibarr_root_path }}/documents/install.lock"
-    state: absent
-  tags:
-    - update
-
-- name: Dolibarr | Update Application
-  shell: "php mno_upgrade.php"
-  args:
-    chdir: "{{ dolibarr_root_path }}/htdocs/install"
-  tags:
-    - update
-
 - name: Dolibarr | Configure Apache virtual host
   template: 
     src: etc-apache24-confd-dolibarr-conf
@@ -97,23 +83,36 @@
     name: apache2 
     state: restarted
 
-- name: Dolibarr | Base schema base_schema.sql
-  template: 
-    src: dolibarr-base-schema.sql
-    dest: "{{ dolibarr_root_path }}/htdocs/maestrano/app/db/base_schema.sql"
-    owner: www-data
-    group: www-data
-    mode: 0755
+- name: Dolibarr | Install Application
+  shell: "php {{ item }}"
+  args:
+    chdir: "{{ dolibarr_root_path }}/htdocs/install"
+  with_items:
+    - step2.php set
+    - step5.php "" "" set admin password
 
 - name: Dolibarr | Apply Maestrano patch
   shell: "mysql {{ dolibarr_db_name }} -u{{dolibarr_db_user}} -p{{dolibarr_db_password}} < maestrano/app/db/{{ item }}"
   args:
     chdir: "{{ dolibarr_root_path }}/htdocs"
   with_items:
-    - base_schema.sql
     - 1_add_mno_uid_field.sql
     - 2_add_mno_id_map.sql
     - 3_increase_account_label_length.sql
+
+- name: Dolibarr | Remove lock file for update
+  file:
+    path: "{{ dolibarr_root_path }}/documents/install.lock"
+    state: absent
+  tags:
+    - update
+
+- name: Dolibarr | Update Application
+  shell: "php mno_upgrade.php"
+  args:
+    chdir: "{{ dolibarr_root_path }}/htdocs/install"
+  tags:
+    - update
 
 - name: Dolibarr | Create default documents directory
   file:
