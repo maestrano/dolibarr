@@ -83,6 +83,37 @@
     name: apache2 
     state: restarted
 
+- name: Dolibarr | Create default documents directory
+  file:
+    path: "{{ dolibarr_root_path }}/documents"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0755
+  tags:
+    - configuration
+
+- name: Dolibarr | Set file permissions
+  file:
+    path: "{{ dolibarr_root_path }}"
+    mode: 0755
+    owner: www-data
+    group: www-data
+    state: directory
+    recurse: yes
+  tags:
+    - configuration
+
+- name: Dolibarr | Configuration file config.php
+  template: 
+    src: dolibarr-conf.php
+    dest: "{{ dolibarr_root_path }}/htdocs/conf/conf.php"
+    owner: www-data
+    group: www-data
+    mode: 0500
+  tags:
+    - configuration
+
 - name: Dolibarr | Install Application
   shell: "php {{ item }}"
   args:
@@ -114,43 +145,12 @@
   tags:
     - update
 
-- name: Dolibarr | Create default documents directory
-  file:
-    path: "{{ dolibarr_root_path }}/documents"
-    state: directory
-    owner: www-data
-    group: www-data
-    mode: 0755
-  tags:
-    - configuration
-
-- name: Dolibarr | Set file permissions
-  file:
-    path: "{{ dolibarr_root_path }}"
-    mode: 0755
-    owner: www-data
-    group: www-data
-    state: directory
-    recurse: yes
-  tags:
-    - configuration
-
 - name: Dolibarr | Add an install lock file
   file:
     path: "{{ dolibarr_root_path }}/documents/install.lock"
     state: touch
   tags:
     - update
-
-- name: Dolibarr | Configuration file config.php
-  template: 
-    src: dolibarr-conf.php
-    dest: "{{ dolibarr_root_path }}/htdocs/conf/conf.php"
-    owner: www-data
-    group: www-data
-    mode: 0500
-  tags:
-    - configuration
 
 - name: Dolibarr | Configuration file maestrano.json
   template: 
