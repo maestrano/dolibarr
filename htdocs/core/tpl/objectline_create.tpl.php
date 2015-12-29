@@ -194,7 +194,7 @@ else {
 	</td>
 
 	<td align="right"><?php
-	if ($seller->tva_assuj == "0") echo '<input type="hidden" name="tva_tx" id="tva_tx" value="0">0';
+	if ($seller->tva_assuj == "0") echo '<input type="hidden" name="tva_tx" id="tva_tx" value="0">'.vatrate(0, true);
 	else echo $form->load_tva('tva_tx', (isset($_POST["tva_tx"])?$_POST["tva_tx"]:-1), $seller, $buyer);
 	?>
 	</td>
@@ -451,7 +451,7 @@ jQuery(document).ready(function() {
 		<?php if (! empty($usemargins) && $user->rights->margins->creer) { ?>
 
 		/* Code for margin */
-  		$("#fournprice_predef options").remove();
+  		$("#fournprice_predef").find("option").remove();
 		$("#fournprice_predef").hide();
 		$("#buying_price").val("").show();
   		$.post('<?php echo DOL_URL_ROOT; ?>/fourn/ajax/getSupplierPrices.php', { 'idprod': $(this).val() }, function(data) {
