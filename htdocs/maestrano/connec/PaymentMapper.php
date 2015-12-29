@@ -60,6 +60,7 @@ abstract class PaymentMapper extends BaseMapper {
       foreach($payment_line_hash['linked_transactions'] as $payment_hash) {
         // Map payment and amount paid
         $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($payment_hash['id'], 'INVOICE');
+error_log("TRANSACTION ID " . $payment_hash['id'] . " - MNOIDMAP " . json_encode($mno_id_map));
         if($mno_id_map) { $payment->amounts[$mno_id_map['app_entity_id']] = $payment_line_amount; }
       }
     }
