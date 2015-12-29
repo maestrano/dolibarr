@@ -140,6 +140,7 @@ before_script:
 
 - |
   if [ "$DEBUG" = true ]; then
+    echo "Debugging informations"
     # Check PHP
     php -i
     # Check PHP CodeSniffer installation
@@ -270,6 +271,8 @@ script:
   php upgrade2.php 3.5.0 3.6.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade350360-2.log
   php upgrade.php 3.6.0 3.7.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade360370.log
   php upgrade2.php 3.6.0 3.7.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade360370-2.log
+  php upgrade.php 3.7.0 3.8.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade370380.log
+  php upgrade2.php 3.7.0 3.8.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade370380-2.log
   cd -
   set +e
   echo
