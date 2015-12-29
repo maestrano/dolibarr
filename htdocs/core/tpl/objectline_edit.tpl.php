@@ -248,10 +248,10 @@ if (! empty($conf->margin->enabled))
 		{
 		?>
 			$('#savelinebutton').click(function (e) {
-				return checkEditLine(e, "marginRate");
+				return checkEditLine(e, "np_marginRate");
 			});
 			$("input[name='np_marginRate']:first").blur(function(e) {
-				return checkEditLine(e, "marginRate");
+				return checkEditLine(e, "np_marginRate");
 			});
 		<?php
 		}
@@ -259,10 +259,10 @@ if (! empty($conf->margin->enabled))
 		{
 		?>
 			$('#savelinebutton').click(function (e) {
-				return checkEditLine(e, "markRate");
+				return checkEditLine(e, "np_markRate");
 			});
 			$("input[name='np_markRate']:first").blur(function(e) {
-				return checkEditLine(e, "markRate");
+				return checkEditLine(e, "np_markRate");
 			});
 		<?php
 		}
@@ -278,7 +278,7 @@ if (! empty($conf->margin->enabled))
 		var remise = $("input[name='remise_percent']:first");
 
 		var rate = $("input[name='"+npRate+"']:first");
-		if (rate.val() == '') return true;
+		if (rate.val() == '' || (typeof rate.val()) == 'undefined' ) return true;
 
 		if (! $.isNumeric(rate.val().replace(',','.')))
 		{
@@ -287,7 +287,7 @@ if (! empty($conf->margin->enabled))
 			setTimeout(function () { rate.focus() }, 50);
 			return false;
 		}
-		if (npRate == "markRate" && rate.val() >= 100)
+		if (npRate == "np_markRate" && rate.val() >= 100)
 		{
 			alert('<?php echo $langs->trans("markRateShouldBeLesserThan100"); ?>');
 			e.stopPropagation();
@@ -303,9 +303,11 @@ if (! empty($conf->margin->enabled))
 			bpjs=price2numjs(buying_price.val());
 			ratejs=price2numjs(rate.val());
 
-			if (npRate == "marginRate")
+			/* console.log(npRate+" - "+bpjs+" - "+ratejs); */
+
+			if (npRate == "np_marginRate")
 				price = ((bpjs * (1 + ratejs / 100)) / (1 - remisejs / 100));
-			else if (npRate == "markRate")
+			else if (npRate == "np_markRate")
 				price = ((bpjs / (1 - ratejs / 100)) / (1 - remisejs / 100));
 		}
 		$("input[name='price_ht']:first").val(price);	// TODO Must use a function like php price to have here a formated value

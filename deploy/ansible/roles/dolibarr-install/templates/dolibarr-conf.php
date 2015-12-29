@@ -7,15 +7,15 @@
 //
 $dolibarr_main_url_root='http://{{ server_hostname }}';
 $dolibarr_main_document_root='{{ dolibarr_root_path }}/htdocs';
-//$dolibarr_main_url_root_alt='/custom';
-//$dolibarr_main_document_root_alt='/var/www/dolibarr/htdocs/custom';
+$dolibarr_main_url_root_alt='/custom';
+$dolibarr_main_document_root_alt='{{ dolibarr_root_path }}/htdocs/custom';
 $dolibarr_main_data_root='{{ dolibarr_root_path }}/documents';
 $dolibarr_main_db_host='localhost';
 $dolibarr_main_db_port='';
-$dolibarr_main_db_name='{{ dolibarr_db_user }}';
+$dolibarr_main_db_name='{{ dolibarr_db_name }}';
 $dolibarr_main_db_prefix='llx_';
 $dolibarr_main_db_user='{{ dolibarr_db_user }}';
-$dolibarr_main_db_pass='{{ dolibarr_db_user }}';
+$dolibarr_main_db_pass='{{ dolibarr_db_password }}';
 $dolibarr_main_db_type='mysqli';
 $dolibarr_main_db_character_set='latin1';
 $dolibarr_main_db_collation='latin1_swedish_ci';
