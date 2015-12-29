@@ -67,6 +67,13 @@
   tags:
     - update
 
+- name: Dolibarr | Update Application
+  shell: "php mno_upgrade.php"
+  args:
+    chdir: "{{ dolibarr_root_path }}/htdocs/install"
+  tags:
+    - update
+
 - name: Dolibarr | Configure Apache virtual host
   template: 
     src: etc-apache24-confd-dolibarr-conf
