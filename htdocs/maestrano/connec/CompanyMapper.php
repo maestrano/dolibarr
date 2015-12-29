@@ -109,10 +109,13 @@ class CompanyMapper extends BaseMapper {
         if(array_key_exists('country', $company_hash['address']['shipping'])) { $country = $company_hash['address']['shipping']['country']; }
 
       }
+
       if(array_key_exists('billing', $company_hash['address'])) {
         if(array_key_exists('line1', $company_hash['address']['billing'])) { $line1 = $company_hash['address']['billing']['line1']; }
         if(array_key_exists('city', $company_hash['address']['billing'])) { $city = $company_hash['address']['billing']['city']; }
         if(array_key_exists('postal_code', $company_hash['address']['billing'])) { $postal_code = $company_hash['address']['billing']['postal_code']; }
+        if(array_key_exists('region', $company_hash['address']['billing'])) { $state = $company_hash['address']['billing']['region']; }
+        if(array_key_exists('country', $company_hash['address']['billing'])) { $country = $company_hash['address']['billing']['country']; }
       }
 
       if($this->is_set($line1)) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_ADDRESS", $line1); }

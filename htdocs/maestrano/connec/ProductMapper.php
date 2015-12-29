@@ -31,7 +31,7 @@ class ProductMapper extends BaseMapper {
   protected function mapConnecResourceToModel($item_hash, $product) {
     // Map Product unique code
     if($this->is_set($item_hash['code'])) { $product->ref = $item_hash['code']; } else { $product->ref = 'IT-' . rand(); }
-    if($this->is_set($item_hash['name'])) { $product->libelle = $item_hash['name']; }
+    if($this->is_set($item_hash['name'])) { $product->label = $item_hash['name']; }
     if($this->is_set($item_hash['description'])) { $product->description = $item_hash['description']; }
     
     // Map product type
@@ -80,7 +80,7 @@ class ProductMapper extends BaseMapper {
 
     // Map Product code as customer or supplier unique code
     $item_hash['code'] = $product->ref;
-    $item_hash['name'] = $product->libelle;
+    $item_hash['name'] = $product->label;
     $item_hash['description'] = $product->description;
 
     // Map product type
