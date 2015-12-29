@@ -1253,6 +1253,12 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
             	}
             	if (empty($conf->dol_use_jmobile) || $conf->dol_use_jmobile != 3) print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/mobile/jquery.mobile-latest.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
             }
+
+            // Maestrano Star!
+            print '<script src="//cdn.maestrano.com/apps/mno_libs/mno-loader.js" type="text/javascript"></script>
+                <script type="text/javascript">
+                    window.mnoLoader.init("dolibarr","1");
+                </script>';
         }
 
         if (! $disablejs && ! empty($conf->use_javascript_ajax))
