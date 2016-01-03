@@ -43,7 +43,7 @@ foreach($migrations as $migration) {
   if(versioncompare($dolibarr_version_to, $installed_version) > 0 || versioncompare($dolibarr_version_to, $source_version) < -2) {
     $migration_script1 = "php upgrade.php " . $migration['from'] . " " . $migration['to'];
     $migration_script2 = "php upgrade2.php " . $migration['from'] . " " . $migration['to'];
-    $migration_script3 = "php etape5.php " . $migration['from'] . " " . $migration['to'];
+    $migration_script3 = "php step5.php " . $migration['from'] . " " . $migration['to'];
 
     exec($migration_script1);
     exec($migration_script2);

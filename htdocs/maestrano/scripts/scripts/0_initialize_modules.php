@@ -14,6 +14,7 @@ installModule('modComptabilite');
 installModule('modTax');
 installModule('modFournisseur');
 installModule('modProduct');
+installModule('modService');
 installModule('modStock');
 
 function installModule($module_name) {

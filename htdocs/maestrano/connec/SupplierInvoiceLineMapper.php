@@ -124,11 +124,11 @@ class SupplierInvoiceLineMapper extends BaseMapper {
   // Persist the Dolibarr InvoiceLine
   protected function persistLocalModel($invoice_line, $invoice_line_hash) {
     if(!$this->is_set($invoice_line->rowid)) {
-      $this->invoice->addline($invoice_line->description, $invoice_line->pu_ht, $invoice_line->tva_tx, 0, 0, $invoice_line->qty, $invoice_line->fk_product, $invoice_line->remise_percent, '', '', 0, '', 'HT', 0, -1, false, false);
+      $this->invoice->addline($invoice_line->description, $invoice_line->pu_ht, $invoice_line->tva_tx, 0, 0, $invoice_line->qty, $invoice_line->fk_product, $invoice_line->remise_percent, '', '', 0, '', 'HT', 0, -1, false, 0, null, false);
       // Dirty hack in FactureFournisseur.addline() to set line rowid
       if(is_null($invoice_line->rowid)) { $invoice_line->rowid = $this->invoice->rowid; }
     } else {
-      $this->invoice->updateline($invoice_line->rowid, $invoice_line->description, $invoice_line->pu_ht, $invoice_line->tva_tx, 0, 0, $invoice_line->qty, $invoice_line->fk_product, 'HT', 0, 0, $invoice_line->remise_percent, false, false);
+      $this->invoice->updateline($invoice_line->rowid, $invoice_line->description, $invoice_line->pu_ht, $invoice_line->tva_tx, 0, 0, $invoice_line->qty, $invoice_line->fk_product, 'HT', 0, 0, $invoice_line->remise_percent, false, '', '', 0, null, false);
     }
   }
 }

@@ -141,10 +141,13 @@ class CustomerInvoiceMapper extends TransactionMapper {
     $user = ConnecUtils::defaultUser();
     if(is_null($user->rights)) { $user->rights = (object) array(); }
     if(is_null($user->rights->facture)) { $user->rights->facture = (object) array(); }
+    if(is_null($user->rights->facture->invoice_advance)) { $user->rights->facture->invoice_advance = (object) array(); }
     if(is_null($user->rights->commande)) { $user->rights->commande = (object) array(); }
+    $user->rights->facture->creer = true;
     $user->rights->facture->valider = true;
+    $user->rights->facture->invoice_advance->validate = true;
     $user->rights->commande->valider = true;
-    
+
     switch($invoice_hash['status']) {
       case "PAID":
         $invoice->set_paid($user, '', '', false);
