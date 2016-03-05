@@ -43,8 +43,8 @@ abstract class PaymentMapper extends BaseMapper {
     if($this->is_set($payment_hash['public_note'])) { $payment->note = $payment_hash['public_note']; }
 
     // Map Account
-    if($this->is_set($payment_hash['deposit_account_id'])) {
-      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($payment_hash['deposit_account_id'], 'ACCOUNT');
+    if($this->is_set($payment_hash['account_id'])) {
+      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($payment_hash['account_id'], 'ACCOUNT');
       if($mno_id_map) { $payment->fk_account = $mno_id_map['app_entity_id']; }
     }
 
@@ -60,7 +60,6 @@ abstract class PaymentMapper extends BaseMapper {
       foreach($payment_line_hash['linked_transactions'] as $payment_hash) {
         // Map payment and amount paid
         $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($payment_hash['id'], 'INVOICE');
-error_log("TRANSACTION ID " . $payment_hash['id'] . " - MNOIDMAP " . json_encode($mno_id_map));
         if($mno_id_map) { $payment->amounts[$mno_id_map['app_entity_id']] = $payment_line_amount; }
       }
     }
@@ -83,7 +82,7 @@ error_log("TRANSACTION ID " . $payment_hash['id'] . " - MNOIDMAP " . json_encode
     // Map Account
     if($this->is_set($payment->fk_account)) {
       $mno_id_map = MnoIdMap::findMnoIdMapByLocalIdAndEntityName($payment->fk_account, 'ACCOUNT');
-      if($mno_id_map) { $payment_hash['deposit_account_id'] = $mno_id_map['mno_entity_guid']; }
+      if($mno_id_map) { $payment_hash['account_id'] = $mno_id_map['mno_entity_guid']; }
     }
 
     return $payment_hash;
@@ -107,8 +106,8 @@ error_log("TRANSACTION ID " . $payment_hash['id'] . " - MNOIDMAP " . json_encode
     }
 
     // Add payment entry to general ledger
-    if($this->is_set($payment_hash['deposit_account_id'])) {
-      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($payment_hash['deposit_account_id'], 'ACCOUNT');
+    if($this->is_set($payment_hash['account_id'])) {
+      $mno_id_map = MnoIdMap::findMnoIdMapByMnoIdAndEntityName($payment_hash['account_id'], 'ACCOUNT');
       if($mno_id_map) {
         $accountMapper = new AccountMapper();
         $account = $accountMapper->loadModelById(intval($mno_id_map['app_entity_id']));
