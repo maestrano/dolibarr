@@ -107,7 +107,6 @@ class CompanyMapper extends BaseMapper {
         if(array_key_exists('postal_code', $company_hash['address']['shipping'])) { $postal_code = $company_hash['address']['shipping']['postal_code']; }
         if(array_key_exists('region', $company_hash['address']['shipping'])) { $state = $company_hash['address']['shipping']['region']; }
         if(array_key_exists('country', $company_hash['address']['shipping'])) { $country = $company_hash['address']['shipping']['country']; }
-
       }
 
       if(array_key_exists('billing', $company_hash['address'])) {
@@ -123,6 +122,7 @@ class CompanyMapper extends BaseMapper {
       if($this->is_set($postal_code)) { dolibarr_set_const($db, "MAIN_INFO_SOCIETE_ZIP", $postal_code); }
 
       // Map Country and state
+      if(!isset($country)) { $country = 'AU'; } // Default to Australia
       if(isset($country)) {
         $country_hash = ConnecUtils::findCountry($country);
         if($country_hash) {
