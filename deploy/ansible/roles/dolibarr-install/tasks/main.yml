@@ -68,19 +68,19 @@
     - update
 
 - name: Dolibarr | Configure Apache virtual host
-  template: 
+  template:
     src: etc-apache24-confd-dolibarr-conf
     dest: /etc/apache2/sites-available/dolibarr.conf
     owner: www-data
     group: www-data
     mode: 0755
 
-- name: Dolibarr | Enable Apache virtual host 
+- name: Dolibarr | Enable Apache virtual host
   file: src=/etc/apache2/sites-available/dolibarr.conf dest=/etc/apache2/sites-enabled/dolibarr.conf state=link
 
 - name: Apache | Restart the Apache service
-  service: 
-    name: apache2 
+  service:
+    name: apache2
     state: restarted
 
 - name: Dolibarr | Create default documents directory
@@ -105,7 +105,7 @@
     - configuration
 
 - name: Dolibarr | Configuration file config.php
-  template: 
+  template:
     src: dolibarr-conf.php
     dest: "{{ dolibarr_root_path }}/htdocs/conf/conf.php"
     owner: www-data
@@ -153,7 +153,7 @@
     - update
 
 - name: Dolibarr | Configuration file maestrano.json
-  template: 
+  template:
     src: dolibarr-maestrano.json
     dest: "{{ dolibarr_root_path }}/htdocs/maestrano.json"
     owner: www-data
@@ -177,6 +177,7 @@
   shell: "(nohup php initialize.php 1>/var/log/apache2/dolibarr_initialize.log 2>&1) &"
   args:
     chdir: "{{ dolibarr_root_path }}/htdocs/maestrano/scripts"
-  sudo_user: www-data
+  become: yes
+  become_user: www-data
   tags:
     - configuration
