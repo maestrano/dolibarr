@@ -17,6 +17,9 @@ class ConnecUtils {
 
   public static function findCountry($country_name) {
     global $db;
+
+    // UK is mapped as GB in Dolibarr
+    if($country_name == 'UK') { $country_name = 'GB'; }
     
     $result = $db->query("SELECT * from ".MAIN_DB_PREFIX."c_country WHERE code = '$country_name' OR code_iso = '$country_name' OR label = '$country_name'");
     if($result->num_rows > 0) { return $result->fetch_assoc(); }
