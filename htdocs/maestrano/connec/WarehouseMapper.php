@@ -54,6 +54,10 @@ class WarehouseMapper extends BaseMapper {
       }
     }
 
+    // Default country
+    if(!$this->is_set($warehouse->country_id)) { $warehouse->country_id = 28; }
+    if(!$this->is_set($warehouse->country_code)) { $warehouse->country_code = 'AU'; }
+
     // Map status
     if($this->is_set($warehouse_hash['status'])) {
       if($warehouse_hash['status'] == 'INACTIVE' || $warehouse_hash['status'] == 'CLOSED') {
